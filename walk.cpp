@@ -1,4 +1,6 @@
 //3350
+//Modified by: Jose Zamora
+//Date: 02/21/2022  
 //program: walk.cpp
 //author:  Gordon Griesel
 //date:    summer 2017 - 2018
@@ -16,6 +18,8 @@
 #include <X11/keysym.h>
 #include <GL/glx.h>
 #include "fonts.h"
+
+//#include "jzamora2.h"
 
 //defined types
 typedef double Flt;
@@ -116,6 +120,7 @@ public:
 	int walk;
 	int walkFrame;
 	double delay;
+	int feature_mode;
 	GLuint walkTexture;
 	Vec box[20];
 	Global() {
@@ -369,6 +374,16 @@ int checkKeys(XEvent *e)
 			timers.recordTime(&timers.walkTime);
 			g.walk ^= 1;
 			break;
+		case XK_f:
+			if (shift) {
+				if (g.feature_mode == 1) {
+					g.feature_mode = 0;
+				}
+				else {
+					g.feature_mode = 1;
+				}
+			}
+			break;
 		case XK_Left:
 			break;
 		case XK_Right:
@@ -499,16 +514,42 @@ void render(void)
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glDisable(GL_ALPHA_TEST);
 	//
-	unsigned int c = 0x00ffff44;
-	r.bot = g.yres - 20;
-	r.left = 10;
-	r.center = 0;
-	ggprint8b(&r, 16, c, "W   Walk cycle");
-	ggprint8b(&r, 16, c, "+   faster");
-	ggprint8b(&r, 16, c, "-   slower");
-	ggprint8b(&r, 16, c, "right arrow -> walk right");
-	ggprint8b(&r, 16, c, "left arrow  <- walk left");
-	ggprint8b(&r, 16, c, "frame: %i", g.walkFrame);
+	if (g.feature_mode) {
+		int t = 40;
+        glColor3f(0.0, 1.0, 0.0);
+        glBegin(GL_TRIANGLE_STRIP);
+            glVertex2f(0,           0);
+            glVertex2f(t,           t);
+            glVertex2f(0,           g.yres);
+            glVertex2f(t,           g.yres - t);
+            glVertex2f(g.xres,     	g.yres);
+            glVertex2f(g.xres - t, 	g.yres - t);
+            glVertex2f(g.xres,     	0);
+            glVertex2f(g.xres - t, 	t);
+            glVertex2f(0,           0);
+            glVertex2f(t,           t);
+        glEnd();
+		extern void test_text(int yres);
+		test_text(g.yres);
+
+		r.bot = g.yres - 20;
+        r.left = g.xres / 2;
+        r.center = 1;
+        ggprint8b(&r, 16, 0x00ff0000, "Jose's Feature Mode");
+	}
+
+	if (!g.feature_mode) {
+		unsigned int c = 0x00ffff44;
+		r.bot = g.yres - 20;
+		r.left = 10;
+		r.center = 0;
+		ggprint8b(&r, 16, c, "W   Walk cycle");
+		ggprint8b(&r, 16, c, "+   faster");
+		ggprint8b(&r, 16, c, "-   slower");
+		ggprint8b(&r, 16, c, "right arrow -> walk right");
+		ggprint8b(&r, 16, c, "left arrow  <- walk left");
+		ggprint8b(&r, 16, c, "frame: %i", g.walkFrame);
+	}
 }
 
 

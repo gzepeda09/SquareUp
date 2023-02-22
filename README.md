@@ -1,2 +1,2 @@
-# squareup3350
-2D fighter using OpenGL, X11, and C++
+# SquareUp
+2D fighter using OpenGL, C++, and X11
