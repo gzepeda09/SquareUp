@@ -509,6 +509,22 @@ void render(void)
 	ggprint8b(&r, 16, c, "right arrow -> walk right");
 	ggprint8b(&r, 16, c, "left arrow  <- walk left");
 	ggprint8b(&r, 16, c, "frame: %i", g.walkFrame);
+
+
+	//Genos functions
+	extern void newText(int yres);
+	newText(g.yres);
+
+
+	//Jesses function
+	extern void greenBoxes();
+	greenBoxes();
+
+	//Joses function
+	extern void test_text (int yres);
+	test_text(g.yres);
+
+
 }
 
 
