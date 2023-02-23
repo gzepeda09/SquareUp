@@ -344,7 +344,7 @@ void initOpengl(void)
 	//int w1 = g.tex.backimage->width;
 	//int h1 = g.tex.backimage->height;
 	int w1 = img[1].width;
-	int hh = img[1].height;
+	int h1 = img[1].height;
 	glBindTexture(GL_TEXTURE_2D, g.tex.backTexture);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
@@ -389,6 +389,7 @@ int checkKeys(XEvent *e)
 {
 	//keyboard input?
 	static int shift=0;
+	int key = (XLookupKeysym(&e->xkey, 0) & 0x0000ffff);
 	if (e->type != KeyRelease) { //&& e->type != KeyPress) {
 		if (key == XK_a) {
             g.tex.xc[0] -= 0.001;
@@ -400,7 +401,6 @@ int checkKeys(XEvent *e)
         }
 		return 0;
 	}
-	int key = (XLookupKeysym(&e->xkey, 0) & 0x0000ffff);
 	if (e->type == KeyRelease) {
 		if (key == XK_Shift_L || key == XK_Shift_R)
 			shift = 0;
