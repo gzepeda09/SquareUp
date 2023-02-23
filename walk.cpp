@@ -504,7 +504,7 @@ void render(void)
         glTexCoord2f(g.tex.xc[1], g.tex.yc[0]); glVertex2i(g.xres, g.yres);
         glTexCoord2f(g.tex.xc[1], g.tex.yc[1]); glVertex2i(g.xres, 0);
     glEnd(); 
-    //glBindTexture(GL_TEXTURE_2D, 0); 
+    //glBindTexture(GL_TEXTURE_2D, g.backTexture); 
 	//show ground
 	glBegin(GL_QUADS);
 		glColor3f(0.2, 0.2, 0.2);
@@ -525,7 +525,7 @@ void render(void)
 	//glEnd();
 	//
 	//show boxes as background
-	for (int i=0; i<20; i++) {
+	/*for (int i=0; i<20; i++) {
 		glPushMatrix();
 		glTranslated(g.box[i][0],g.box[i][1],g.box[i][2]);
 		glColor3f(0.2, 0.2, 0.2);
@@ -541,7 +541,7 @@ void render(void)
 	float w = h * 0.5;
 	glPushMatrix();
 	glColor3f(1.0, 1.0, 1.0);
-	glBindTexture(GL_TEXTURE_2D, g.walkTexture);
+	glBindTexture(GL_TEXTURE_2D, g.walkTexture);*/
 	//
 	glEnable(GL_ALPHA_TEST);
 	glAlphaFunc(GL_GREATER, 0.0f);
