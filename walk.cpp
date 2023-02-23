@@ -85,7 +85,7 @@ public:
 		unlink(ppmname);
 	}
 };
-Image img[2] = {"images/sprite.gif"
+Image img[2] = {"images/sprite.gif",
 				"images/map1.gif"};
 
 
@@ -469,7 +469,7 @@ void render(void)
 	float cy = g.yres/2.0;
 	//display map
 	glColor3f(0.5f, 0.5f, 0.5f);
-	glBindTexture(GL_TEXTURE_2D, g.map_one)
+	glBindTexture(GL_TEXTURE_2D, g.map_one);
 	glBegin(GL_QUADS); 
         glTexCoord2f(0.0f, 0.0f); glVertex2i(0,      0); 
         glTexCoord2f(0.0f, 1.0f); glVertex2i(0,      g.yres); 
