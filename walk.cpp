@@ -130,7 +130,8 @@ public:
 	double delay;
 	int feature_mode;
 	GLuint walkTexture;
-	Texture tex;
+	GLuint map1Texture
+	//Texture tex;
 	Vec box[20];
 	Global() {
 		done=0;
@@ -311,18 +312,6 @@ void initOpengl(void)
 	//
 	int w = img[0].width;
 	int h = img[0].height;
-
-	int w1 = g.tex.backImage->width;
-	int h1 = g.tex.backImage->height;
-	glBindTexture(GL_TEXTURE_2D, g.text.backTexture);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, 3, w1, h1, 0,
-                GL_RGB, GL_UNSIGNED_BYTE, g.tex.backimage->data);
-    g.tex.xc[0] = 0.0;
-    g.tex.xc[1] = 0.25;
-    g.tex.yc[0] = 0.0;
-    g.tex.yc[1] = 1.0;
 	//
 	//create opengl texture elements
 	glGenTextures(1, &g.walkTexture);
@@ -342,6 +331,15 @@ void initOpengl(void)
 	//free(walkData);
 	//unlink("./images/walk.ppm");
 	//-------------------------------------------------------------------------
+	//My Attempt:
+	int w1 = img[1].width;
+	int h1 = img[1].height;
+	glGenTextures(1, &g.map1Texture);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	unsigned char *mapData = buildAlphaData(&img[1]);	
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w1, h1 0,
+		GL_RGBA, GL_UNSIGNED_BYTE, mapData);
 }
 
 void init() {
@@ -479,15 +477,15 @@ void render(void)
 	float cx = g.xres/2.0;
 	float cy = g.yres/2.0;
 	//display map
-	glColor3f(1.0, 1.0, 1.0);
-    glBindTexture(GL_TEXTURE_2D, g.tex.backTexture);
-    glBegin(GL_QUADS);
-        glTexCoord2f(g.tex.xc[0], g.tex.yc[1]); glVertex2i(0,      0);
-        glTexCoord2f(g.tex.xc[0], g.tex.yc[0]); glVertex2i(0,      g.yres);
-        glTexCoord2f(g.tex.xc[1], g.tex.yc[0]); glVertex2i(g.xres, g.yres);
-        glTexCoord2f(g.tex.xc[1], g.tex.yc[1]); glVertex2i(g.xres, 0);
+	glColor3f(0.5f, 0.5f, 0.5f);
+	glBindTexture(GL_TEXTURE_2D, g.map_one)
+	glBegin(GL_QUADS); 
+        glTexCoord2f(0.0f, 0.0f); glVertex2i(0,      0); 
+        glTexCoord2f(0.0f, 1.0f); glVertex2i(0,      g.yres); 
+        glTexCoord2f(1.0f, 1.0f); glVertex2i(g.xres, g.yres); 
+    glTexCoord2f(1.0f, 0.0f); glVertex2i(g.xres, 0); 
     glEnd(); 
-	//
+    glBindTexture(GL_TEXTURE_2D, 0); 
 	//show ground
 	glBegin(GL_QUADS);
 		glColor3f(0.2, 0.2, 0.2);
