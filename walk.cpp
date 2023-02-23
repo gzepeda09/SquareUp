@@ -86,7 +86,7 @@ public:
 	}
 };
 Image img[2] = {"images/sprite.gif"
-				"images/map1"};
+				"images/map1.gif"};
 
 
 //-----------------------------------------------------------------------------
@@ -316,7 +316,7 @@ void initOpengl(void)
 	//this is similar to a sprite graphic
 	//
 	glBindTexture(GL_TEXTURE_2D, g.walkTexture);
-		glBindTexture(GL_TEXTURE_2D, g.map_one)
+		glBindTexture(GL_TEXTURE_2D, g.map_one);
 	//
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
@@ -325,6 +325,10 @@ void initOpengl(void)
 	unsigned char *walkData = buildAlphaData(&img[0]);	
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
 		GL_RGBA, GL_UNSIGNED_BYTE, walkData);
+
+	unsigned char *map1Data = buildAlphaData(&img[1]);	
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w1, h1, 0,
+		GL_RGBA, GL_UNSIGNED_BYTE, map1Data);
 	//free(walkData);
 	//unlink("./images/walk.ppm");
 	//-------------------------------------------------------------------------
