@@ -85,7 +85,8 @@ public:
 		unlink(ppmname);
 	}
 };
-Image img[1] = {"images/sprite.gif"};
+Image img[2] = {"images/sprite.gif"
+				"images/map1"};
 
 
 //-----------------------------------------------------------------------------
@@ -122,6 +123,7 @@ public:
 	double delay;
 	int feature_mode;
 	GLuint walkTexture;
+	GLuint map_one;
 	Vec box[20];
 	Global() {
 		done=0;
@@ -302,14 +304,19 @@ void initOpengl(void)
 	//
 	int w = img[0].width;
 	int h = img[0].height;
+
+		int w1 = img[1].width;
+		int h1 = img[1].height;
 	//
 	//create opengl texture elements
 	glGenTextures(1, &g.walkTexture);
+		glGenTextures(1, &g.map_one);
 	//-------------------------------------------------------------------------
 	//silhouette
 	//this is similar to a sprite graphic
 	//
 	glBindTexture(GL_TEXTURE_2D, g.walkTexture);
+		glBindTexture(GL_TEXTURE_2D, g.map_one)
 	//
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
@@ -456,6 +463,16 @@ void render(void)
 	glClear(GL_COLOR_BUFFER_BIT);
 	float cx = g.xres/2.0;
 	float cy = g.yres/2.0;
+	//display map
+	glColor3f(0.5f, 0.5f, 0.5f);
+	glBindTexture(GL_TEXTURE_2D, g.map_one)
+	glBegin(GL_QUADS); 
+        glTexCoord2f(0.0f, 0.0f); glVertex2i(0,      0); 
+        glTexCoord2f(0.0f, 1.0f); glVertex2i(0,      g.yres); 
+        glTexCoord2f(1.0f, 1.0f); glVertex2i(g.xres, g.yres); 
+    glTexCoord2f(1.0f, 0.0f); glVertex2i(g.xres, 0); 
+    glEnd(); 
+    glBindTexture(GL_TEXTURE_2D, 0); 
 	//
 	//show ground
 	glBegin(GL_QUADS);
