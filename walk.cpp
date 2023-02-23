@@ -130,7 +130,7 @@ public:
 	double delay;
 	int feature_mode;
 	GLuint walkTexture;
-	GLuint map1Texture
+	GLuint map1Texture;
 	//Texture tex;
 	Vec box[20];
 	Global() {
@@ -338,7 +338,7 @@ void initOpengl(void)
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
 	unsigned char *mapData = buildAlphaData(&img[1]);	
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w1, h1 0,
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w1, h1, 0,
 		GL_RGBA, GL_UNSIGNED_BYTE, mapData);
 }
 
@@ -478,7 +478,7 @@ void render(void)
 	float cy = g.yres/2.0;
 	//display map
 	glColor3f(0.5f, 0.5f, 0.5f);
-	glBindTexture(GL_TEXTURE_2D, g.map_one)
+	glBindTexture(GL_TEXTURE_2D, g.map1Texture)
 	glBegin(GL_QUADS); 
         glTexCoord2f(0.0f, 0.0f); glVertex2i(0,      0); 
         glTexCoord2f(0.0f, 1.0f); glVertex2i(0,      g.yres); 
