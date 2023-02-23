@@ -511,16 +511,18 @@ void render(void)
 	glColor3f(1.0, 1.0, 1.0);
     glBindTexture(GL_TEXTURE_2D, g.tex.backTexture);
 	//Display Background
-    /*glBegin(GL_QUADS);
+    glBegin(GL_QUADS);
         glTexCoord2f(g.tex.xc[0], g.tex.yc[1]); glVertex2i(0,      -150);
         glTexCoord2f(g.tex.xc[0], g.tex.yc[0]); glVertex2i(0,      g.yres*2);
         glTexCoord2f(g.tex.xc[1], g.tex.yc[0]); glVertex2i(g.xres, g.yres*2);
         glTexCoord2f(g.tex.xc[1], g.tex.yc[1]); glVertex2i(g.xres, -150);
-    glEnd(); */
+    glEnd(); 
 	//
+
 	//Test
-	extern void display_map_one(float, float, float, float, int, int);
-	extern void display_map_one(g.tex.xc[0], g.tex.xc[1], g.tex.yc[0], g.tex.xc[1], g.xres, g.yres);
+	//extern void display_map_one(float, float, float, float, int, int);
+	//display_map_one(g.tex.xc[0], g.tex.xc[1], g.tex.yc[0], g.tex.xc[1], g.xres, g.yres);
+
 	//
     //glBindTexture(GL_TEXTURE_2D, g.backTexture); 
 	//show ground

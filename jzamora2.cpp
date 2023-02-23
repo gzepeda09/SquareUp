@@ -67,14 +67,14 @@ extern void test_text (int yres)
 
 }
 
-extern void display_map_one(float xc1[0], float xc2[0], float yc1[0], float yc2[0], int xres, int yres) {
+/*extern void display_map_one(float xc1[0], float xc2[0], float yc1[0], float yc2[0], int xres, int yres) {
     glBegin(GL_QUADS);
         glTexCoord2f(xc1[0], yc2[0]); glVertex2i(0,      -150);
         glTexCoord2f(xc1[0], yc1[0]); glVertex2i(0,      yres*2);
         glTexCoord2f(xc2[0], yc1[0]); glVertex2i(xres,   yres*2);
         glTexCoord2f(xc2[0], yc2[1]); glVertex2i(xres,   -150);
     glEnd(); 
-}
+}*/
 // Add a background
 
 // Add title screen
