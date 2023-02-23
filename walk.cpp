@@ -340,13 +340,16 @@ void initOpengl(void)
 	unsigned char *mapData = buildAlphaData(&img[1]);	
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w1, h1, 0,
 		GL_RGBA, GL_UNSIGNED_BYTE, mapData);*/
-	int w1 = g.tex.backimage->width;
-	int h1 = g.tex.backimage->height;
+
+	//int w1 = g.tex.backimage->width;
+	//int h1 = g.tex.backimage->height;
+	int w1 = img[1].width;
+	int hh = img[1].height;
 	glBindTexture(GL_TEXTURE_2D, g.tex.backTexture);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
 	glTexImage2D(GL_TEXTURE_2D, 0, 3, w1, h1, 0,
-                GL_RGB, GL_UNSIGNED_BYTE, g.tex.backimage->data);
+                GL_RGB, GL_UNSIGNED_BYTE, img[1].data);
     g.tex.xc[0] = 0.0;
     g.tex.xc[1] = 0.25;
     g.tex.yc[0] = 0.0;
@@ -386,8 +389,17 @@ int checkKeys(XEvent *e)
 {
 	//keyboard input?
 	static int shift=0;
-	if (e->type != KeyRelease && e->type != KeyPress)
+	if (e->type != KeyRelease) { //&& e->type != KeyPress) {
+		if (key == XK_a) {
+            g.tex.xc[0] -= 0.001;
+            g.tex.xc[1] -= 0.001;
+        }
+        if (key == XK_d) {
+            g.tex.xc[0] += 0.001;
+            g.tex.xc[1] += 0.001;
+        }
 		return 0;
+	}
 	int key = (XLookupKeysym(&e->xkey, 0) & 0x0000ffff);
 	if (e->type == KeyRelease) {
 		if (key == XK_Shift_L || key == XK_Shift_R)
@@ -499,21 +511,21 @@ void render(void)
 	glColor3f(1.0, 1.0, 1.0);
     glBindTexture(GL_TEXTURE_2D, g.tex.backTexture);
     glBegin(GL_QUADS);
-        glTexCoord2f(g.tex.xc[0], g.tex.yc[1]); glVertex2i(0,      0);
-        glTexCoord2f(g.tex.xc[0], g.tex.yc[0]); glVertex2i(0,      g.yres);
-        glTexCoord2f(g.tex.xc[1], g.tex.yc[0]); glVertex2i(g.xres, g.yres);
-        glTexCoord2f(g.tex.xc[1], g.tex.yc[1]); glVertex2i(g.xres, 0);
+        glTexCoord2f(g.tex.xc[0], g.tex.yc[1]); glVertex2i(0,      -150);
+        glTexCoord2f(g.tex.xc[0], g.tex.yc[0]); glVertex2i(0,      g.yres*2);
+        glTexCoord2f(g.tex.xc[1], g.tex.yc[0]); glVertex2i(g.xres, g.yres*2);
+        glTexCoord2f(g.tex.xc[1], g.tex.yc[1]); glVertex2i(g.xres, -150);
     glEnd(); 
     //glBindTexture(GL_TEXTURE_2D, g.backTexture); 
 	//show ground
-	glBegin(GL_QUADS);
+	/*glBegin(GL_QUADS);
 		glColor3f(0.2, 0.2, 0.2);
 		glVertex2i(0,       220);
 		glVertex2i(g.xres, 220);
 		glColor3f(0.4, 0.4, 0.4);
 		glVertex2i(g.xres,   0);
 		glVertex2i(0,         0);
-	glEnd();
+	glEnd();*/
 	//
 	//fake shadow
 	//glColor3f(0.25, 0.25, 0.25);
@@ -536,12 +548,12 @@ void render(void)
 			glVertex2i(20,  0);
 		glEnd();
 		glPopMatrix();
-	}
+	}*/
 	float h = 250.0;
 	float w = h * 0.5;
-	glPushMatrix();
+	//glPushMatrix();
 	glColor3f(1.0, 1.0, 1.0);
-	glBindTexture(GL_TEXTURE_2D, g.walkTexture);*/
+	glBindTexture(GL_TEXTURE_2D, g.walkTexture);
 	//
 	glEnable(GL_ALPHA_TEST);
 	glAlphaFunc(GL_GREATER, 0.0f);
