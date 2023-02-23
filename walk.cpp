@@ -95,7 +95,7 @@ class Texture {
 		GLuint backTexture;
 		float xc[2];
 		float yc[2];
-}
+};
 //-----------------------------------------------------------------------------
 //Setup timers
 class Timers {
@@ -312,13 +312,13 @@ void initOpengl(void)
 	int w = img[0].width;
 	int h = img[0].height;
 
-	int w1 = g.text.backImage->width;
-	int h1 = g.text.backImage->height;
+	int w1 = g.tex.backImage->width;
+	int h1 = g.tex.backImage->height;
 	glBindTexture(GL_TEXTURE_2D, g.text.backTexture);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
-                GL_RGB, GL_UNSIGNED_BYTE, g.tex.backImage->data);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, w1, h1, 0,
+                GL_RGB, GL_UNSIGNED_BYTE, g.tex.backimage->data);
     g.tex.xc[0] = 0.0;
     g.tex.xc[1] = 0.25;
     g.tex.yc[0] = 0.0;
