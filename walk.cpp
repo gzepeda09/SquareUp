@@ -341,8 +341,7 @@ void initOpengl(void)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w1, h1, 0,
 		GL_RGBA, GL_UNSIGNED_BYTE, mapData);*/
 
-	//int w1 = g.tex.backimage->width;
-	//int h1 = g.tex.backimage->height;
+	//
 	int w1 = img[1].width;
 	int h1 = img[1].height;
 	glBindTexture(GL_TEXTURE_2D, g.tex.backTexture);
@@ -499,30 +498,13 @@ void render(void)
 	glClear(GL_COLOR_BUFFER_BIT);
 	float cx = g.xres/2.0;
 	float cy = g.yres/2.0;
-	//display map
-	/*glColor3f(0.5f, 0.5f, 0.5f);
-	glBindTexture(GL_TEXTURE_2D, g.map1Texture);
-	glBegin(GL_QUADS); 
-        glTexCoord2f(0.0f, 0.0f); glVertex2i(0,      0); 
-        glTexCoord2f(0.0f, 1.0f); glVertex2i(0,      g.yres); 
-        glTexCoord2f(1.0f, 1.0f); glVertex2i(g.xres, g.yres); 
-    glTexCoord2f(1.0f, 0.0f); glVertex2i(g.xres, 0); 
-    glEnd(); */
 	glColor3f(1.0, 1.0, 1.0);
     glBindTexture(GL_TEXTURE_2D, g.tex.backTexture);
 	//Display Background
-    glBegin(GL_QUADS);
-        glTexCoord2f(g.tex.xc[0], g.tex.yc[1]); glVertex2i(0,      -150);
-        glTexCoord2f(g.tex.xc[0], g.tex.yc[0]); glVertex2i(0,      g.yres*2);
-        glTexCoord2f(g.tex.xc[1], g.tex.yc[0]); glVertex2i(g.xres, g.yres*2);
-        glTexCoord2f(g.tex.xc[1], g.tex.yc[1]); glVertex2i(g.xres, -150);
-    glEnd(); 
-	//
-
-	//Test
-	//extern void display_map_one(float, float, float, float, int, int);
-	//display_map_one(g.tex.xc[0], g.tex.xc[1], g.tex.yc[0], g.tex.xc[1], g.xres, g.yres);
-
+	extern void display_map_one(int x0, int x1, int y0, int y1, int xres, int yres);
+	display_map_one(g.tex.xc[0], g.tex.xc[1]
+					g.tex.yc[0], g.tex.yc[1]
+					g.xres, 	 g,yres);
 	//
     //glBindTexture(GL_TEXTURE_2D, g.backTexture); 
 	//show ground
@@ -559,7 +541,7 @@ void render(void)
 	}*/
 	float h = 250.0;
 	float w = h * 0.5;
-	//glPushMatrix();
+	glPushMatrix();
 	glColor3f(1.0, 1.0, 1.0);
 	glBindTexture(GL_TEXTURE_2D, g.walkTexture);
 	//
@@ -573,50 +555,26 @@ void render(void)
 	float tx = (float)ix / 10.0;
 	float ty = (float)iy / 10.0;
 	glBegin(GL_QUADS);
-		glTexCoord2f(tx,      ty+.100); glVertex2i(cx-w, cy-h);
-		glTexCoord2f(tx,      ty );    glVertex2i(cx-w, cy+h);
-		glTexCoord2f(tx+.100, ty);    glVertex2i(cx+w, cy+h);
-		glTexCoord2f(tx+.100, ty); glVertex2i(cx+w, cy-h);
+		glTexCoord2f(tx,      ty+.5); 	glVertex2i(cx-w, cy-h-150);
+		glTexCoord2f(tx,      ty );    	glVertex2i(cx-w, cy+h-150);
+		glTexCoord2f(tx+.125, ty);    	glVertex2i(cx+w, cy+h-150);
+		glTexCoord2f(tx+.125, ty+.5); 	glVertex2i(cx+w, cy-h-150);
 	glEnd();
 	glPopMatrix();
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glDisable(GL_ALPHA_TEST);
 	//
 	if (g.feature_mode) {
-		int t = 40;
-        glColor3f(0.0, 1.0, 0.0);
-        glBegin(GL_TRIANGLE_STRIP);
-            glVertex2f(0,           0);
-            glVertex2f(t,           t);
-            glVertex2f(0,           g.yres);
-            glVertex2f(t,           g.yres - t);
-            glVertex2f(g.xres,     	g.yres);
-            glVertex2f(g.xres - t, 	g.yres - t);
-            glVertex2f(g.xres,     	0);
-            glVertex2f(g.xres - t, 	t);
-            glVertex2f(0,           0);
-            glVertex2f(t,           t);
-        glEnd();
-		extern void test_text(int yres);
-		test_text(g.yres);
+		extern void fmBorder(int xres, int yres);
+		fmBorder(g.xres, g.yres);
 
-		r.bot = g.yres - 20;
-        r.left = g.xres / 2;
-        r.center = 1;
-        ggprint8b(&r, 16, 0x00ff0000, "Jose's Feature Mode");
+		extern void test_text(int xres, int yres);
+		test_text(g.xres, g.yres);
 	}
-
+	//
 	if (!g.feature_mode) {
-		unsigned int c = 0x00ffff44;
-		r.bot = g.yres - 20;
-		r.left = 10;
-		r.center = 0;
-		ggprint8b(&r, 16, c, "W   Walk cycle");
-		ggprint8b(&r, 16, c, "+   faster");
-		ggprint8b(&r, 16, c, "-   slower");
-		ggprint8b(&r, 16, c, "right arrow -> walk right");
-		ggprint8b(&r, 16, c, "left arrow  <- walk left");
-		ggprint8b(&r, 16, c, "frame: %i", g.walkFrame);
+		extern void display_controls(int wf, int yres);
+		display_controls(g.walkFrame, int g.yres)
 	}
 }
 
