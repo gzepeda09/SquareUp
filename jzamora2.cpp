@@ -37,7 +37,7 @@ extern void fmBorder(int xres, int yres) {
 extern void test_text (int xres, int yres)
 {
     Rect r;
-    unsigned int c = 0x00ffff44;
+    //unsigned int c = 0x00ffff44;
 	r.bot = yres - 20;
     r.left = xres / 2;
     r.center = 1;
@@ -46,7 +46,7 @@ extern void test_text (int xres, int yres)
 }
 
 extern void display_controls(int wf, int yres) {
-    React r;
+    Rect r;
     unsigned int c = 0x00ffff44;
 	r.bot = yres - 20;
 	r.left = 10;
@@ -60,7 +60,9 @@ extern void display_controls(int wf, int yres) {
 }
 
 // Add a background
-extern void display_map_one(int x0, int x1, int y0, int y1, int xres, int yres) {
+extern void display_map_one(float x0, float x1, 
+                            float y0, float y1, 
+                            int xres, int yres) {
     glBegin(GL_QUADS);
         glTexCoord2f(x0, y1+1.5); 		glVertex2i(0,       -357);
         glTexCoord2f(x0, y0); 			glVertex2i(0,       yres*2);

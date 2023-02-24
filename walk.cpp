@@ -85,7 +85,7 @@ public:
 		unlink(ppmname);
 	}
 };
-Image img[2] = {"images/sprite.gif",
+Image img[2] = {"images/walk.gif",
 				"images/map1.gif"};
 
 
@@ -135,8 +135,8 @@ public:
 	Vec box[20];
 	Global() {
 		done=0;
-		xres=800;
-		yres=600;
+		xres=1280;		// 800
+		yres=720;		// 600
 		walk=0;
 		walkFrame=0;
 		delay = 0.1;
@@ -187,7 +187,7 @@ public:
 	void setTitle() {
 		//Set the window title bar.
 		XMapWindow(dpy, win);
-		XStoreName(dpy, win, "Walk Cycle");
+		XStoreName(dpy, win, "Sqaure Up!");
 	}
 	void setupScreenRes(const int w, const int h) {
 		g.xres = w;
@@ -397,6 +397,8 @@ int checkKeys(XEvent *e)
         if (key == XK_d) {
             g.tex.xc[0] += 0.001;
             g.tex.xc[1] += 0.001;
+			timers.recordTime(&timers.walkTime);
+			g.walk ^= 1;
         }
 		return 0;
 	}
@@ -491,20 +493,20 @@ void physics(void)
 
 void render(void)
 {
-	Rect r;
+	//Rect r;
 	//Clear the screen
 	glClearColor(0.1, 0.1, 0.1, 1.0);
 	//glClearColor(1, 1, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 	float cx = g.xres/2.0;
 	float cy = g.yres/2.0;
+	//Display Background
 	glColor3f(1.0, 1.0, 1.0);
     glBindTexture(GL_TEXTURE_2D, g.tex.backTexture);
-	//Display Background
-	extern void display_map_one(int x0, int x1, int y0, int y1, int xres, int yres);
-	display_map_one(g.tex.xc[0], g.tex.xc[1]
-					g.tex.yc[0], g.tex.yc[1]
-					g.xres, 	 g,yres);
+	extern void display_map_one(float x0, float x1, float y0, float y1, int xres, int yres);
+	display_map_one(g.tex.xc[0], g.tex.xc[1],
+					g.tex.yc[0], g.tex.yc[1],
+					g.xres, 	 g.yres);
 	//
     //glBindTexture(GL_TEXTURE_2D, g.backTexture); 
 	//show ground
@@ -574,7 +576,7 @@ void render(void)
 	//
 	if (!g.feature_mode) {
 		extern void display_controls(int wf, int yres);
-		display_controls(g.walkFrame, int g.yres)
+		display_controls(g.walkFrame, g.yres);
 	}
 }
 
