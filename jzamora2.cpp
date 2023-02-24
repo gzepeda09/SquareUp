@@ -19,19 +19,19 @@
 
 extern void fmBorder(int xres, int yres) {
     int t = 40;
-        glColor3f(0.0, 1.0, 0.0);
-        glBegin(GL_TRIANGLE_STRIP);
-            glVertex2f(0,           0);
-            glVertex2f(t,           t);
-            glVertex2f(0,           yres);
-            glVertex2f(t,           yres - t);
-            glVertex2f(xres,     	yres);
-            glVertex2f(xres - t, 	yres - t);
-            glVertex2f(xres,     	0);
-            glVertex2f(xres - t, 	t);
-            glVertex2f(0,           0);
-            glVertex2f(t,           t);
-        glEnd();
+    glColor3f(0.0, 1.0, 0.0);
+    glBegin(GL_TRIANGLE_STRIP);
+        glVertex2f(0,           0);
+        glVertex2f(t,           t);
+        glVertex2f(0,           yres);
+        glVertex2f(t,           yres - t);
+        glVertex2f(xres,     	yres);
+        glVertex2f(xres - t, 	yres - t);
+        glVertex2f(xres,     	0);
+        glVertex2f(xres - t, 	t);
+        glVertex2f(0,           0);
+        glVertex2f(t,           t);
+    glEnd();
 }
 
 extern void test_text (int xres, int yres)
