@@ -114,15 +114,18 @@ public:
 	int done;
 	int xres, yres;
 	int walk;
+	int gflag, bflag;
+	int jeflag, joflag;
 	int walkFrame;
 	double delay;
 	GLuint walkTexture;
 	Vec box[20];
 	Global() {
 		done=0;
-		xres=800;
-		yres=600;
+		xres=1440;
+		yres=1200;
 		walk=0;
+		gflag = bflag = jeflag = joflag = 0;
 		walkFrame=0;
 		delay = 0.1;
 		for (int i=0; i<20; i++) {
@@ -369,6 +372,12 @@ int checkKeys(XEvent *e)
 			timers.recordTime(&timers.walkTime);
 			g.walk ^= 1;
 			break;
+		case XK_g:
+			if(g.gflag == 1){
+				g.gflag = 0;
+			} else {
+				g.gflag = 1;
+			}
 		case XK_Left:
 			break;
 		case XK_Right:
@@ -435,12 +444,9 @@ void physics(void)
 
 void render(void)
 {
-	Rect r;
 	//Clear the screen
 	glClearColor(0.1, 0.1, 0.1, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
-	float cx = g.xres/2.0;
-	float cy = g.yres/2.0;
 	//
 	//show ground
 	glBegin(GL_QUADS);
@@ -451,78 +457,32 @@ void render(void)
 		glVertex2i(g.xres,   0);
 		glVertex2i(0,         0);
 	glEnd();
-	//
-	//fake shadow
-	//glColor3f(0.25, 0.25, 0.25);
-	//glBegin(GL_QUADS);
-	//	glVertex2i(cx-60, 150);
-	//	glVertex2i(cx+50, 150);
-	//	glVertex2i(cx+50, 130);
-	//	glVertex2i(cx-60, 130);
-	//glEnd();
-	//
-	//show boxes as background
-	for (int i=0; i<20; i++) {
-		glPushMatrix();
-		glTranslated(g.box[i][0],g.box[i][1],g.box[i][2]);
-		glColor3f(0.2, 0.2, 0.2);
-		glBegin(GL_QUADS);
-			glVertex2i( 0,  0);
-			glVertex2i( 0, 30);
-			glVertex2i(20, 30);
-			glVertex2i(20,  0);
-		glEnd();
-		glPopMatrix();
+
+
+
+
+
+	if(g.gflag == 1){	
+		//Genos functions
+		extern void newText(int yres);
+		newText(g.yres);
+		glColor3f(0.5, 0.5, 0.5);
+		glRecti(300, 400, 500, 450);
+		glColor3f(1, 1, 1);
+		glRasterPos2i(350, 420);
 	}
-	float h = 250.0;
-	float w = h * 0.5;
-	glPushMatrix();
-	glColor3f(1.0, 1.0, 1.0);
-	glBindTexture(GL_TEXTURE_2D, g.walkTexture);
-	//
-	glEnable(GL_ALPHA_TEST);
-	glAlphaFunc(GL_GREATER, 0.0f);
-	glColor4ub(255,255,255,255);
-	int ix = g.walkFrame % 8;
-	int iy = 0;
-	if (g.walkFrame >= 8)
-		iy = 1;
-	float tx = (float)ix / 10.0;
-	float ty = (float)iy / 10.0;
-	glBegin(GL_QUADS);
-		glTexCoord2f(tx,      ty+.100); glVertex2i(cx-w, cy-h);
-		glTexCoord2f(tx,      ty );    glVertex2i(cx-w, cy+h);
-		glTexCoord2f(tx+.100, ty);    glVertex2i(cx+w, cy+h);
-		glTexCoord2f(tx+.100, ty); glVertex2i(cx+w, cy-h);
-	glEnd();
-	glPopMatrix();
-	glBindTexture(GL_TEXTURE_2D, 0);
-	glDisable(GL_ALPHA_TEST);
-	//
-	unsigned int c = 0x00ffff44;
-	r.bot = g.yres - 20;
-	r.left = 10;
-	r.center = 0;
-	ggprint8b(&r, 16, c, "W   Walk cycle");
-	ggprint8b(&r, 16, c, "+   faster");
-	ggprint8b(&r, 16, c, "-   slower");
-	ggprint8b(&r, 16, c, "right arrow -> walk right");
-	ggprint8b(&r, 16, c, "left arrow  <- walk left");
-	ggprint8b(&r, 16, c, "frame: %i", g.walkFrame);
 
+	if(g.jeflag == 1){
+		//Jesses function
+		extern void greenBoxes();
+		greenBoxes();
+	}
 
-	//Genos functions
-	extern void newText(int yres);
-	newText(g.yres);
-
-
-	//Jesses function
-	extern void greenBoxes();
-	greenBoxes();
-
-	//Joses function
-	extern void test_text (int yres);
-	test_text(g.yres);
+	if(g.joflag == 1){
+		//Joses function
+		extern void test_text (int yres);
+		test_text(g.yres);
+	}
 
 
 }
