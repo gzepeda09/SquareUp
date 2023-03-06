@@ -16,6 +16,7 @@
 #include <X11/keysym.h>
 #include <GL/glx.h>
 #include "fonts.h"
+#include <iostream>
 
 //defined types
 typedef double Flt;
@@ -332,12 +333,21 @@ void checkMouse(XEvent *e)
 	static int savex = 0;
 	static int savey = 0;
 	//
+
+
+
+
 	if (e->type == ButtonRelease) {
 		return;
 	}
 	if (e->type == ButtonPress) {
 		if (e->xbutton.button==1) {
 			//Left button is down
+
+			if(e->xbutton.x <= g.xres - 1000 && e->xbutton.y <= g.yres + 250){
+
+				std::cout << "START!!!!!" << std::endl;
+			}
 		}
 		if (e->xbutton.button==3) {
 			//Right button is down
@@ -347,6 +357,7 @@ void checkMouse(XEvent *e)
 		//Mouse moved
 		savex = e->xbutton.x;
 		savey = e->xbutton.y;
+
 	}
 }
 
@@ -378,6 +389,10 @@ int checkKeys(XEvent *e)
 			} else {
 				g.gflag = 1;
 			}
+			break;
+		case XK_1:
+			std::cout << "START" << std::endl;
+			break;
 		case XK_Left:
 			break;
 		case XK_Right:
@@ -448,28 +463,15 @@ void render(void)
 	glClearColor(0.1, 0.1, 0.1, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 	//
-	//show ground
-	glBegin(GL_QUADS);
-		glColor3f(0.2, 0.2, 0.2);
-		glVertex2i(0,       220);
-		glVertex2i(g.xres, 220);
-		glColor3f(0.4, 0.4, 0.4);
-		glVertex2i(g.xres,   0);
-		glVertex2i(0,         0);
-	glEnd();
-
+	
 
 
 
 
 	if(g.gflag == 1){	
 		//Genos functions
-		extern void newText(int yres);
-		newText(g.yres);
-		glColor3f(0.5, 0.5, 0.5);
-		glRecti(300, 400, 500, 450);
-		glColor3f(1, 1, 1);
-		glRasterPos2i(350, 420);
+		extern void newText(int yres, int xres);
+		newText(g.yres, g.xres);
 	}
 
 	if(g.jeflag == 1){
