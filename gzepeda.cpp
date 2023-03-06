@@ -52,8 +52,17 @@ extern void newText(int yres, int xres){
 	unsigned char c3[3] = {184, 2, 2};
 
 
-
+	Rect r;
     glClear(GL_COLOR_BUFFER_BIT);
+
+
+    r.bot = yres - box3.pos[1];
+    r.left = box3.pos[0];
+    r.center = 0;
+
+
+
+
 
     box.set_color(c);
 	box2.set_color(c2);
@@ -72,6 +81,7 @@ extern void newText(int yres, int xres){
 	glEnd();
 	glPopMatrix();
 
+
 	//Draw box.
 	glPushMatrix();
 	glColor3ubv(box2.color);
@@ -83,6 +93,9 @@ extern void newText(int yres, int xres){
 	glVertex2f( box2.w, -box2.h);
 	glEnd();
 	glPopMatrix();
+
+
+	ggprint8b(&r, 16, 0x000000, "Start");
 
 	//Draw box.
 	glPushMatrix();

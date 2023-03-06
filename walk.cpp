@@ -459,12 +459,18 @@ void physics(void)
 
 void render(void)
 {
+	Rect r;
 	//Clear the screen
 	glClearColor(0.1, 0.1, 0.1, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 	//
 	
 
+    r.bot = g.yres - 20;
+    r.left = 10;
+    r.center = 0;
+    ggprint8b(&r, 16, 0x00ff0000, "3350 - Waterfall");
+    ggprint8b(&r, 16, 0x00ff0000, "Geno Zepeda");
 
 
 
