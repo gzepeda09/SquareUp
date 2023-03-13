@@ -472,6 +472,10 @@ int checkKeys(XEvent *e)
 		    g.gflag = 1;
 		}
             break;
+	case XK_1:
+		std::cout << "START" << std::endl;
+		    g.joflag = 1;
+		break;
 	case XK_Left:
             //
             break;
@@ -652,7 +656,7 @@ void physics(void)
 
 
     // Punch
-    if (g.keyStates[XK_1] && player2.punch == 0) {
+    if (g.keyStates[XK_m] && player2.punch == 0) {
         player2.punch = 1;
 
         // Punch detection
@@ -786,19 +790,13 @@ void render(void)
     //
     
     //
-    if(g.gflag == 1){	
+	if(g.gflag == 1){	
 		//Genos functions
-		extern void newText(int yres);
-		newText(g.yres);
-		glColor3f(0.5, 0.5, 0.5);
-		glRecti(300, 400, 500, 450);
-		glColor3f(1, 1, 1);
-		glRasterPos2i(350, 420);
+		extern void newText(int yres, int xres);
+		newText(g.yres, g.xres);
 	}
-    //
-    
-    //
-    if(g.jeflag == 1){
+
+	if(g.jeflag == 1){
 		//Jesses function
 		extern void greenBoxes();
 		greenBoxes();
