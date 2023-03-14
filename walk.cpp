@@ -737,11 +737,11 @@ void render(void)
 	if (g.gflag == 0) {
 		Rect r;
     	unsigned int c = 0x0000ff00;
-    	r.bot = g.yres - 20;
+    	r.bot = g.yres/2;
     	r.left = g.xres/2;
     	r.center = 50;
     	ggprint8b(&r, 16, c, "Feature Modes: ");
-    	ggprint8b(&r, 16, c, "Geno's Feature Mode: g");
+    	ggprint8b(&r, 16, c, "Geno's Feature Mode: 1");
 		ggprint8b(&r, 16, c, "Jose's Feature Mode: SHIFT-J");
 		ggprint8b(&r, 16, c, "Brian's Feature Mode: 2");
 		ggprint8b(&r, 16, c, "Jesse's Feature Mode: J");
@@ -760,6 +760,13 @@ void render(void)
 		extern void display_controls(int wf, int yres);
         display_controls(g.walkFrame, g.yres);
 	
+		Rect r;
+    	unsigned int c = 0x0000ff00;
+    	r.bot = g.yres - 20;
+    	r.left = g.xres/2;
+    	r.center = 50;
+    	ggprint8b(&r, 16, c, "Player 1 Health: %i", player1.health);
+    	ggprint8b(&r, 16, c, "Player 2 Health: %i", player2.health);
 
 		//Display Background
 		glColor3f(1.0, 1.0, 1.0);
@@ -875,13 +882,6 @@ void render(void)
     //
     
     //
-    Rect r;
-    unsigned int c = 0x0000ff00;
-    r.bot = g.yres - 20;
-    r.left = g.xres/2;
-    r.center = 50;
-    ggprint8b(&r, 16, c, "Player 1 Health: %i", player1.health);
-    ggprint8b(&r, 16, c, "Player 2 Health: %i", player2.health);
 
 	//JOSE: I JUST HAVE TO KEEP THIS; OTHERWISE, MAP MOVING DOENS'T WORK
 	//if (!g.feature_mode) {
