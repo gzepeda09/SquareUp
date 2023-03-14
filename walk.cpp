@@ -46,7 +46,7 @@ const float pos1 = 1920/2, pos2 = 1080/2;
 
 class Image {
 public:
-	int width, height;
+    int width, height;
 	unsigned char *data;
 	~Image() { delete [] data; }
 	Image(const char *fname) {
@@ -94,48 +94,48 @@ Image img[2] = {"images/walk.gif",
 
 //JOSE: sets up variables used for creating the background.
 class Texture {
-	public:
-		Image *backimage;
-		GLuint backTexture;
-		float xc[2];
-		float yc[2];
-        //TESTING:
-        //Player 1
-        float p1lr;
-        float p1ud;
-        int p1punch;
-        //Player2 2
-        float p2lr;
-        float p2ud;
-        int p2punch;
+public:
+    Image *backimage;
+    GLuint backTexture;
+    float xc[2];
+    float yc[2];
+    //TESTING:
+    //Player 1
+    float p1lr;
+    float p1ud;
+    int p1punch;
+    //Player2 2
+    float p2lr;
+    float p2ud;
+    int p2punch;
 };
 
 class Player_1 {
-    public:
-        Vec pos;
-        Vec vel;
-        float w = 20.0f;
-        float h = 100.0f;
-        float pw1 = 20.0f;
-        float pw2 = 100.0f;
-        float ph = 10.0f;
-        int punch;
-        float punchcooldown = 250.0f;
-        int health = 100;
+public:
+    Vec pos;
+    Vec vel;
+    float w = 20.0f;
+    float h = 100.0f;
+    float pw1 = 20.0f;
+    float pw2 = 100.0f;
+    float ph = 10.0f;
+    int punch;
+    float punchcooldown = 250.0f;
+    int health = 100;
 } player1;
 
 class Player_2 {
-    public:
-        Vec pos;
-        Vec vel;
-        float w = 20.0f;
-        float h = 100.0f;
-        float pw1 = 20.0f;
-        float pw2 = 100.0f;
-        float ph = 10.0f;
-        int punch;
-        float punchcooldown = 250.0f;
-        int health = 100;
+public:
+    Vec pos;
+    Vec vel;
+    float w = 20.0f;
+    float h = 100.0f;
+    float pw1 = 20.0f;
+    float pw2 = 100.0f;
+    float ph = 10.0f;
+    int punch;
+    float punchcooldown = 250.0f;
+    int health = 100;
 } player2;
 //-----------------------------------------------------------------------------
 //Setup timers
