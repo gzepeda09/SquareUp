@@ -756,7 +756,8 @@ void render(void)
 					g.tex.yc[0], g.tex.yc[1],
 					g.xres, 	 g.yres);
 
-	//Centers Background; will combine with ^this later
+	//Centers Background; 
+    //will combine with ^this later
 	if (g.mapCenter != 0) {
 		g.tex.xc[0] = 0.083;
 		g.tex.xc[1] = 1.083;
