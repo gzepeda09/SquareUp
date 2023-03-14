@@ -181,10 +181,10 @@ public:
 		xres=1920;		// 800
 		yres=1080;		// 600
 		walk=0;
-        	mapCenter = 1;
-       		bflag = jeflag = joflag = 0;
-        	gflag = 1;
-        	memset(keyStates, 0, 65536);
+       	mapCenter = 1;
+   		bflag = jeflag = joflag = 0;
+       	gflag = 1;
+       	memset(keyStates, 0, 65536);
 		walkFrame=0;
 		delay = 0.1;
 		for (int i=0; i<20; i++) {
