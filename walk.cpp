@@ -8,6 +8,7 @@
 //Walk cycle using a sprite sheet.
 //images courtesy: http://games.ucla.edu/resource/walk-cycles/
 //
+#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,11 +19,14 @@
 #include <X11/keysym.h>
 #include <GL/glx.h>
 #include "fonts.h"
+//#include <windows.h>
+//#include <irrklang/irrKlang.h>
+//using namespace irrklang;
 
 //defined types
 typedef double Flt;
 typedef double Vec[3];
-typedef Flt Matrix[4][4];
+typedef Flt	Matrix[4][4];
 
 //macros
 #define rnd() (((double)rand())/(double)RAND_MAX)
@@ -38,7 +42,7 @@ const float timeslice = 1.0f;
 const float gravity = -0.2f;
 const float pos1 = 1920/2, pos2 = 1080/2;
 #define ALPHA 1
-
+//bool* keyStates = new bool[256];
 
 class Image {
 public:
@@ -86,15 +90,15 @@ public:
 };
 //JOSE: THIS IS WHERE ANY IMAGES WE USE GO
 Image img[2] = {"images/walk.gif",
-		"images/map1.gif"};
+				"images/map1.gif"};
 
 //JOSE: sets up variables used for creating the background.
 class Texture {
-public:
-	Image *backimage;
-	GLuint backTexture;
-	float xc[2];
-	float yc[2];
+	public:
+		Image *backimage;
+		GLuint backTexture;
+		float xc[2];
+		float yc[2];
         //TESTING:
         //Player 1
         float p1lr;
@@ -110,13 +114,13 @@ class Player_1 {
     public:
         Vec pos;
         Vec vel;
-        float w = 20.f;
+        float w = 20.0f;
         float h = 100.0f;
-        float pw1 = 20.f;
+        float pw1 = 20.0f;
         float pw2 = 100.0f;
         float ph = 10.0f;
         int punch;
-        float punchcooldown = 20.0f;
+        float punchcooldown = 250.0f;
         int health = 100;
 } player1;
 
@@ -124,13 +128,13 @@ class Player_2 {
     public:
         Vec pos;
         Vec vel;
-        float w = 20.f;
+        float w = 20.0f;
         float h = 100.0f;
-        float pw1 = 20.f;
+        float pw1 = 20.0f;
         float pw2 = 100.0f;
         float ph = 10.0f;
         int punch;
-        float punchcooldown = 20.0f;
+        float punchcooldown = 250.0f;
         int health = 100;
 } player2;
 //-----------------------------------------------------------------------------
@@ -171,6 +175,7 @@ public:
 	GLuint walkTexture;
 	//GLuint map1Texture;
     int mapCenter;
+    int punchflip = 1;
 	Texture tex;
     char keyStates[65536];
 	Vec box[20];
@@ -387,8 +392,8 @@ void initOpengl(void)
     g.tex.xc[1] = 1.0f;
     g.tex.yc[0] = 0.0f;
     g.tex.yc[1] = 1.0f;
-}
 
+}
 void init() {
     // Initialize Player 1 stats
     MakeVector((float)g.xres/4,100.0f,0.0, player1.pos);
@@ -426,17 +431,17 @@ void checkMouse(XEvent *e)
 
 int checkKeys(XEvent *e)
 {
-    //keyboard input?
-    static int shift=0;
-    if (e->type != KeyRelease && e->type != KeyPress) {
-        return 0;
-    }
-    int key = (XLookupKeysym(&e->xkey, 0) & 0x0000ffff);
-        //
+	//keyboard input?
+	static int shift=0;
+	if (e->type != KeyRelease && e->type != KeyPress) {
+		return 0;
+	}
+	int key = (XLookupKeysym(&e->xkey, 0) & 0x0000ffff);
+    //
     if (e->type == KeyRelease) {
         g.keyStates[key] = 0;
-            if (key == XK_Shift_L || key == XK_Shift_R)
-                shift = 0;
+        if (key == XK_Shift_L || key == XK_Shift_R)
+            shift = 0;
         return 0;
     }
     if (e->type == KeyPress) {
@@ -447,51 +452,58 @@ int checkKeys(XEvent *e)
         }
     }
 
-    (void)shift;
-    switch (key) {
-	case XK_w:
-	    //timers.recordTime(&timers.walkTime);
-	    //g.walk ^= 1;
-	    break;
-	case XK_f:
-	    if (shift) {
-	        if (g.feature_mode == 1) {
-		    g.feature_mode = 0;
-                    std::cout << g.tex.p1lr << std::endl;
-		}
-		else {
-		    g.feature_mode = 1;
-		}
-	    }
-	    break;
+	(void)shift;
+	switch (key) {
+		case XK_w:
+			//timers.recordTime(&timers.walkTime);
+			//g.walk ^= 1;
+			break;
+		case XK_f:
+			if (shift) {
+				if (g.feature_mode == 1) {
+					g.feature_mode = 0;
+				}
+				else {
+					g.feature_mode = 1;
+				}
+			}
+			break;
         case XK_g:
-		if (g.gflag == 1) {
-		    g.gflag = 0;
-		} 
-                else {
-		    g.gflag = 1;
-		}
+			if (g.gflag == 1) {
+				g.gflag = 0;
+			} 
+            else {
+				g.gflag = 1;
+			}
             break;
-	case XK_Left:
-            //
+		case XK_Left:
             break;
-	case XK_Right:    
-	    break;
-	case XK_Up:
-	    break;
-	case XK_Down:
-	    break;
-	case XK_equal:
-	    g.delay -= 0.005;
-		if (g.delay < 0.005)
-	    		g.delay = 0.005;
-	    break;
-	case XK_minus:
-	    g.delay += 0.005;
-	    break;
-	case XK_Escape:
-	    return 1;
-	    break;
+        case XK_j:
+            if (g.joflag == 1) {
+                g.joflag = 0;
+            }
+            else {
+                g.joflag = 1;
+            }
+            break;
+		case XK_Right:
+            
+			break;
+		case XK_Up:
+			break;
+		case XK_Down:
+			break;
+		case XK_equal:
+			g.delay -= 0.005;
+			if (g.delay < 0.005)
+				g.delay = 0.005;
+			break;
+		case XK_minus:
+			g.delay += 0.005;
+			break;
+		case XK_Escape:
+			return 1;
+			break;
         case XK_a:
             
             break;
@@ -525,29 +537,29 @@ void physics(void)
 {
     int addgrav = 1;
 	if (g.walk) {
-	    //man is walking...
-	    //when time is up, advance the frame.
-            timers.recordTime(&timers.timeCurrent);
-       	    double timeSpan = timers.timeDiff(&timers.walkTime, &timers.timeCurrent);
-	    if (timeSpan > g.delay) {
+		//man is walking...
+		//when time is up, advance the frame.
+		timers.recordTime(&timers.timeCurrent);
+		double timeSpan = timers.timeDiff(&timers.walkTime, &timers.timeCurrent);
+		if (timeSpan > g.delay) {
 			//advance
-	    ++g.walkFrame;
-	    if (g.walkFrame >= 16)
-		g.walkFrame -= 16;
-		timers.recordTime(&timers.walkTime);
-	    }
-	    for (int i=0; i<20; i++) {
-	        g.box[i][0] -= 2.0 * (0.05 / g.delay);
-		if (g.box[i][0] < -10.0)
-		    g.box[i][0] += g.xres + 10.0;
-	    }
-    }
+			++g.walkFrame;
+			if (g.walkFrame >= 16)
+				g.walkFrame -= 16;
+			timers.recordTime(&timers.walkTime);
+		}
+		for (int i=0; i<20; i++) {
+			g.box[i][0] -= 2.0 * (0.05 / g.delay);
+			if (g.box[i][0] < -10.0)
+				g.box[i][0] += g.xres + 10.0;
+		}
+	}
 
     //--Player 1 Movement & Abilites--
 
     // Move left
     if(g.keyStates[XK_a]) {
-        if (player1.pos[0] > 20) {
+        if (player1.pos[0] > player1.w) {
             player1.pos[0] -= player1.vel[0];
             std::cout << player1.pos[0] << std::endl;
         }
@@ -559,7 +571,7 @@ void physics(void)
 
     // Move right
     if (g.keyStates[XK_d]) {
-        if (player1.pos[0] < 1420.0f) {
+        if (player1.pos[0] < (float)g.xres - player1.w) {
             player1.pos[0] += player1.vel[0];
             std::cout << player1.pos[0] << std::endl;
         }
@@ -571,17 +583,23 @@ void physics(void)
     }
 
     // Jump
-    if (g.keyStates[XK_w] && player1.vel[1] == 0) {
+    if (g.keyStates[XK_w] && player1.vel[1] == 0 && player1.pos[1] != 600.0f) {
         player1.vel[1] = 200.0f;
-        player1.pos[1] += 500.0f;
+        player1.vel[2] = 200.0f;
+        //player1.pos[1] += 500.0ff;
         std::cout << "W key pressed" << std::endl;
     }
 
+    if (player1.vel[2] != 0) {
+        player1.vel[2] -= 5.0f;
+        player1.pos[1] += 12.5f;
+    }
+
     // Gravity
-    if (player1.vel[1] != 0) {
+    if (player1.vel[1] != 0 && player1.vel[2] == 0.0f) {
         std::cout << "yo1" << std::endl;
-        player1.vel[1] -= 100.0f;
-        player1.pos[1] -= 250.0f;
+        player1.vel[1] -= 5.0f;
+        player1.pos[1] -= 12.5f;
     }
 
     //JOSE: apparently after a jump the box doesn't go exactly back to original spot; this would fix it if need be
@@ -595,9 +613,15 @@ void physics(void)
         player1.punch = 1;
 
         // Punch Detection
-        if (player1.pos[0] + player1.pw2 >= player2.pos[0]) {
+        if (player1.pos[0] + player1.pw2 >= player2.pos[0] + (-player2.w) && player1.pos[0] < player2.pos[0]) {
             std::cout << "Player 1 hits Player 2!" << std::endl;
             player2.health -= 10;
+        }
+        // Punch Detection (Flipped)
+        else if (player1.pos[0] - player1.pw2 <= player2.pos[0] + (player2.w) && player1.pos[0] > player2.pos[0]) {
+            std::cout << "Player 1 hits Player 2!" << std::endl;
+            player2.health -= 10;
+
         }
     }
     
@@ -605,7 +629,7 @@ void physics(void)
     if (player1.punch == 1) {
         if (player1.punchcooldown == 0) {
             player1.punch = 0;
-            player1.punchcooldown = 20.0f;
+            player1.punchcooldown = 250.0f;
         }
         else {
             player1.punchcooldown -= 10.0f;
@@ -616,7 +640,7 @@ void physics(void)
  
     // Move left   
     if (g.keyStates[XK_Left]) {
-        if (player2.pos[0] > 20) {
+        if (player2.pos[0] > player2.w) {
             player2.pos[0] -= player2.vel[0];
         }
         else if (player2.pos[0] <= 20.0f && g.tex.xc[0] >= 0) {
@@ -627,7 +651,7 @@ void physics(void)
 
     // Move right
     if (g.keyStates[XK_Right]) {
-        if (player2.pos[0] < 1420.0f) {
+        if (player2.pos[0] < (float)g.xres - player2.w) {
             player2.pos[0] += player2.vel[0];
         }
         else if (player2.pos[0] >= 1420.0f && g.tex.xc[0] <= 0.166) {
@@ -637,17 +661,23 @@ void physics(void)
     }
 
     // Jump
-    if (g.keyStates[XK_Up] && player2.vel[1] == 0) {
+    if (g.keyStates[XK_Up] && player2.vel[1] == 0 && player2.pos[1] != 600.0f) {
         player2.vel[1] = 200.0f;
-        player2.pos[1] += 500.0f;
+        player2.vel[2] = 200.0f;
+        //player2.pos[1] += 500.0f;
         std::cout << "Up Arrow key pressed" << std::endl;
     }
 
+    if (player2.vel[2] != 0) {
+        player2.vel[2] -= 5.0f;
+        player2.pos[1] += 12.5f;
+    }
+
     // Gravity
-    if (player2.vel[1] != 0) {
+    if (player2.vel[1] != 0 && player2.vel[2] == 0.0f) {
         std::cout << "Down" << std::endl;
-        player2.vel[1] -= 100.0f;
-        player2.pos[1] -= 250.0f;
+        player2.vel[1] -= 5.0f;
+        player2.pos[1] -= 12.5f;
     }
 
 
@@ -656,51 +686,67 @@ void physics(void)
         player2.punch = 1;
 
         // Punch detection
-        if (player2.pos[0] + player2.pw1 >= player1.pos[0]) {
+        if (player2.pos[0] - player2.pw2 <= player1.pos[0] + (player1.w) && player2.pos[0] > player1.pos[0]) {
             std::cout << "Player 2 hits Player 1!" << std::endl;
             player1.health -= 10;
         }
+        // Punch Detection (Flipped)
+        else if (player2.pos[0] + player2.pw2 >= player1.pos[0] + (-player1.w) && player2.pos[0] < player1.pos[0]) {
+            std::cout << "Player 1 hits Player 2!" << std::endl;
+            player1.health -= 10;
+        }
+
     }
 
     // Punch cooldown
     if (player2.punch == 1) {
         if (player2.punchcooldown == 0) {
             player2.punch = 0;
-            player2.punchcooldown = 20.0f;
+            player2.punchcooldown = 250.0f;
         }
         else {
             player2.punchcooldown -= 10.0f;
         }
     }
 
+    // -- Misc --
+    
+    // Players flip
+    if (player1.pos[0] > player2.pos[0]) {
+        g.punchflip = -1;
+    }
+    else if (player1.pos[0] < player2.pos[0]) {
+        g.punchflip = 1;
+    }
+
 }
 
 void render(void)
 {
-    //Clear the screen
-    glClearColor(0.1, 0.1, 0.1, 1.0);
-    glClear(GL_COLOR_BUFFER_BIT);
+	//Clear the screen
+	glClearColor(0.1, 0.1, 0.1, 1.0);
+	glClear(GL_COLOR_BUFFER_BIT);
 
     
-    float cx = g.xres/3.0;
-    float cy = g.yres/2.0;
+	float cx = g.xres/3.0;
+	float cy = g.yres/2.0;
 
-    //Display Background
-    glColor3f(1.0, 1.0, 1.0);
+	//Display Background
+	glColor3f(1.0, 1.0, 1.0);
     glBindTexture(GL_TEXTURE_2D, g.tex.backTexture);
     extern void display_map_one(float x0, float x1, float y0, float y1, int xres, int yres);
     display_map_one(g.tex.xc[0], g.tex.xc[1],
-	    		g.tex.yc[0], g.tex.yc[1],
+	    			g.tex.yc[0], g.tex.yc[1],
 	            	g.xres, 	 g.yres);
 
-    //Centers Background; will combine with ^this later
+	//Centers Background; will combine with ^this later
     if (g.mapCenter != 0) {
         g.tex.xc[0] = 0.083;
         g.tex.xc[1] = 1.083;
         g.mapCenter = 0;
     }
 
-    //glClear(GL_COLOR_BUFFER_BIT);
+	//glClear(GL_COLOR_BUFFER_BIT);
     //static float pos[2] = {g.xres/2.0f, g.yres/2.0f};
     glPushMatrix();
     glTranslatef(player1.pos[0], player1.pos[1], 0.0f);
@@ -710,20 +756,20 @@ void render(void)
 		glVertex2f(-player1.w,   player1.h);
 		glVertex2f( player1.w,   player1.h);
 		glVertex2f( player1.w,  -player1.h);
-    glEnd();
+	glEnd();
     glPopMatrix();
     // Player 1 punch box
     if (player1.punch == 1) {
-    glPushMatrix();
-    glTranslatef(player1.pos[0], player1.pos[1]+40.0f, 0.0f);
-    glBegin(GL_QUADS);
-		glColor3ub(0, 150, 0);
-		glVertex2f(-player1.pw1,  -player1.ph);
-		glVertex2f(-player1.pw1,   player1.ph);
-		glVertex2f( player1.pw2,   player1.ph);
-		glVertex2f( player1.pw2,  -player1.ph);
-    glEnd();
-    glPopMatrix();
+        glPushMatrix();
+        glTranslatef(player1.pos[0], player1.pos[1]+40.0f, 0.0f);
+        glBegin(GL_QUADS);
+		    glColor3ub(0, 150, 0);
+		    glVertex2f(-player1.pw1 * g.punchflip,  -player1.ph);
+		    glVertex2f(-player1.pw1 * g.punchflip,   player1.ph);
+		    glVertex2f( player1.pw2 * g.punchflip,   player1.ph);
+		    glVertex2f( player1.pw2 * g.punchflip,  -player1.ph);
+	    glEnd();
+        glPopMatrix();
     }
     //Player2:
     glPushMatrix();
@@ -734,20 +780,20 @@ void render(void)
 		glVertex2f(-player2.w,   player2.h);
 		glVertex2f( player2.w,   player2.h);
 		glVertex2f( player2.w,  -player2.h);
-    glEnd();
+	glEnd();
     glPopMatrix();
     // Player 2 punch box
     if (player2.punch == 1) {
-    glPushMatrix();
-    glTranslatef(player2.pos[0], player2.pos[1]+40.0f, 0.0f);
-    glBegin(GL_QUADS);
-		glColor3ub(0, 150, 0);
-		glVertex2f(-player2.pw2,  -player2.ph);
-		glVertex2f(-player2.pw2,   player2.ph);
-		glVertex2f( player2.pw1,   player2.ph);
-		glVertex2f( player2.pw1,  -player2.ph);
-	glEnd();
-    glPopMatrix();
+        glPushMatrix();
+        glTranslatef(player2.pos[0], player2.pos[1]+40.0f, 0.0f);
+        glBegin(GL_QUADS);
+		    glColor3ub(0, 150, 0);
+		    glVertex2f(-player2.pw2 * g.punchflip,  -player2.ph);
+		    glVertex2f(-player2.pw2 * g.punchflip,   player2.ph);
+		    glVertex2f( player2.pw1 * g.punchflip,   player2.ph);
+		    glVertex2f( player2.pw1 * g.punchflip,  -player2.ph);
+	    glEnd();
+        glPopMatrix();
     }
 
 
@@ -779,10 +825,10 @@ void render(void)
 	glDisable(GL_ALPHA_TEST);*/
 	
     //JOSE: I JUST HAVE TO KEEP THIS; OTHERWISE, MAP MOVING DOENS'T WORK
-    if (!g.feature_mode) {
-	extern void display_controls(int wf, int yres);
+	if (!g.feature_mode) {
+		extern void display_controls(int wf, int yres);
         display_controls(g.walkFrame, g.yres);
-    }
+	}
     //
     
     //
@@ -821,10 +867,8 @@ void render(void)
     r.left = g.xres/2;
     r.center = 50;
     ggprint8b(&r, 16, c, "Player 1 Health: %i", player1.health);
-    ggprint8b(&r, 16, c, "Player 2 Health: %i", player2.health);
-   
+    ggprint8b(&r, 16, c, "Player 2 Health: %i", player2.health);    
 }
-
 
 
 
