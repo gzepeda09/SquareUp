@@ -867,9 +867,12 @@ void render(void)
     r.left = g.xres/2;
     r.center = 50;
     ggprint8b(&r, 16, c, "Player 1 Health: %i", player1.health);
-    ggprint8b(&r, 16, c, "Player 2 Health: %i", player2.health);    
-}
+    ggprint8b(&r, 16, c, "Player 2 Health: %i", player2.health);
 
+
+
+    
+}
 
 
 
