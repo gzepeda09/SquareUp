@@ -508,6 +508,7 @@ int checkKeys(XEvent *e)
 	    	return 1;
 	    	break;
     	case XK_a: 
+    		break;
     	case XK_j:
     		if (g.joflag == 1 || g.joflag == 0) {
 		    	g.joflag = 2;
@@ -515,7 +516,6 @@ int checkKeys(XEvent *e)
         	else {
 		    	g.joflag = 1;
 			}
-
         	break;
     	case XK_d:
         	break;
@@ -734,7 +734,7 @@ void render(void)
     glClear(GL_COLOR_BUFFER_BIT);
 
     
-    if(g.joflag == 1){
+    if(g.joflag == 1 || g.joflag == 2){
 
 	
 	    //Clear the screen
@@ -859,7 +859,7 @@ void render(void)
     //
     
     //
-    if(g.joflag == 1){
+    if(g.joflag == 2){
 		//Joses function
         extern void fmBorder(int xres, int yres);
         fmBorder(g.xres, g.yres);
