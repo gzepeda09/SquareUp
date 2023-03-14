@@ -453,6 +453,7 @@ int checkKeys(XEvent *e)
         }
     }
 
+    // checks keys
 	(void)shift;
 	switch (key) {
 		case XK_w:
