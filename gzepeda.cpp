@@ -30,7 +30,7 @@ extern void newText(int yres, int xres){
 	            memcpy(color, col, sizeof(unsigned char) * 3);
 	        }
 
-	        Box(int yres, int xres) {
+	        Box(float yres, float xres) {
 	            w = 80.0f;
 	            h = 20.5f;
 	            pos[0] = xres/2;
@@ -41,15 +41,21 @@ extern void newText(int yres, int xres){
 
 	};
 
-	int sxres = xres - 1000;
+	float sxres = xres - 0.5f;
 
-	Box box(yres, sxres);
-	Box box2(yres + 250, sxres);
-	Box box3(yres - 250, sxres);
+	Box box(yres , sxres);
+	Box box2(yres + 1.0f, sxres);
+	Box box3(yres - 0.5f, sxres);
+
+
+	Box border(yres - 0.5f, sxres);
 
 	unsigned char c[3] = {176, 172, 172};
 	unsigned char c2[3] = {33, 156, 14};
 	unsigned char c3[3] = {184, 2, 2};
+
+
+	unsigned char bc[3] = {255, 255, 255};
 
 
 	Rect r;
@@ -67,6 +73,7 @@ extern void newText(int yres, int xres){
     box.set_color(c);
 	box2.set_color(c2);
 	box3.set_color(c3);
+	border.set_color(bc);
 
     
 	   //Draw box.
@@ -80,6 +87,22 @@ extern void newText(int yres, int xres){
 	glVertex2f( box.w, -box.h);
 	glEnd();
 	glPopMatrix();
+
+
+
+
+	//Draw border.
+	glPushMatrix();
+	glColor3ubv(border.color);
+	glTranslatef(border.pos[0], border.pos[1], 0.0f);
+	glBegin(GL_QUADS);
+	glVertex2f(-border.w + 20, -border.h + 20);
+	glVertex2f(-border.w + 20,  border.h + 20);
+	glVertex2f( border.w + 20,  border.h + 20);
+	glVertex2f( border.w + 20, -border.h + 20);
+	glEnd();
+	glPopMatrix();
+
 
 
 	//Draw box.
