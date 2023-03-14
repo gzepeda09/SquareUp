@@ -839,12 +839,12 @@ void render(void)
     //
     if(g.gflag == 1){	
 		//Genos functions
-		extern void newText(int yres);
-		newText(g.yres);
-		glColor3f(0.5, 0.5, 0.5);
-		glRecti(300, 400, 500, 450);
-		glColor3f(1, 1, 1);
-		glRasterPos2i(350, 420);
+		extern void newText(int yres, int xres);
+		newText(g.yres, g.xres);
+		//glColor3f(0.5, 0.5, 0.5);
+		//glRecti(300, 400, 500, 450);
+		//glColor3f(1, 1, 1);
+		//glRasterPos2i(350, 420);
 	}
     //
     
