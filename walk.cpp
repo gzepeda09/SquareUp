@@ -472,7 +472,7 @@ int checkKeys(XEvent *e)
         case XK_1:
 			if (g.gflag == 1) {
 				g.gflag = 0;
-				g.joflag = 1;
+				//g.joflag = 1;
 			} 
             else {
 				g.gflag = 1;
@@ -481,12 +481,14 @@ int checkKeys(XEvent *e)
 		case XK_Left:
             break;
         case XK_j:
-            if (g.joflag == 1) {
-                g.joflag = 0;
-            }
-            else {
-                g.joflag = 1;
-            }
+			if (shift) {
+				if (g.joflag == 1) {
+					g.joflag = 0;
+				}
+				else {
+					g.joflag = 1;
+				}
+			}
             break;
 		case XK_Right:
             
