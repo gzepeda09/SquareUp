@@ -727,75 +727,87 @@ void render(void)
 	glClearColor(0.1, 0.1, 0.1, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-    
 	float cx = g.xres/3.0;
 	float cy = g.yres/2.0;
 
-	//Display Background
-	glColor3f(1.0, 1.0, 1.0);
-    glBindTexture(GL_TEXTURE_2D, g.tex.backTexture);
-    extern void display_map_one(float x0, float x1, float y0, float y1, int xres, int yres);
-    display_map_one(g.tex.xc[0], g.tex.xc[1],
-	    			g.tex.yc[0], g.tex.yc[1],
-	            	g.xres, 	 g.yres);
+	//
+    if(g.joflag == 1){
+		//Joses function
+        extern void fmBorder(int xres, int yres);
+        fmBorder(g.xres, g.yres);
 
-	//Centers Background; will combine with ^this later
-    if (g.mapCenter != 0) {
-        g.tex.xc[0] = 0.083;
-        g.tex.xc[1] = 1.083;
-        g.mapCenter = 0;
-    }
+		//extern void test_text (int xres, int yres);
+		//test_text(g.xres, g.yres);
 
-	//glClear(GL_COLOR_BUFFER_BIT);
-    //static float pos[2] = {g.xres/2.0f, g.yres/2.0f};
-    glPushMatrix();
-    glTranslatef(player1.pos[0], player1.pos[1], 0.0f);
-    glBegin(GL_QUADS);
-		glColor3ub(150, 160, 220);
-		glVertex2f(-player1.w,  -player1.h);
-		glVertex2f(-player1.w,   player1.h);
-		glVertex2f( player1.w,   player1.h);
-		glVertex2f( player1.w,  -player1.h);
-	glEnd();
-    glPopMatrix();
-    // Player 1 punch box
-    if (player1.punch == 1) {
-        glPushMatrix();
-        glTranslatef(player1.pos[0], player1.pos[1]+40.0f, 0.0f);
-        glBegin(GL_QUADS);
-		    glColor3ub(0, 150, 0);
-		    glVertex2f(-player1.pw1 * g.punchflip,  -player1.ph);
-		    glVertex2f(-player1.pw1 * g.punchflip,   player1.ph);
-		    glVertex2f( player1.pw2 * g.punchflip,   player1.ph);
-		    glVertex2f( player1.pw2 * g.punchflip,  -player1.ph);
-	    glEnd();
-        glPopMatrix();
-    }
-    //Player2:
-    glPushMatrix();
-    glTranslatef(player2.pos[0], player2.pos[1], 0.0f);
-    glBegin(GL_QUADS);
-		glColor3ub(0, 0, 0);
-		glVertex2f(-player2.w,  -player2.h);
-		glVertex2f(-player2.w,   player2.h);
-		glVertex2f( player2.w,   player2.h);
-		glVertex2f( player2.w,  -player2.h);
-	glEnd();
-    glPopMatrix();
-    // Player 2 punch box
-    if (player2.punch == 1) {
-        glPushMatrix();
-        glTranslatef(player2.pos[0], player2.pos[1]+40.0f, 0.0f);
-        glBegin(GL_QUADS);
-		    glColor3ub(0, 150, 0);
-		    glVertex2f(-player2.pw2 * g.punchflip,  -player2.ph);
-		    glVertex2f(-player2.pw2 * g.punchflip,   player2.ph);
-		    glVertex2f( player2.pw1 * g.punchflip,   player2.ph);
-		    glVertex2f( player2.pw1 * g.punchflip,  -player2.ph);
-	    glEnd();
-        glPopMatrix();
-    }
+		extern void display_controls(int wf, int yres);
+        display_controls(g.walkFrame, g.yres);
+	
 
+		//Display Background
+		glColor3f(1.0, 1.0, 1.0);
+		glBindTexture(GL_TEXTURE_2D, g.tex.backTexture);
+		extern void display_map_one(float x0, float x1, float y0, float y1, int xres, int yres);
+		display_map_one(g.tex.xc[0], g.tex.xc[1],
+						g.tex.yc[0], g.tex.yc[1],
+						g.xres, 	 g.yres);
+
+		//Centers Background; will combine with ^this later
+		if (g.mapCenter != 0) {
+			g.tex.xc[0] = 0.083;
+			g.tex.xc[1] = 1.083;
+			g.mapCenter = 0;
+		}
+
+		//glClear(GL_COLOR_BUFFER_BIT);
+		//static float pos[2] = {g.xres/2.0f, g.yres/2.0f};
+		glPushMatrix();
+		glTranslatef(player1.pos[0], player1.pos[1], 0.0f);
+		glBegin(GL_QUADS);
+			glColor3ub(150, 160, 220);
+			glVertex2f(-player1.w,  -player1.h);
+			glVertex2f(-player1.w,   player1.h);
+			glVertex2f( player1.w,   player1.h);
+			glVertex2f( player1.w,  -player1.h);
+		glEnd();
+		glPopMatrix();
+		// Player 1 punch box
+		if (player1.punch == 1) {
+			glPushMatrix();
+			glTranslatef(player1.pos[0], player1.pos[1]+40.0f, 0.0f);
+			glBegin(GL_QUADS);
+				glColor3ub(0, 150, 0);
+				glVertex2f(-player1.pw1 * g.punchflip,  -player1.ph);
+				glVertex2f(-player1.pw1 * g.punchflip,   player1.ph);
+				glVertex2f( player1.pw2 * g.punchflip,   player1.ph);
+				glVertex2f( player1.pw2 * g.punchflip,  -player1.ph);
+			glEnd();
+			glPopMatrix();
+		}
+		//Player2:
+		glPushMatrix();
+		glTranslatef(player2.pos[0], player2.pos[1], 0.0f);
+		glBegin(GL_QUADS);
+			glColor3ub(0, 0, 0);
+			glVertex2f(-player2.w,  -player2.h);
+			glVertex2f(-player2.w,   player2.h);
+			glVertex2f( player2.w,   player2.h);
+			glVertex2f( player2.w,  -player2.h);
+		glEnd();
+		glPopMatrix();
+		// Player 2 punch box
+		if (player2.punch == 1) {
+			glPushMatrix();
+			glTranslatef(player2.pos[0], player2.pos[1]+40.0f, 0.0f);
+			glBegin(GL_QUADS);
+				glColor3ub(0, 150, 0);
+				glVertex2f(-player2.pw2 * g.punchflip,  -player2.ph);
+				glVertex2f(-player2.pw2 * g.punchflip,   player2.ph);
+				glVertex2f( player2.pw1 * g.punchflip,   player2.ph);
+				glVertex2f( player2.pw1 * g.punchflip,  -player2.ph);
+			glEnd();
+			glPopMatrix();
+		}
+	}
 
     //JOSE: I think this is part of Sprite stuff
     //float h = 250.0;
@@ -823,13 +835,6 @@ void render(void)
 	glPopMatrix();
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glDisable(GL_ALPHA_TEST);*/
-	
-    //JOSE: I JUST HAVE TO KEEP THIS; OTHERWISE, MAP MOVING DOENS'T WORK
-	if (!g.feature_mode) {
-		extern void display_controls(int wf, int yres);
-        display_controls(g.walkFrame, g.yres);
-	}
-    //
     
     //
     if(g.gflag == 1){	
@@ -852,15 +857,6 @@ void render(void)
     //
     
     //
-    if(g.joflag == 1){
-		//Joses function
-        extern void fmBorder(int xres, int yres);
-        fmBorder(g.xres, g.yres);
-
-		extern void test_text (int xres, int yres);
-		test_text(g.xres, g.yres);
-	}
-    //
     Rect r;
     unsigned int c = 0x0000ff00;
     r.bot = g.yres - 20;
@@ -869,7 +865,12 @@ void render(void)
     ggprint8b(&r, 16, c, "Player 1 Health: %i", player1.health);
     ggprint8b(&r, 16, c, "Player 2 Health: %i", player2.health);
 
-
+	//JOSE: I JUST HAVE TO KEEP THIS; OTHERWISE, MAP MOVING DOENS'T WORK
+	//if (!g.feature_mode) {
+	//	extern void display_controls(int wf, int yres);
+    //    display_controls(g.walkFrame, g.yres);
+	//}
+    //
 
     
 }
