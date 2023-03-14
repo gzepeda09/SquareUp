@@ -507,7 +507,15 @@ int checkKeys(XEvent *e)
 		case XK_Escape:
 	    	return 1;
 	    	break;
-    	case XK_a:    
+    	case XK_a: 
+    	case XK_j:
+    		if (g.joflag == 1 || g.joflag == 0) {
+		    	g.joflag = 2;
+			} 
+        	else {
+		    	g.joflag = 1;
+			}
+
         	break;
     	case XK_d:
         	break;
