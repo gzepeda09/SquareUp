@@ -810,7 +810,6 @@ void render(void)
 			glVertex2f( player2.pw1 * g.punchflip,  -player2.ph);
 		glEnd();
 		glPopMatrix();
-		}
 	}
 
     //JOSE: I think this is part of Sprite stuff
@@ -878,7 +877,7 @@ void render(void)
 		extern void display_controls(int wf, int yres);
 		display_controls(g.walkFrame, g.yres);
 	}
-	
+
 	Rect r;
 	unsigned int c = 0x0000ff00;
 	r.bot = g.yres - 20;
