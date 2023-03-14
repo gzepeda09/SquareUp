@@ -734,6 +734,20 @@ void render(void)
 	float cx = g.xres/3.0;
 	float cy = g.yres/2.0;
 
+	if (g.gflag == 0) {
+		Rect r;
+    	unsigned int c = 0x0000ff00;
+    	r.bot = g.yres - 20;
+    	r.left = g.xres/2;
+    	r.center = 50;
+    	ggprint8b(&r, 16, c, "Feature Modes: ");
+    	ggprint8b(&r, 16, c, "Geno's Feature Mode: g");
+		ggprint8b(&r, 16, c, "Jose's Feature Mode: SHIFT-J");
+		ggprint8b(&r, 16, c, "Brian's Feature Mode: 2");
+		ggprint8b(&r, 16, c, "Jesse's Feature Mode: J");
+
+	}
+
 	//
     if(g.joflag == 1){
 		//Joses function
