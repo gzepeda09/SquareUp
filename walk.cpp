@@ -185,7 +185,8 @@ public:
 		yres=1080;		// 600
 		walk=0;
         mapCenter = 1;
-        gflag = bflag = jeflag = joflag = 0;
+        bflag = jeflag = joflag = 0;
+		gflag = 1;
         memset(keyStates, 0, 65536);
 		walkFrame=0;
 		delay = 0.1;
@@ -468,9 +469,10 @@ int checkKeys(XEvent *e)
 				}
 			}
 			break;
-        case XK_g:
+        case XK_1:
 			if (g.gflag == 1) {
 				g.gflag = 0;
+				g.joflag = 1;
 			} 
             else {
 				g.gflag = 1;
@@ -682,7 +684,7 @@ void physics(void)
 
 
     // Punch
-    if (g.keyStates[XK_1] && player2.punch == 0) {
+    if (g.keyStates[XK_m] && player2.punch == 0) {
         player2.punch = 1;
 
         // Punch detection
