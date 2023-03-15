@@ -615,11 +615,19 @@ void physics(void)
         if (player1.pos[0] + player1.pw2 >= player2.pos[0] + (-player2.w) && player1.pos[0] < player2.pos[0]) {
             std::cout << "Player 1 hits Player 2!" << std::endl;
             player2.health -= 10;
+            //Jesse - reaction to punches
+			player2.pos[1] += 50.0f;
+			player2.vel[1] += 20.0f;
+			player2.pos[0] += 35.0f;
         }
         // Punch Detection (Flipped)
         else if (player1.pos[0] - player1.pw2 <= player2.pos[0] + (player2.w) && player1.pos[0] > player2.pos[0]) {
             std::cout << "Player 1 hits Player 2!" << std::endl;
             player2.health -= 10;
+            //Jesse - reaction to punches
+			player2.pos[1] += 50.0f;
+			player2.vel[1] += 20.0f;
+			player2.pos[0] -= 35.0f;
 
         }
     }
@@ -688,11 +696,19 @@ void physics(void)
         if (player2.pos[0] - player2.pw2 <= player1.pos[0] + (player1.w) && player2.pos[0] > player1.pos[0]) {
             std::cout << "Player 2 hits Player 1!" << std::endl;
             player1.health -= 10;
+            //Jesse - reaction to punches
+			player1.pos[1] += 50.0f;
+			player1.vel[1] += 20.0f;
+			player1.pos[0] -= 35.0f;
         }
         // Punch Detection (Flipped)
         else if (player2.pos[0] + player2.pw2 >= player1.pos[0] + (-player1.w) && player2.pos[0] < player1.pos[0]) {
             std::cout << "Player 1 hits Player 2!" << std::endl;
             player1.health -= 10;
+            //Jesse - raction to punches
+			player1.pos[1] += 50.0f;
+			player1.vel[1] += 20.0f;
+			player1.pos[0] += 35.0f;
         }
 
     }
