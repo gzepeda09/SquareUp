@@ -19,6 +19,10 @@
 #include <X11/keysym.h>
 #include <GL/glx.h>
 #include "fonts.h"
+#include <thread>
+
+
+using namespace std;
 //#include <windows.h>
 //#include <irrklang/irrKlang.h>
 //using namespace irrklang;
@@ -299,10 +303,16 @@ void physics(void);
 void render(void);
 
 
+
 int main(void)
 {
     initOpengl();
     init();
+
+    //GENOS SOUND FUNCTIONALITY
+    extern void initSound();
+    initSound();
+
     int done = 0;
     while (!done) {
         while (x11.getXPending()) {
@@ -315,6 +325,10 @@ int main(void)
         render();
         x11.swapBuffers();
     }
+
+    //GENOS SOUND FUNCTIONALITY
+    extern void cleanupSound();
+    cleanupSound();
     cleanup_fonts();
     return 0;
 }
@@ -629,6 +643,10 @@ void physics(void)
 
     // Punch player 1
     if (g.keyStates[XK_b] && player1.punch == 0 && player1.dead == 0) {
+
+        extern void playPunchSound();
+        playPunchSound();
+
         player1.punch = 1;
 
         // Punch Detection player 1
@@ -971,9 +989,15 @@ void render(void)
 
     //
     if(g.gflag == 1) {	
+
         //Genos functions
+        extern void playSound();
+        playSound();
+
+
         extern void newText(int yres, int xres);
         newText(g.yres, g.xres);
+
         //glColor3f(0.5, 0.5, 0.5);
         //glRecti(300, 400, 500, 450);
         //glColor3f(1, 1, 1);
