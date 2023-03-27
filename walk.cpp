@@ -676,7 +676,7 @@ void physics(void)
         }
     }
 
-    // Punch cooldown player 1
+    // Punch cooldown player 1 /
     if (player1.punch == 1) {
         if (player1.punchcooldown == 0) {
             player1.punch = 0;
