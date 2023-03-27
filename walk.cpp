@@ -114,6 +114,7 @@ class Player_1 {
     public:
         Vec pos;
         Vec vel;
+        int dead = 0;
         float w = 20.0f;
         float h = 100.0f;
         float pw1 = 20.0f;
@@ -128,6 +129,7 @@ class Player_2 {
     public:
         Vec pos;
         Vec vel;
+        int dead = 0;
         float w = 20.0f;
         float h = 100.0f;
         float pw1 = 20.0f;
@@ -172,6 +174,7 @@ class Global {
         int jeflag, joflag;
         double delay;
         int feature_mode;
+        int restart;
         GLuint walkTexture;
         //GLuint map1Texture;
         int mapCenter;
@@ -181,12 +184,13 @@ class Global {
         Vec box[20];
         Global() {
             done=0;
-            xres=1920;		// 800
-            yres=1080;		// 600
+            xres=800;
+            yres=600;
             walk=0;
             mapCenter = 1;
             bflag = jeflag = joflag = 0;
             gflag = 1;
+            restart = 0;
             memset(keyStates, 0, 65536);
             walkFrame=0;
             delay = 0.1;
@@ -197,6 +201,15 @@ class Global {
             }
         }
 } g;
+
+//Jesse - added values to reset character stats
+class Reset_Values {
+    public:
+        int dead = 0;
+        float player1posX = (float)g.xres/4;
+        float player2posX = (float)g.xres/1.3;
+        int health = 100;
+} reset;
 
 class X11_wrapper {
     private:
@@ -403,7 +416,7 @@ void init() {
     MakeVector(10.0f,0.0,0.0, player1.vel);
 
     // Initialize Player 2 stats
-    MakeVector((float)g.xres/2,100.0f,0.0, player2.pos);
+    MakeVector((float)g.xres/1.3,100.0f,0.0, player2.pos);
     MakeVector(10.0f,0.0,0.0, player2.vel);
 }
 
@@ -478,6 +491,10 @@ int checkKeys(XEvent *e)
             break;
         case XK_2:
             g.bflag =! g.bflag;
+            break;
+        case XK_3:
+            g.jeflag =! g.jeflag;
+            break;
         case XK_Left:
             break;
         case XK_j:
@@ -507,6 +524,9 @@ int checkKeys(XEvent *e)
 
             break;
         case XK_d:
+            break;
+        case XK_r:
+            g.restart =! g.restart;
             break;
 
     }
@@ -556,8 +576,8 @@ void physics(void)
 
     //--Player 1 Movement & Abilites--
 
-    // Move left
-    if(g.keyStates[XK_a]) {
+    // Move left player 1
+    if(g.keyStates[XK_a] && player1.dead == 0) {
         if (player1.pos[0] > player1.w) {
             player1.pos[0] -= player1.vel[0];
             std::cout << player1.pos[0] << std::endl;
@@ -568,8 +588,8 @@ void physics(void)
         }
     }
 
-    // Move right
-    if (g.keyStates[XK_d]) {
+    // Move right player 1
+    if (g.keyStates[XK_d] && player1.dead == 0) {
         if (player1.pos[0] < (float)g.xres - player1.w) {
             player1.pos[0] += player1.vel[0];
             std::cout << player1.pos[0] << std::endl;
@@ -581,8 +601,8 @@ void physics(void)
 
     }
 
-    // Jump
-    if (g.keyStates[XK_w] && player1.vel[1] == 0 && player1.pos[1] != 600.0f) {
+    // Jump player 1
+    if (g.keyStates[XK_w] && player1.vel[1] == 0 && player1.pos[1] != 600.0f && player1.dead == 0) {
         player1.vel[1] = 200.0f;
         player1.vel[2] = 200.0f;
         //player1.pos[1] += 500.0ff;
@@ -594,7 +614,7 @@ void physics(void)
         player1.pos[1] += 12.5f;
     }
 
-    // Gravity
+    // Gravity player 1
     if (player1.vel[1] != 0 && player1.vel[2] == 0.0f) {
         std::cout << "yo1" << std::endl;
         player1.vel[1] -= 5.0f;
@@ -607,32 +627,56 @@ void physics(void)
       player1.pos[1] = 100.0f;
       }*/
 
-    // Punch
-    if (g.keyStates[XK_b] && player1.punch == 0) {
+    // Punch player 1
+    if (g.keyStates[XK_b] && player1.punch == 0 && player1.dead == 0) {
         player1.punch = 1;
 
-        // Punch Detection
+        // Punch Detection player 1
         if (player1.pos[0] + player1.pw2 >= player2.pos[0] + (-player2.w) && player1.pos[0] < player2.pos[0]) {
             std::cout << "Player 1 hits Player 2!" << std::endl;
-            player2.health -= 10;
+            //player2.health -= 10;
+            //For testing. delete once testing is done
+            if (g.jeflag == 1 && player2.dead == 0) {
+                player2.health -= 50;
+            } else if (player2.dead == 0){
+                player2.health -= 10;
+            }
             //Jesse - reaction to punches
-			player2.pos[1] += 50.0f;
-			player2.vel[1] += 20.0f;
-			player2.pos[0] += 35.0f;
+            if (player2.dead == 0) {
+                player2.pos[1] += 50.0f;
+                player2.vel[1] += 20.0f;
+                player2.pos[0] += 35.0f;
+            }
+            //player 1 dies
+            if (player2.health <= 0) {
+                player2.dead = 1;
+            }
         }
         // Punch Detection (Flipped)
         else if (player1.pos[0] - player1.pw2 <= player2.pos[0] + (player2.w) && player1.pos[0] > player2.pos[0]) {
             std::cout << "Player 1 hits Player 2!" << std::endl;
-            player2.health -= 10;
+            //player2.health -= 10;
+            //For testing. delete once testing is done
+            if (g.jeflag == 1 && player2.dead == 0) {
+                player2.health -= 50;
+            } else if (player2.dead == 0){
+                player2.health -= 10;
+            }
             //Jesse - reaction to punches
-			player2.pos[1] += 50.0f;
-			player2.vel[1] += 20.0f;
-			player2.pos[0] -= 35.0f;
+            if (player2.dead == 0) {
+                player2.pos[1] += 50.0f;
+                player2.vel[1] += 20.0f;
+                player2.pos[0] -= 35.0f;
+            }
+            //player 1 dies
+            if (player2.health <= 0) {
+                player2.dead = 1;
+            }
 
         }
     }
 
-    // Punch cooldown
+    // Punch cooldown player 1
     if (player1.punch == 1) {
         if (player1.punchcooldown == 0) {
             player1.punch = 0;
@@ -645,8 +689,8 @@ void physics(void)
 
     // --Player 2 Movement & Abilites--
 
-    // Move left   
-    if (g.keyStates[XK_Left]) {
+    // Move left player 2
+    if (g.keyStates[XK_Left] && player2.dead == 0) {
         if (player2.pos[0] > player2.w) {
             player2.pos[0] -= player2.vel[0];
         }
@@ -656,8 +700,8 @@ void physics(void)
         }
     }
 
-    // Move right
-    if (g.keyStates[XK_Right]) {
+    // Move right player 2
+    if (g.keyStates[XK_Right] && player2.dead == 0) {
         if (player2.pos[0] < (float)g.xres - player2.w) {
             player2.pos[0] += player2.vel[0];
         }
@@ -667,8 +711,8 @@ void physics(void)
         }
     }
 
-    // Jump
-    if (g.keyStates[XK_Up] && player2.vel[1] == 0 && player2.pos[1] != 600.0f) {
+    // Jump player 2
+    if (g.keyStates[XK_Up] && player2.vel[1] == 0 && player2.pos[1] != 600.0f && player2.dead == 0) {
         player2.vel[1] = 200.0f;
         player2.vel[2] = 200.0f;
         //player2.pos[1] += 500.0f;
@@ -680,7 +724,7 @@ void physics(void)
         player2.pos[1] += 12.5f;
     }
 
-    // Gravity
+    // Gravity player 2
     if (player2.vel[1] != 0 && player2.vel[2] == 0.0f) {
         std::cout << "Down" << std::endl;
         player2.vel[1] -= 5.0f;
@@ -688,32 +732,56 @@ void physics(void)
     }
 
 
-    // Punch
-    if (g.keyStates[XK_m] && player2.punch == 0) {
+    // Punch player 2
+    if (g.keyStates[XK_m] && player2.punch == 0 && player2.dead == 0 && player2.dead == 0) {
         player2.punch = 1;
 
-        // Punch detection
+        // Punch detection player 2
         if (player2.pos[0] - player2.pw2 <= player1.pos[0] + (player1.w) && player2.pos[0] > player1.pos[0]) {
             std::cout << "Player 2 hits Player 1!" << std::endl;
-            player1.health -= 10;
+            //player1.health -= 10;
+            //For testing. delete once testing is done
+            if (g.jeflag == 1 && player1.dead == 0) {
+                player1.health -= 50;
+            } else if (player1.dead == 0){
+                player1.health -= 10;
+            }
             //Jesse - reaction to punches
-			player1.pos[1] += 50.0f;
-			player1.vel[1] += 20.0f;
-			player1.pos[0] -= 35.0f;
+            if (player1.dead == 0) {
+                player1.pos[1] += 50.0f;
+                player1.vel[1] += 20.0f;
+                player1.pos[0] -= 35.0f;
+            }
+            //player 1 dies
+            if (player1.health <= 0) {
+                player1.dead = 1;
+            }
         }
         // Punch Detection (Flipped)
         else if (player2.pos[0] + player2.pw2 >= player1.pos[0] + (-player1.w) && player2.pos[0] < player1.pos[0]) {
             std::cout << "Player 1 hits Player 2!" << std::endl;
-            player1.health -= 10;
+            //player1.health -= 10;
+            //For testing. delete once testing is done
+            if (g.jeflag == 1 && player1.dead == 0) {
+                player1.health -= 50;
+            } else if (player1.dead == 0) {
+                player1.health -= 10;
+            }
             //Jesse - raction to punches
-			player1.pos[1] += 50.0f;
-			player1.vel[1] += 20.0f;
-			player1.pos[0] += 35.0f;
+            if (player1.dead == 0) {
+                player1.pos[1] += 50.0f;
+                player1.vel[1] += 20.0f;
+                player1.pos[0] += 35.0f;
+            }
+            //player 1 dies
+            if (player1.health <= 0) {
+                player1.dead = 1;
+            }
         }
 
     }
 
-    // Punch cooldown
+    // Punch cooldown player 2
     if (player2.punch == 1) {
         if (player2.punchcooldown == 0) {
             player2.punch = 0;
@@ -776,53 +844,95 @@ void render(void)
 
     //glClear(GL_COLOR_BUFFER_BIT);
     //static float pos[2] = {g.xres/2.0f, g.yres/2.0f};
-    glPushMatrix();
-    glTranslatef(player1.pos[0], player1.pos[1], 0.0f);
-    glBegin(GL_QUADS);
-    glColor3ub(150, 160, 220);
-    glVertex2f(-player1.w,  -player1.h);
-    glVertex2f(-player1.w,   player1.h);
-    glVertex2f( player1.w,   player1.h);
-    glVertex2f( player1.w,  -player1.h);
-    glEnd();
-    glPopMatrix();
-    // Player 1 punch box
-    if (player1.punch == 1) {
+    //Player1:
+    if (g.jeflag == 1 && player1.dead == 1) { //Jesse- replace once postion function is made
         glPushMatrix();
-        glTranslatef(player1.pos[0], player1.pos[1]+40.0f, 0.0f);
+        glTranslatef(player1.pos[0], player1.w, 0.0f);
         glBegin(GL_QUADS);
-        glColor3ub(0, 150, 0);
-        glVertex2f(-player1.pw1 * g.punchflip,  -player1.ph);
-        glVertex2f(-player1.pw1 * g.punchflip,   player1.ph);
-        glVertex2f( player1.pw2 * g.punchflip,   player1.ph);
-        glVertex2f( player1.pw2 * g.punchflip,  -player1.ph);
+        glColor3ub(150, 160, 220);
+        glVertex2f(-player1.h,  -player1.w);
+        glVertex2f(-player1.h,   player1.w);
+        glVertex2f( player1.h,   player1.w);
+        glVertex2f( player1.h,  -player1.w);
         glEnd();
         glPopMatrix();
+        extern void restartScreen(int player, int ywin, int xwin);
+        restartScreen(1, g.yres, g.xres);
+    } else {
+        glPushMatrix();
+        glTranslatef(player1.pos[0], player1.pos[1], 0.0f);
+        glBegin(GL_QUADS);
+        glColor3ub(150, 160, 220);
+        glVertex2f(-player1.w,  -player1.h);
+        glVertex2f(-player1.w,   player1.h);
+        glVertex2f( player1.w,   player1.h);
+        glVertex2f( player1.w,  -player1.h);
+        glEnd();
+        glPopMatrix();
+        // Player 1 punch box
+        if (player1.punch == 1) {
+            glPushMatrix();
+            glTranslatef(player1.pos[0], player1.pos[1]+40.0f, 0.0f);
+            glBegin(GL_QUADS);
+            glColor3ub(0, 150, 0);
+            glVertex2f(-player1.pw1 * g.punchflip,  -player1.ph);
+            glVertex2f(-player1.pw1 * g.punchflip,   player1.ph);
+            glVertex2f( player1.pw2 * g.punchflip,   player1.ph);
+            glVertex2f( player1.pw2 * g.punchflip,  -player1.ph);
+            glEnd();
+            glPopMatrix();
+        }
     }
     //Player2:
-    glPushMatrix();
-    glTranslatef(player2.pos[0], player2.pos[1], 0.0f);
-    glBegin(GL_QUADS);
-    glColor3ub(0, 0, 0);
-    glVertex2f(-player2.w,  -player2.h);
-    glVertex2f(-player2.w,   player2.h);
-    glVertex2f( player2.w,   player2.h);
-    glVertex2f( player2.w,  -player2.h);
-    glEnd();
-    glPopMatrix();
-    // Player 2 punch box
-    if (player2.punch == 1) {
+    if (g.jeflag == 1 && player2.dead == 1) { //Jesse- replace once postion function is made
         glPushMatrix();
-        glTranslatef(player2.pos[0], player2.pos[1]+40.0f, 0.0f);
+        glTranslatef(player2.pos[0], player2.w, 0.0f);
         glBegin(GL_QUADS);
-        glColor3ub(0, 150, 0);
-        glVertex2f(-player2.pw2 * g.punchflip,  -player2.ph);
-        glVertex2f(-player2.pw2 * g.punchflip,   player2.ph);
-        glVertex2f( player2.pw1 * g.punchflip,   player2.ph);
-        glVertex2f( player2.pw1 * g.punchflip,  -player2.ph);
+        glColor3ub(0, 0, 0);
+        glVertex2f(-player2.h,  -player2.w);
+        glVertex2f(-player2.h,   player2.w);
+        glVertex2f( player2.h,   player2.w);
+        glVertex2f( player2.h,  -player2.w);
         glEnd();
         glPopMatrix();
+        extern void restartScreen(int player, int ywin, int xwin);
+        restartScreen(2, g.yres, g.xres);
+    } else {
+        glPushMatrix();
+        glTranslatef(player2.pos[0], player2.pos[1], 0.0f);
+        glBegin(GL_QUADS);
+        glColor3ub(0, 0, 0);
+        glVertex2f(-player2.w,  -player2.h);
+        glVertex2f(-player2.w,   player2.h);
+        glVertex2f( player2.w,   player2.h);
+        glVertex2f( player2.w,  -player2.h);
+        glEnd();
+        glPopMatrix();
+        // Player 2 punch box
+        if (player2.punch == 1) {
+            glPushMatrix();
+            glTranslatef(player2.pos[0], player2.pos[1]+40.0f, 0.0f);
+            glBegin(GL_QUADS);
+            glColor3ub(0, 150, 0);
+            glVertex2f(-player2.pw2 * g.punchflip,  -player2.ph);
+            glVertex2f(-player2.pw2 * g.punchflip,   player2.ph);
+            glVertex2f( player2.pw1 * g.punchflip,   player2.ph);
+            glVertex2f( player2.pw1 * g.punchflip,  -player2.ph);
+            glEnd();
+            glPopMatrix();
+        }
     }
+
+    //Jesse- This resets the players stats if the users wants to restart the game
+    if ( (player1.dead == 1 || player2.dead == 1) && g.restart == 1) {
+            player1.health = reset.health;
+            player2.health = reset.health;
+            player1.pos[0] = reset.player1posX;
+            player2.pos[0] = reset.player2posX;
+            player1.dead = reset.dead;
+            player2.dead = reset.dead;
+            g.restart = 0;
+        }
 
     //JOSE: I think this is part of Sprite stuff
     if (g.bflag == 1) {
@@ -874,8 +984,8 @@ void render(void)
     //
     if(g.jeflag == 1) {
         //Jesses function
-        extern void greenBoxes();
-        greenBoxes();
+        extern void greenBoxes(int ywin, int xwin);
+        greenBoxes(g.yres, g.xres);
     }
     //
 
