@@ -122,6 +122,34 @@ extern void player_1(int x, int y) {
     glPopMatrix();
 }
 
-// Add title screen
+
+// Makes boxes for players
+extern void player_hitbox(int w, int h, float x, float y) {
+    glPushMatrix();
+    glTranslatef(x, y, 0.0f);
+    glBegin(GL_QUADS);
+        glColor3ub(0, 0, 0);
+        glVertex2f(-w,  -h);
+        glVertex2f(-w,   h);
+        glVertex2f( w,   h);
+        glVertex2f( w,  -h);
+    glEnd();
+    glPopMatrix();
+}
+
+extern void punch_hitbox(int w1, int w2, int h, float x, float y) {
+    glPushMatrix();
+    glTranslatef(x, y, 0.0f);
+    glBegin(GL_QUADS);
+        glColor3ub(0, 150, 0);
+        glVertex2f(-w2,  -h);
+        glVertex2f(-w2,   h);
+        glVertex2f( w1,   h);
+        glVertex2f( w1,  -h);
+    glEnd();
+    glPopMatrix();
+}
+
+
 
 #endif
