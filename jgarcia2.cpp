@@ -66,6 +66,7 @@ void restartScreen(int player, int ywin, int xwin)
     glEnd();
     glPopMatrix();
 
+    r.left += 80;
     ggprint8b(&r, 16, c, "");
     ggprint8b(&r, 16, c, "");
     ggprint8b(&r, 16, c, "");
@@ -78,7 +79,8 @@ void restartScreen(int player, int ywin, int xwin)
     ggprint8b(&r, 16, c, "");
     ggprint8b(&r, 16, c, "");
     ggprint8b(&r, 16, c, "");
-    ggprint8b(&r, 50, c, "                                                                                       PLAYER%i WINS", player);
-    ggprint8b(&r, 50, c, "                                                                                   PRESS r TO RESTART");
+    ggprint8b(&r, 50, c, "PLAYER%i WINS", player);
+    ggprint8b(&r, 50, c, "PRESS r TO RESTART");
+    r.left -= 80;
 }
 
