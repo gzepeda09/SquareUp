@@ -1,5 +1,5 @@
 CFLAGS = -I ./include
-LFLAGS = -lrt -lX11 -lGLU -lGL -pthread -lopenal -lalut -lm #-lXrandr
+LFLAGS = -lrt -lX11 -lGLU -lGL -pthread -lopenal -lalut -lm -lglut #-lXrandr
 
 all: walk
 

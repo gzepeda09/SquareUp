@@ -5,6 +5,8 @@
 //author:  Gordon Griesel
 //date:    summer 2017 - 2018
 //
+//modified by: Geno Zepeda
+//purpose: developed a function that renders random platforms for player to jump on
 //Walk cycle using a sprite sheet.
 //images courtesy: http://games.ucla.edu/resource/walk-cycles/
 //
@@ -20,6 +22,9 @@
 #include <GL/glx.h>
 #include "fonts.h"
 #include <thread>
+#include "box.h"
+#include <GL/glut.h>
+
 
 
 using namespace std;
@@ -31,6 +36,8 @@ using namespace std;
 typedef double Flt;
 typedef double Vec[3];
 typedef Flt	Matrix[4][4];
+
+
 
 //macros
 #define rnd() (((double)rand())/(double)RAND_MAX)
@@ -206,6 +213,12 @@ class Global {
         }
 } g;
 
+
+//Geno -  random platform for 
+Box rplat[3];
+
+// Box rpl[3] = {Box(g.yres, g.xres), Box(g.yres, g.xres), Box(g.yres, g.xres)};
+
 //Jesse - added values to reset character stats
 class Reset_Values {
     public:
@@ -303,11 +316,18 @@ void physics(void);
 void render(void);
 
 
-
+int rNum = 0;
 int main(void)
 {
     initOpengl();
     init();
+
+    std::srand(std::time(nullptr));
+
+    //chooses a rand num between 1-100 to check against players health
+    rNum = std::rand() % 61 + 30;
+
+    std::cout << "Random number: " << rNum << std::endl;
 
     //GENOS SOUND FUNCTIONALITY
     extern void initSound();
@@ -644,8 +664,9 @@ void physics(void)
     // Punch player 1
     if (g.keyStates[XK_b] && player1.punch == 0 && player1.dead == 0) {
 
-        extern void playPunchSound();
-        playPunchSound();
+        //Functions can be found in gzepeda.cpp
+            extern void playPunchSound();
+            playPunchSound();
 
         player1.punch = 1;
 
@@ -820,7 +841,13 @@ void physics(void)
         g.punchflip = 1;
     }
 
+
+
 }
+
+
+    bool brend = true;
+
 
 void render(void)
 {
@@ -995,8 +1022,8 @@ void render(void)
         playSound();
 
 
-        extern void newText(int yres, int xres);
-        newText(g.yres, g.xres);
+        // extern void newText(int yres, int xres);
+        // newText(g.yres, g.xres);
 
         //glColor3f(0.5, 0.5, 0.5);
         //glRecti(300, 400, 500, 450);
@@ -1004,6 +1031,66 @@ void render(void)
         //glRasterPos2i(350, 420);
     }
     //
+
+    //GENO - Random Platforms 
+
+
+
+                                        float x = (std::rand() % static_cast<int>(g.xres)) - g.xres/2;
+            float y = (std::rand() % static_cast<int>(g.yres)) - g.yres/2;
+
+
+
+          
+
+
+            rplat[0].set_width(100.0f);
+            rplat[0].set_height(25.0f);
+            rplat[1].set_width(100.0f);
+            rplat[1].set_height(25.0f);
+            rplat[2].set_width(100.0f);
+            rplat[2].set_height(25.0f);
+            rplat[0].set_xres(g.xres + x);
+            rplat[0].set_yres(g.yres + y);
+            
+            rplat[1].set_xres(g.xres + x + 2.0f);
+            rplat[1].set_yres(g.yres + y - 2.5f);
+
+            rplat[2].set_xres(g.xres + x + 3.5f);
+            rplat[2].set_yres(g.yres + y );
+    
+
+
+    if(player1.health <= rNum || player2.health <= rNum){
+
+        for(int i = 0; i < 3; i++){
+
+
+
+
+            unsigned char c3[3] = {184, 2, 2};
+
+            rplat[i].set_color(c3);
+
+
+
+
+                glPushMatrix();
+                glColor3ubv(rplat[i].color);
+                glTranslatef(rplat[i].pos[0], rplat[i].pos[1], 0.0f);
+                glBegin(GL_QUADS);
+                    glVertex2f(-rplat[i].w, -rplat[i].h);
+                    glVertex2f(-rplat[i].w,  rplat[i].h);
+                    glVertex2f( rplat[i].w,  rplat[i].h);
+                    glVertex2f( rplat[i].w, -rplat[i].h);
+                glEnd();
+                glPopMatrix();
+            }
+
+        }
+
+
+
 
     //
     if(g.jeflag == 1) {

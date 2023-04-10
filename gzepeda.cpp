@@ -17,6 +17,8 @@ Purpose: Draws text
 
 
 
+
+
 #define USE_OPENAL_SOUND
 #ifdef USE_OPENAL_SOUND
 // #include </usr/include/AL/alut.h>
@@ -156,100 +158,100 @@ extern void playPunchSound()
 // End of code taken from snake framework
 
 
-extern void newText(int yres, int xres){
+// extern void newText(int yres, int xres){
 
 
 
-	float sxres = xres - 0.5f;
+	// float sxres = xres - 0.5f;
 
-	Box box(yres , sxres);
-	Box box2(yres + 1.0f, sxres);
-	Box box3(yres - 0.5f, sxres);
-
-
-	Box border(yres - 0.5f, sxres);
-
-	unsigned char c[3] = {176, 172, 172};
-	unsigned char c2[3] = {33, 156, 14};
-	unsigned char c3[3] = {184, 2, 2};
+	// Box box(yres , sxres);
+	// Box box2(yres + 1.0f, sxres);
+	// Box box3(yres - 0.5f, sxres);
 
 
-	unsigned char bc[3] = {255, 255, 255};
+	// Box border(yres - 0.5f, sxres);
+
+	// unsigned char c[3] = {176, 172, 172};
+	// unsigned char c2[3] = {33, 156, 14};
+	// unsigned char c3[3] = {184, 2, 2};
 
 
-	Rect r;
-    glClear(GL_COLOR_BUFFER_BIT);
+	// unsigned char bc[3] = {255, 255, 255};
 
 
-    r.bot = yres - box3.pos[1];
-    r.left = box3.pos[0];
-    r.center = 0;
+	// Rect r;
+    // glClear(GL_COLOR_BUFFER_BIT);
 
 
+    // r.bot = yres - box3.pos[1];
+    // r.left = box3.pos[0];
+    // r.center = 0;
 
 
 
-    box.set_color(c);
-	box2.set_color(c2);
-	box3.set_color(c3);
-	border.set_color(bc);
+
+
+    // box.set_color(c);
+	// box2.set_color(c2);
+	// box3.set_color(c3);
+	// border.set_color(bc);
 
     
-	   //Draw box.
-	glPushMatrix();
-	glColor3ubv(box.color);
-	glTranslatef(box.pos[0], box.pos[1], 0.0f);
-	glBegin(GL_QUADS);
-	glVertex2f(-box.w, -box.h);
-	glVertex2f(-box.w,  box.h);
-	glVertex2f( box.w,  box.h);
-	glVertex2f( box.w, -box.h);
-	glEnd();
-	glPopMatrix();
+	//    //Draw box.
+	// glPushMatrix();
+	// glColor3ubv(box.color);
+	// glTranslatef(box.pos[0], box.pos[1], 0.0f);
+	// glBegin(GL_QUADS);
+	// glVertex2f(-box.w, -box.h);
+	// glVertex2f(-box.w,  box.h);
+	// glVertex2f( box.w,  box.h);
+	// glVertex2f( box.w, -box.h);
+	// glEnd();
+	// glPopMatrix();
 
 
 
 
-	//Draw border.
-	glPushMatrix();
-	glColor3ubv(border.color);
-	glTranslatef(border.pos[0], border.pos[1], 0.0f);
-	glBegin(GL_QUADS);
-	glVertex2f(-border.w + 20, -border.h + 20);
-	glVertex2f(-border.w + 20,  border.h + 20);
-	glVertex2f( border.w + 20,  border.h + 20);
-	glVertex2f( border.w + 20, -border.h + 20);
-	glEnd();
-	glPopMatrix();
+	// //Draw border.
+	// glPushMatrix();
+	// glColor3ubv(border.color);
+	// glTranslatef(border.pos[0], border.pos[1], 0.0f);
+	// glBegin(GL_QUADS);
+	// glVertex2f(-border.w + 20, -border.h + 20);
+	// glVertex2f(-border.w + 20,  border.h + 20);
+	// glVertex2f( border.w + 20,  border.h + 20);
+	// glVertex2f( border.w + 20, -border.h + 20);
+	// glEnd();
+	// glPopMatrix();
 
 
 
-	//Draw box.
-	glPushMatrix();
-	glColor3ubv(box2.color);
-	glTranslatef(box2.pos[0], box2.pos[1], 0.0f);
-	glBegin(GL_QUADS);
-	glVertex2f(-box2.w, -box2.h);
-	glVertex2f(-box2.w,  box2.h);
-	glVertex2f( box2.w,  box2.h);
-	glVertex2f( box2.w, -box2.h);
-	glEnd();
-	glPopMatrix();
+	// //Draw box.
+	// glPushMatrix();
+	// glColor3ubv(box2.color);
+	// glTranslatef(box2.pos[0], box2.pos[1], 0.0f);
+	// glBegin(GL_QUADS);
+	// glVertex2f(-box2.w, -box2.h);
+	// glVertex2f(-box2.w,  box2.h);
+	// glVertex2f( box2.w,  box2.h);
+	// glVertex2f( box2.w, -box2.h);
+	// glEnd();
+	// glPopMatrix();
 
 
-	ggprint8b(&r, 16, 0x000000, "Start");
+	// ggprint8b(&r, 16, 0x000000, "Start");
 
-	//Draw box.
-	glPushMatrix();
-	glColor3ubv(box3.color);
-	glTranslatef(box3.pos[0], box3.pos[1], 0.0f);
-	glBegin(GL_QUADS);
-	glVertex2f(-box3.w, -box3.h);
-	glVertex2f(-box3.w,  box3.h);
-	glVertex2f( box3.w,  box3.h);
-	glVertex2f( box3.w, -box3.h);
-	glEnd();
-	glPopMatrix();
+	// //Draw box.
+	// glPushMatrix();
+	// glColor3ubv(box3.color);
+	// glTranslatef(box3.pos[0], box3.pos[1], 0.0f);
+	// glBegin(GL_QUADS);
+	// glVertex2f(-box3.w, -box3.h);
+	// glVertex2f(-box3.w,  box3.h);
+	// glVertex2f( box3.w,  box3.h);
+	// glVertex2f( box3.w, -box3.h);
+	// glEnd();
+	// glPopMatrix();
 
 
-}
+// }
