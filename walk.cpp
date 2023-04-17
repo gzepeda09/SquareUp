@@ -880,7 +880,7 @@ void render(void)
     //Display Background
     glColor3f(1.0, 1.0, 1.0);
     glBindTexture(GL_TEXTURE_2D, g.tex.backTexture);
-    display_map_one(g.tex.xc[0], g.tex.xc[1],
+    display_map(g.tex.xc[0], g.tex.xc[1],
             g.tex.yc[0], g.tex.yc[1],
             g.xres, 	 g.yres);
 
