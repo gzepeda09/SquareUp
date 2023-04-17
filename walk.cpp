@@ -55,6 +55,12 @@ const float pos1 = 1920/2, pos2 = 1080/2;
 #define ALPHA 1
 //bool* keyStates = new bool[256];
 
+//All external functions -
+// --- Jose ---
+extern void display_map(float x0, float x1, float y0, float y1, int xres, int yres);
+extern void player_hitbox(int w, int h, float x, float y);
+extern void punch_hitbox(int w1, int w2, int h, float x, float y);
+
 class Image {
     public:
         int width, height;
@@ -874,7 +880,6 @@ void render(void)
     //Display Background
     glColor3f(1.0, 1.0, 1.0);
     glBindTexture(GL_TEXTURE_2D, g.tex.backTexture);
-    extern void display_map_one(float x0, float x1, float y0, float y1, int xres, int yres);
     display_map_one(g.tex.xc[0], g.tex.xc[1],
             g.tex.yc[0], g.tex.yc[1],
             g.xres, 	 g.yres);
@@ -891,7 +896,7 @@ void render(void)
     //static float pos[2] = {g.xres/2.0f, g.yres/2.0f};
     //Player1:
     if (g.jeflag == 1 && player1.dead == 1) { //Jesse- replace once postion function is made
-        glPushMatrix();
+        /*glPushMatrix();
         glTranslatef(player1.pos[0], player1.w, 0.0f);
         glBegin(GL_QUADS);
         glColor3ub(150, 160, 220);
@@ -900,11 +905,12 @@ void render(void)
         glVertex2f( player1.h,   player1.w);
         glVertex2f( player1.h,  -player1.w);
         glEnd();
-        glPopMatrix();
+        glPopMatrix();*/
+		player_hitbox(player1.w, player1.h, player1.pos[0], player1.pos[1]);
         extern void restartScreen(int player, int ywin, int xwin);
         restartScreen(1, g.yres, g.xres);
     } else {
-        glPushMatrix();
+        /*glPushMatrix();
         glTranslatef(player1.pos[0], player1.pos[1], 0.0f);
         glBegin(GL_QUADS);
         glColor3ub(150, 160, 220);
@@ -913,24 +919,18 @@ void render(void)
         glVertex2f( player1.w,   player1.h);
         glVertex2f( player1.w,  -player1.h);
         glEnd();
-        glPopMatrix();
+        glPopMatrix();*/
+		player_hitbox(player1.w, player1.h, player1.pos[0], player1.pos[1]);
         // Player 1 punch box
         if (player1.punch == 1) {
-            glPushMatrix();
-            glTranslatef(player1.pos[0], player1.pos[1]+40.0f, 0.0f);
-            glBegin(GL_QUADS);
-            glColor3ub(0, 150, 0);
-            glVertex2f(-player1.pw1 * g.punchflip,  -player1.ph);
-            glVertex2f(-player1.pw1 * g.punchflip,   player1.ph);
-            glVertex2f( player1.pw2 * g.punchflip,   player1.ph);
-            glVertex2f( player1.pw2 * g.punchflip,  -player1.ph);
-            glEnd();
-            glPopMatrix();
+            int pw2 = player1.pw2 * g.punchflip;
+        	int pw1 = player1.pw1 * g.punchflip;
+        	punch_hitbox(pw2, pw1, player1.ph, player1.pos[0], player1.pos[1] + 40.0f);
         }
     }
     //Player2:
     if (g.jeflag == 1 && player2.dead == 1) { //Jesse- replace once postion function is made
-        glPushMatrix();
+        /*glPushMatrix();
         glTranslatef(player2.pos[0], player2.w, 0.0f);
         glBegin(GL_QUADS);
         glColor3ub(0, 0, 0);
@@ -939,11 +939,13 @@ void render(void)
         glVertex2f( player2.h,   player2.w);
         glVertex2f( player2.h,  -player2.w);
         glEnd();
-        glPopMatrix();
+        glPopMatrix();*/
+		player_hitbox(player2.w, player2.h, player2.pos[0], player2.pos[1]);
         extern void restartScreen(int player, int ywin, int xwin);
         restartScreen(2, g.yres, g.xres);
     } else {
-        glPushMatrix();
+		player_hitbox(player2.w, player2.h, player2.pos[0], player2.pos[1]);
+        /*glPushMatrix();
         glTranslatef(player2.pos[0], player2.pos[1], 0.0f);
         glBegin(GL_QUADS);
         glColor3ub(0, 0, 0);
@@ -952,10 +954,13 @@ void render(void)
         glVertex2f( player2.w,   player2.h);
         glVertex2f( player2.w,  -player2.h);
         glEnd();
-        glPopMatrix();
+        glPopMatrix();*/
         // Player 2 punch box
         if (player2.punch == 1) {
-            glPushMatrix();
+			int pw2 = player2.pw2 * g.punchflip;
+        	int pw1 = player2.pw1 * g.punchflip;
+        	punch_hitbox(pw1, pw2, player2.ph, player2.pos[0], player2.pos[1] + 40.0f);
+            /*glPushMatrix();
             glTranslatef(player2.pos[0], player2.pos[1]+40.0f, 0.0f);
             glBegin(GL_QUADS);
             glColor3ub(0, 150, 0);
@@ -964,7 +969,7 @@ void render(void)
             glVertex2f( player2.pw1 * g.punchflip,   player2.ph);
             glVertex2f( player2.pw1 * g.punchflip,  -player2.ph);
             glEnd();
-            glPopMatrix();
+            glPopMatrix();*/
         }
     }
 
