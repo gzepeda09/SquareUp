@@ -195,8 +195,8 @@ class Global {
         Vec box[20];
         Global() {
             done=0;
-            xres=800;
-            yres=600;
+            xres=1920;
+            yres=1080;
             walk=0;
             mapCenter = 1;
             bflag = jeflag = joflag = 0;
@@ -460,6 +460,10 @@ void checkMouse(XEvent *e)
     //Was a mouse button clicked?
     static int savex = 0;
     static int savey = 0;
+    static int inside_Restart = 0; //mouse inside restart button
+    static int lbuttondown_Restart = 0; //left button is down in restart option boundaries
+    int mouseX = e->xbutton.x;
+    int mouseY = e->xbutton.y;
     //
     if (e->type == ButtonRelease) {
         return;
@@ -467,15 +471,35 @@ void checkMouse(XEvent *e)
     if (e->type == ButtonPress) {
         if (e->xbutton.button==1) {
             //Left button is down
+            if (inside_Restart) {
+                lbuttondown_Restart = 1;
+            }
         }
         if (e->xbutton.button==3) {
             //Right button is down
         }
     }
-    if (savex != e->xbutton.x || savey != e->xbutton.y) {
-        //Mouse moved
-        savex = e->xbutton.x;
-        savey = e->xbutton.y;
+    if (e->type == MotionNotify) { //jesse-code so program knows position of mouse
+        //mouse moved
+        if (savex != e->xbutton.x || savey != e->xbutton.y) {
+            //Mouse moved
+            savex = e->xbutton.x;
+            savey = e->xbutton.y;
+
+            if (lbuttondown_Restart) {
+                //restart the game when player click restart option
+                g.restart = 1;
+                return;
+            }
+            
+            inside_Restart = 0;
+
+            if (mouseX >= g.xres/3 && mouseX <= (g.xres/3 + 500)) { //check to see if mouse is in restart boundaries
+                if (mouseY >= g.yres/2 && mouseY <= (g.yres/2 +500)) {
+                    inside_Restart = 1; // mouse in restart boundaries 
+                }
+            }
+        }
     }
 }
 
@@ -772,7 +796,7 @@ void physics(void)
 
 
     // Punch player 2
-    if (g.keyStates[XK_m] && player2.punch == 0 && player2.dead == 0 && player2.dead == 0) {
+    if (g.keyStates[XK_m] && player2.punch == 0 && player2.dead == 0) {
         player2.punch = 1;
 
         // Punch detection player 2
@@ -901,7 +925,7 @@ void render(void)
         glVertex2f( player1.h,  -player1.w);
         glEnd();
         glPopMatrix();
-        extern void restartScreen(int player, int ywin, int xwin);
+        extern void restartScreen(int player, int ywin, int xwin); //move this to the top
         restartScreen(1, g.yres, g.xres);
     } else {
         glPushMatrix();
@@ -940,7 +964,7 @@ void render(void)
         glVertex2f( player2.h,  -player2.w);
         glEnd();
         glPopMatrix();
-        extern void restartScreen(int player, int ywin, int xwin);
+        extern void restartScreen(int player, int ywin, int xwin); //move this to the top
         restartScreen(2, g.yres, g.xres);
     } else {
         glPushMatrix();
