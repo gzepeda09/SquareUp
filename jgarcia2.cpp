@@ -75,8 +75,8 @@ public:
                 if (!ppmFlag)
                         unlink(ppmname);
         }
-} player1Menu("player1wins.png"), player2Menu("player2wins.png"), menuSquare("menuWhiteSquare.png"), 
-restartSquare("restartWhiteSquare.png");
+} player1Menu("menuP1.png"), player2Menu("menuP2.png");
+ //menuSquare("menuWhiteSquare.png"), restartSquare("restartWhiteSquare.png");
 
 
 void greenBoxes(int ywin, int xwin)
