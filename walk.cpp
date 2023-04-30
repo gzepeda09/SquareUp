@@ -60,6 +60,9 @@ const float pos1 = 1920/2, pos2 = 1080/2;
 extern void display_map(float x0, float x1, float y0, float y1, int xres, int yres);
 extern void player_hitbox(int w, int h, float x, float y);
 extern void punch_hitbox(int w1, int w2, int h, float x, float y);
+//--- Jesse ---
+extern void restartScreen(int player, int ywin, int xwin);
+extern void playerBlocking(float w, float h, float x, float y, int flipped);
 
 class Image {
     public:
@@ -132,6 +135,7 @@ class Player_1 {
         Vec pos;
         Vec vel;
         int dead = 0;
+        int block = 0;
         float w = 20.0f;
         float h = 100.0f;
         float pw1 = 20.0f;
@@ -147,6 +151,7 @@ class Player_2 {
         Vec pos;
         Vec vel;
         int dead = 0;
+        int block = 0;
         float w = 20.0f;
         float h = 100.0f;
         float pw1 = 20.0f;
@@ -466,45 +471,28 @@ void checkMouse(XEvent *e)
     //Was a mouse button clicked?
     static int savex = 0;
     static int savey = 0;
-    static int inside_Restart = 0; //mouse inside restart button
-    static int lbuttondown_Restart = 0; //left button is down in restart option boundaries
-    int mouseX = e->xbutton.x;
-    int mouseY = e->xbutton.y;
-    //
+
+    if (e->type != ButtonPress
+        && e->type != ButtonRelease
+        && e->type != MotionNotify) {
+        return;
+    }
+
     if (e->type == ButtonRelease) {
         return;
     }
     if (e->type == ButtonPress) {
         if (e->xbutton.button==1) {
-            //Left button is down
-            if (inside_Restart) {
-                lbuttondown_Restart = 1;
-            }
         }
         if (e->xbutton.button==3) {
-            //Right button is down
         }
     }
-    if (e->type == MotionNotify) { //jesse-code so program knows position of mouse
-        //mouse moved
+    
+    if (e->type == MotionNotify) {
         if (savex != e->xbutton.x || savey != e->xbutton.y) {
             //Mouse moved
             savex = e->xbutton.x;
             savey = e->xbutton.y;
-
-            if (lbuttondown_Restart) {
-                //restart the game when player click restart option
-                g.restart = 1;
-                return;
-            }
-            
-            inside_Restart = 0;
-
-            if (mouseX >= g.xres/3 && mouseX <= (g.xres/3 + 500)) { //check to see if mouse is in restart boundaries
-                if (mouseY >= g.yres/2 && mouseY <= (g.yres/2 +500)) {
-                    inside_Restart = 1; // mouse in restart boundaries 
-                }
-            }
         }
     }
 }
@@ -708,16 +696,19 @@ void physics(void)
             if (g.jeflag == 1 && player2.dead == 0) {
                 player2.health -= 50;
             } else if (player2.dead == 0){
-                player2.health -= 10;
-            }
-            //Jesse - reaction to punches
-            if (player2.dead == 0) {
+                if (!player2.block) {    
+                    player2.health -= 10;
+                } else {
+                    player2.health -=5;
+                }
+                //Jesse - reaction to punches
                 player2.pos[1] += 50.0f;
                 player2.vel[1] += 20.0f;
                 player2.pos[0] += 35.0f;
             }
             //player 1 dies
             if (player2.health <= 0) {
+                player2.health = 0;
                 player2.dead = 1;
             }
         }
@@ -729,20 +720,31 @@ void physics(void)
             if (g.jeflag == 1 && player2.dead == 0) {
                 player2.health -= 50;
             } else if (player2.dead == 0){
-                player2.health -= 10;
-            }
-            //Jesse - reaction to punches
-            if (player2.dead == 0) {
+                if (!player2.block) {    
+                    player2.health -= 10;
+                } else {
+                    player2.health -=5;
+                }
+                //Jesse - reaction to punches
                 player2.pos[1] += 50.0f;
                 player2.vel[1] += 20.0f;
                 player2.pos[0] -= 35.0f;
             }
             //player 1 dies
             if (player2.health <= 0) {
+                player2.health = 0;
                 player2.dead = 1;
             }
 
         }
+    }
+
+    // Block player 1
+    if (g.keyStates[XK_t] && player1.dead == 0 && player1.punch == 0) {
+        //printf("player1 blocking");
+        player1.block = 1;
+    } else {
+        player1.block = 0;
     }
 
     // Punch cooldown player 1
@@ -813,16 +815,19 @@ void physics(void)
             if (g.jeflag == 1 && player1.dead == 0) {
                 player1.health -= 50;
             } else if (player1.dead == 0){
-                player1.health -= 10;
-            }
-            //Jesse - reaction to punches
-            if (player1.dead == 0) {
+                if (!player1.block) {    
+                    player1.health -= 10;
+                } else {
+                    player1.health -=5;
+                }
+                //Jesse - reaction to punches
                 player1.pos[1] += 50.0f;
                 player1.vel[1] += 20.0f;
                 player1.pos[0] -= 35.0f;
             }
             //player 1 dies
             if (player1.health <= 0) {
+                player1.health = 0;
                 player1.dead = 1;
             }
         }
@@ -834,20 +839,31 @@ void physics(void)
             if (g.jeflag == 1 && player1.dead == 0) {
                 player1.health -= 50;
             } else if (player1.dead == 0) {
-                player1.health -= 10;
-            }
-            //Jesse - raction to punches
-            if (player1.dead == 0) {
+                if (!player1.block) {    
+                    player1.health -= 10;
+                } else {
+                    player1.health -=5;
+                }
+                //Jesse - raction to punches
                 player1.pos[1] += 50.0f;
                 player1.vel[1] += 20.0f;
                 player1.pos[0] += 35.0f;
             }
             //player 1 dies
             if (player1.health <= 0) {
+                player1.health = 0;
                 player1.dead = 1;
             }
         }
 
+    }
+
+    // Block player 2
+    if (g.keyStates[XK_l] && player2.dead == 0 && player2.punch == 0) {
+        //printf("player1 blocking");
+        player2.block = 1;
+    } else {
+        player2.block = 0;
     }
 
     // Punch cooldown player 2
@@ -919,31 +935,10 @@ void render(void)
     //glClear(GL_COLOR_BUFFER_BIT);
     //static float pos[2] = {g.xres/2.0f, g.yres/2.0f};
     //Player1:
-    if (g.jeflag == 1 && player1.dead == 1) { //Jesse- replace once postion function is made
-        /*glPushMatrix();
-        glTranslatef(player1.pos[0], player1.w, 0.0f);
-        glBegin(GL_QUADS);
-        glColor3ub(150, 160, 220);
-        glVertex2f(-player1.h,  -player1.w);
-        glVertex2f(-player1.h,   player1.w);
-        glVertex2f( player1.h,   player1.w);
-        glVertex2f( player1.h,  -player1.w);
-        glEnd();
-        glPopMatrix();*/
-		player_hitbox(player1.w, player1.h, player1.pos[0], player1.pos[1]);
-        extern void restartScreen(int player, int ywin, int xwin);
+    if (player1.dead == 1) {
+		player_hitbox(player1.h, player1.w, player1.pos[0], player1.w);
         restartScreen(1, g.yres, g.xres);
     } else {
-        /*glPushMatrix();
-        glTranslatef(player1.pos[0], player1.pos[1], 0.0f);
-        glBegin(GL_QUADS);
-        glColor3ub(150, 160, 220);
-        glVertex2f(-player1.w,  -player1.h);
-        glVertex2f(-player1.w,   player1.h);
-        glVertex2f( player1.w,   player1.h);
-        glVertex2f( player1.w,  -player1.h);
-        glEnd();
-        glPopMatrix();*/
 		player_hitbox(player1.w, player1.h, player1.pos[0], player1.pos[1]);
         // Player 1 punch box
         if (player1.punch == 1) {
@@ -951,49 +946,26 @@ void render(void)
         	int pw1 = player1.pw1 * g.punchflip;
         	punch_hitbox(pw2, pw1, player1.ph, player1.pos[0], player1.pos[1] + 40.0f);
         }
+        // Player 1 block
+        if (player1.block) {
+            playerBlocking(player1.w, player1.h, player1.pos[0], player1.pos[1], g.punchflip);
+        }
     }
     //Player2:
-    if (g.jeflag == 1 && player2.dead == 1) { //Jesse- replace once postion function is made
-        /*glPushMatrix();
-        glTranslatef(player2.pos[0], player2.w, 0.0f);
-        glBegin(GL_QUADS);
-        glColor3ub(0, 0, 0);
-        glVertex2f(-player2.h,  -player2.w);
-        glVertex2f(-player2.h,   player2.w);
-        glVertex2f( player2.h,   player2.w);
-        glVertex2f( player2.h,  -player2.w);
-        glEnd();
-        glPopMatrix();*/
-		player_hitbox(player2.w, player2.h, player2.pos[0], player2.pos[1]);
-        extern void restartScreen(int player, int ywin, int xwin);
+    if (player2.dead == 1) {
+		player_hitbox(player2.h, player2.w, player2.pos[0], player2.w);
         restartScreen(2, g.yres, g.xres);
     } else {
 		player_hitbox(player2.w, player2.h, player2.pos[0], player2.pos[1]);
-        /*glPushMatrix();
-        glTranslatef(player2.pos[0], player2.pos[1], 0.0f);
-        glBegin(GL_QUADS);
-        glColor3ub(0, 0, 0);
-        glVertex2f(-player2.w,  -player2.h);
-        glVertex2f(-player2.w,   player2.h);
-        glVertex2f( player2.w,   player2.h);
-        glVertex2f( player2.w,  -player2.h);
-        glEnd();
-        glPopMatrix();*/
         // Player 2 punch box
         if (player2.punch == 1) {
 			int pw2 = player2.pw2 * g.punchflip;
         	int pw1 = player2.pw1 * g.punchflip;
         	punch_hitbox(pw1, pw2, player2.ph, player2.pos[0], player2.pos[1] + 40.0f);
-            /*glPushMatrix();
-            glTranslatef(player2.pos[0], player2.pos[1]+40.0f, 0.0f);
-            glBegin(GL_QUADS);
-            glColor3ub(0, 150, 0);
-            glVertex2f(-player2.pw2 * g.punchflip,  -player2.ph);
-            glVertex2f(-player2.pw2 * g.punchflip,   player2.ph);
-            glVertex2f( player2.pw1 * g.punchflip,   player2.ph);
-            glVertex2f( player2.pw1 * g.punchflip,  -player2.ph);
-            glEnd();
-            glPopMatrix();*/
+        }
+        // Player 2 block
+        if (player2.block) {
+            playerBlocking(player2.w, player2.h, player2.pos[0], player2.pos[1], g.punchflip*-1);
         }
     }
 

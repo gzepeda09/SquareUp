@@ -17,16 +17,15 @@
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
 #include <GL/glx.h>
-//#include "log.h"
 #include "fonts.h"
 
 
 class Global {
 public:
      GLuint menu; //my menus texture
-
+     GLuint restartBox;
+     GLuint menuBox;
 }gl;
-
 
 class Image {
 public:
@@ -75,8 +74,8 @@ public:
                 if (!ppmFlag)
                         unlink(ppmname);
         }
-} player1Menu("menuP1.png"), player2Menu("menuP2.png");
- //menuSquare("menuWhiteSquare.png"), restartSquare("restartWhiteSquare.png");
+} player1Menu("menuP1.png"), player2Menu("menuP2.png"),
+menuSquare("menuWhiteSquare.png"), restartSquare("restartWhiteSquare.png");
 
 
 void greenBoxes(int ywin, int xwin)
@@ -107,6 +106,61 @@ void greenBoxes(int ywin, int xwin)
         glPopMatrix();
 }
 
+void playerBlocking(float w, float h, float x, float y, int flipped)
+{
+    if (flipped == 1) { //fliped = 1 so player is facing right
+        //before elbow
+        glPushMatrix();
+        glTranslatef(x, y+50.0, 0.0);
+        glBegin(GL_QUADS);
+        //glColor3ub(0, 0, 0);
+            glVertex2i(-w, -w);
+            glVertex2i(-w, 0);
+            glVertex2i(w*2+2, 0); //the w*2+2 dictates how far the 
+            glVertex2i(w*2+2, -w); //elbow reach is
+        glEnd();
+        glPopMatrix();
+        
+        //after elbow
+        glPushMatrix();
+        glTranslatef(x+w*2+2, y+50.0, 0.0);
+        glBegin(GL_QUADS);
+        //glColor3ub(0, 0, 0);
+            glVertex2i(-w, 0);
+            glVertex2i(-w, h/2);
+            glVertex2i(0, h/2);
+            glVertex2i(0, 0);
+        glEnd();
+        glPopMatrix();
+    
+    } else { //player is facing left
+        //before elbow
+        glPushMatrix();
+        glTranslatef(x, y+50.0, 0.0);
+        glBegin(GL_QUADS);
+        //glColor3ub(0, 0, 0);
+            glVertex2i(-w*2-2, -w);
+            glVertex2i(-w*2-2, 0);
+            glVertex2i(w, 0);
+            glVertex2i(w, -w);
+        glEnd();
+        glPopMatrix();
+
+        //after elbow
+        glPushMatrix();
+        glTranslatef(x-w*2-2, y+50.0, 0.0);
+        glBegin(GL_QUADS);
+        //glColor3ub(0, 0, 0);
+            glVertex2i(w, 0);
+            glVertex2i(w, h/2);
+            glVertex2i(0, h/2);
+            glVertex2i(0, 0);
+        glEnd();
+        glPopMatrix();
+    }
+}
+
+int flasher = 0; //variable to flash menu options in menu
 void restartScreen(int player, int ywin, int xwin)
 {
     /* //stuff for ggprint8b
@@ -117,12 +171,7 @@ void restartScreen(int player, int ywin, int xwin)
 	r.center = 0;
     */
     
-   //side note for this texture. This function is constantly getting called so these gl functions
-   //will be called over and over. This might be a problem sonce most of these functions
-   //were only called once in asteroids.
-
-    //gl texture
-    
+    //for player menu///////////////////////////////////////////////////////////////
     glEnable(GL_TEXTURE_2D);
     glGenTextures(1, &gl.menu);
 
@@ -136,7 +185,8 @@ void restartScreen(int player, int ywin, int xwin)
         w = player2Menu.width;
         h = player2Menu.height;
     }
-    
+
+    //for player menu
     glBindTexture(GL_TEXTURE_2D, gl.menu);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
@@ -148,22 +198,12 @@ void restartScreen(int player, int ywin, int xwin)
                             GL_RGB, GL_UNSIGNED_BYTE, player2Menu.data);
     }
 
-    //this is the only code that is ran over and over because it is in render
     glBindTexture(GL_TEXTURE_2D, gl.menu);
     glColor3f(1.0, 1.0, 1.0);
 
     int width = 500;
     int height = 500;
 
-    /* //change based on size of image
-    if (player != 1) {
-        width = 899;
-        height = 139;
-    } else {
-        width = 909;
-        height = 139;
-    }
-    */
     glBegin(GL_QUADS);
         glTexCoord2f(0.0f, 1.0f); glVertex2i(xwin/3, ywin/2);
         glTexCoord2f(0.0f, 0.0f); glVertex2i(xwin/3, ywin/2+height);
@@ -172,7 +212,72 @@ void restartScreen(int player, int ywin, int xwin)
     glEnd();
     glBindTexture(GL_TEXTURE_2D, 0);
     
+    
+    if (flasher < 3) {
+    //for white restart box//////////////////////////////////////////////////////
+        //printf("flasher: %i\n", flasher);
+        glEnable(GL_TEXTURE_2D);
+        glGenTextures(1, &gl.restartBox);
+    
+        int rbW = restartSquare.width;
+        int rbH = restartSquare.height;
 
+        glBindTexture(GL_TEXTURE_2D, gl.restartBox);
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+        glTexImage2D(GL_TEXTURE_2D, 0, 3, rbW, rbH, 0,
+                            GL_RGB, GL_UNSIGNED_BYTE, restartSquare.data);
+
+        glBindTexture(GL_TEXTURE_2D, gl.restartBox);
+        glColor3f(1.0, 1.0, 1.0);
+
+        int sizeRestart = 200;
+        int adjustYBox = 36;
+        int adjustXBox = 285;
+    
+        glBegin(GL_QUADS);
+            glTexCoord2f(0.0f, 1.0f); glVertex2i(xwin/3+adjustXBox, ywin/2+adjustYBox);
+            glTexCoord2f(0.0f, 0.0f); glVertex2i(xwin/3+adjustXBox, ywin/2+sizeRestart+adjustYBox);
+            glTexCoord2f(1.0f, 0.0f); glVertex2i(xwin/3+sizeRestart+adjustXBox, ywin/2+sizeRestart+adjustYBox);
+            glTexCoord2f(1.0f, 1.0f); glVertex2i(xwin/3+sizeRestart+adjustXBox, ywin/2+adjustYBox);
+        glEnd();
+        glBindTexture(GL_TEXTURE_2D, 0);
+        
+        //for white menu box//////////////////////////////////////////////////////////////////
+        glEnable(GL_TEXTURE_2D);
+        glGenTextures(1, &gl.menuBox);
+    
+        int mbW = menuSquare.width;
+        int mbH = menuSquare.height;
+
+        glBindTexture(GL_TEXTURE_2D, gl.menuBox);
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+        glTexImage2D(GL_TEXTURE_2D, 0, 3, mbW, mbH, 0,
+                            GL_RGB, GL_UNSIGNED_BYTE, menuSquare.data);
+
+        glBindTexture(GL_TEXTURE_2D, gl.menuBox);
+        glColor3f(1.0, 1.0, 1.0);
+
+        int sizeMenu = 120;
+        int adjustYMenu = 76;
+        int adjustXMenu = 40;
+    
+        glBegin(GL_QUADS);
+            glTexCoord2f(0.0f, 1.0f); glVertex2i(xwin/3+adjustXMenu, ywin/2+adjustYMenu);
+            glTexCoord2f(0.0f, 0.0f); glVertex2i(xwin/3+adjustXMenu, ywin/2+sizeMenu+adjustYMenu);
+            glTexCoord2f(1.0f, 0.0f); glVertex2i(xwin/3+sizeMenu+adjustXMenu, ywin/2+sizeMenu+adjustYMenu);
+            glTexCoord2f(1.0f, 1.0f); glVertex2i(xwin/3+sizeMenu+adjustXMenu, ywin/2+adjustYMenu);
+        glEnd();
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+    
+        flasher += 1;
+
+    if (flasher > 6) {
+        printf("flasher: %i\n", flasher);
+        flasher = 0;
+    }
 
     //box for menu -> I want to put a texture over this
     /*
