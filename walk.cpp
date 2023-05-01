@@ -61,6 +61,9 @@ extern void display_map(float x0, float x1, float y0, float y1, int xres, int yr
 extern void player_hitbox(int w, int h, float x, float y);
 extern void punch_hitbox(int w1, int w2, int h, float x, float y);
 
+
+
+
 class Image {
     public:
         int width, height;
@@ -222,6 +225,7 @@ class Global {
 
 //Geno -  random platform for 
 Box rplat[3];
+Box hbar[2];
 
 // Box rpl[3] = {Box(g.yres, g.xres), Box(g.yres, g.xres), Box(g.yres, g.xres)};
 
@@ -615,6 +619,18 @@ Flt VecNormalize(Vec vec)
     vec[2] = zlen * tlen;
     return(len);
 }
+//Geno - this is a flag for platforms
+bool stop = false;
+bool top = false;
+bool endIt = false;
+
+
+//Geno - flag for physics
+int activate = 0;
+
+
+int prevI = 0;
+int pltFlg = 0;
 
 void physics(void)
 {
@@ -870,6 +886,75 @@ void physics(void)
     else if (player1.pos[0] < player2.pos[0]) {
         g.punchflip = 1;
     }
+	
+	// //Geno - rand platform detection
+    // extern void pltPhysics(double plPos0, double plPos1, double plVel,
+    //               float rPos0, float rPos1, float rW, float rH, int yres);
+
+ 
+   
+    bool onPlat = false;
+
+    double gRav = 0.0000001;
+    if(pltFlg == 1){
+
+
+
+        for (int i = 0; i < 3; i++) {
+            if (player1.pos[0] >= rplat[i].pos[0] - rplat[i].w &&
+                player1.pos[0] <= rplat[i].pos[0] + rplat[i].w &&
+                player1.pos[1] >= rplat[i].pos[1] - rplat[i].h &&
+                player1.pos[1] <= rplat[i].pos[1] + rplat[i].h) {
+                // The player is on this platform, so set their vertical position
+                // to the top of the platform
+                if(!top){
+                    player1.pos[1] = rplat[i].pos[1] + rplat[i].h/2 + 
+                                     player1.h/2;
+
+                }
+                prevI = i;
+                onPlat = true;
+                activate = 1;
+
+
+            }
+
+
+        }
+
+
+            if (onPlat) {
+                // Player is on a platform, so their vertical velocity should be zero
+                player1.vel[1] = 0.0f;
+                top = true;
+
+               
+
+            } else {
+
+                if(activate == 1){
+                    // Player is not on a platform, so make them fall
+                    player1.vel[1] -= gRav;
+                    // Check if player has reached the bottom of the screen
+                    if (player1.pos[1] <= 0.0f) {
+                        // Player has fallen off the bottom of the screen, so reset their position
+                        if(!stop){
+                            player1.pos[1] = g.yres/2 - 440.5f;
+                            player1.vel[1] = 0.0;
+                            stop = true;
+                            activate = 0;
+                        }
+                    }
+
+                    stop = false;
+
+                }
+            }
+        
+
+    }
+
+
 
 
 
@@ -1117,8 +1202,48 @@ void render(void)
             }
 
         }
+	
+	    //
+
+    //GENO - Random Platforms 
+
+    rplat[0].set_width(150.0f);
+    rplat[0].set_height(25.0f);
+    rplat[1].set_width(150.0f);
+    rplat[1].set_height(25.0f);
+    rplat[2].set_width(150.0f);
+    rplat[2].set_height(25.0f);
+    
+
+    //top
+    rplat[0].set_xres(g.xres + 25.0f);
+    rplat[0].set_yres(g.yres + 130.0f);
+    
+    //right
+    rplat[1].set_xres(g.xres + 1700.0f);
+    rplat[1].set_yres(g.yres - 50.0f);
+
+    //left 
+    rplat[2].set_xres(g.xres - 1000.0f);
+    rplat[2].set_yres(g.yres - 50.0f );
 
 
+    extern void rForms(float w, float h, unsigned char color[3], float pos0, float pos1);
+
+    if(player1.health <= rNum || player2.health <= rNum){
+
+        pltFlg = 1;
+
+        for(int i = 0; i < 3; i++){
+
+            unsigned char c3[3] = {184, 2, 2};
+
+            rplat[i].set_color(c3);
+
+            rForms(rplat[i].w, rplat[i].h,  rplat[i].color, rplat[i].pos[0], rplat[i].pos[1]);
+        }
+
+    }
 
 
     //
@@ -1151,6 +1276,28 @@ void render(void)
     r.center = 50;
     ggprint8b(&r, 16, c, "Player 1 Health: %i", player1.health);
     ggprint8b(&r, 16, c, "Player 2 Health: %i", player2.health);
+	
+	
+    extern void health(float w, float h, unsigned char color[3], float pos0, float pos1, int player, int health);
+
+    //Geno, Jesse health bar for players
+
+    hbar[0].set_width(player1.health);
+    hbar[0].set_height(20.0f);
+    hbar[0].set_xres(g.xres - 1080.0f);
+    hbar[0].set_yres(g.yres + 1000.0f);
+    hbar[0].set_color(c4);
+
+    hbar[1].set_width(player2.health);
+    hbar[1].set_height(20.0f);
+    hbar[1].set_xres(g.xres + 1080.0f);
+    hbar[1].set_yres(g.yres + 1000.0f);
+    hbar[1].set_color(c4);
+
+
+
+    health(hbar[0].w, hbar[0].h, hbar[0].color, hbar[0].pos[0], hbar[0].pos[1], 1, player1.health);
+    health(hbar[1].w, hbar[1].h, hbar[1].color, hbar[1].pos[0], hbar[1].pos[1], 2, player2.health);
 
 }
 
