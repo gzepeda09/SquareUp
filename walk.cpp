@@ -1116,66 +1116,6 @@ void render(void)
         //glColor3f(1, 1, 1);
         //glRasterPos2i(350, 420);
     }
-    //
-
-    //GENO - Random Platforms 
-
-
-
-                                        float x = (std::rand() % static_cast<int>(g.xres)) - g.xres/2;
-            float y = (std::rand() % static_cast<int>(g.yres)) - g.yres/2;
-
-
-
-          
-
-
-            rplat[0].set_width(100.0f);
-            rplat[0].set_height(25.0f);
-            rplat[1].set_width(100.0f);
-            rplat[1].set_height(25.0f);
-            rplat[2].set_width(100.0f);
-            rplat[2].set_height(25.0f);
-            rplat[0].set_xres(g.xres + x);
-            rplat[0].set_yres(g.yres + y);
-            
-            rplat[1].set_xres(g.xres + x + 2.0f);
-            rplat[1].set_yres(g.yres + y - 2.5f);
-
-            rplat[2].set_xres(g.xres + x + 3.5f);
-            rplat[2].set_yres(g.yres + y );
-    
-
-
-    if(player1.health <= rNum || player2.health <= rNum){
-
-        for(int i = 0; i < 3; i++){
-
-
-
-
-            unsigned char c3[3] = {184, 2, 2};
-
-            rplat[i].set_color(c3);
-
-
-
-
-                glPushMatrix();
-                glColor3ubv(rplat[i].color);
-                glTranslatef(rplat[i].pos[0], rplat[i].pos[1], 0.0f);
-                glBegin(GL_QUADS);
-                    glVertex2f(-rplat[i].w, -rplat[i].h);
-                    glVertex2f(-rplat[i].w,  rplat[i].h);
-                    glVertex2f( rplat[i].w,  rplat[i].h);
-                    glVertex2f( rplat[i].w, -rplat[i].h);
-                glEnd();
-                glPopMatrix();
-            }
-
-        }
-	
-	    //
 
     //GENO - Random Platforms 
 
@@ -1252,6 +1192,7 @@ void render(void)
 	
     extern void health(float w, float h, unsigned char color[3], float pos0, float pos1, int player, int health);
 
+    unsigned char c4[3] = {0, 128, 0};
     //Geno, Jesse health bar for players
 
     hbar[0].set_width(player1.health);
