@@ -69,6 +69,10 @@ extern void sprite(int cx, int cy, int walkFrame, GLuint walkTexture);
 
 
 
+// Geno
+extern void playSound();
+extern void strMenu(int yres, int xres);
+
 
 //JOSE: THIS IS WHERE ANY IMAGES WE USE GO
 Image img[3] = {"images/Freddy2.png",
@@ -168,6 +172,7 @@ class Global {
         int walkFrame;
         int walk2Frame;
         int gflag, bflag;
+	int start;
         int jeflag, joflag;
         double delay;
         int feature_mode;
@@ -187,6 +192,7 @@ class Global {
             mapCenter = 1;
             bflag = jeflag = joflag = 0;
             gflag = 1;
+	    start = 0;
             restart = 0;
             memset(keyStates, 0, 65536);
             walkFrame=0;
@@ -303,7 +309,7 @@ void init();
 void physics(void);
 void render(void);
 
-
+bool music = false;
 int rNum = 0;
 int main(void)
 {
@@ -328,6 +334,11 @@ int main(void)
             x11.checkResize(&e);
             checkMouse(&e);
             done = checkKeys(&e);
+	    //Geno - logic for main music
+	    if(!music){
+                 playSound();
+                 music = true;
+            }
         }
         physics();
         render();
@@ -570,6 +581,9 @@ int checkKeys(XEvent *e)
             break;
         case XK_a:
 
+            break;
+        case XK_F1:
+            g.start = 1;
             break;
         case XK_d:
             break;
@@ -1038,132 +1052,212 @@ bool brend = true;
 
 void render(void)
 {
-    //Clear the screen
-    glClearColor(0.1, 0.1, 0.1, 1.0);
-    glClear(GL_COLOR_BUFFER_BIT);
+    if(g.start == 1){
+	    //Clear the screen
+	    glClearColor(0.1, 0.1, 0.1, 1.0);
+	    glClear(GL_COLOR_BUFFER_BIT);
 
-    float cx = g.xres/3.0;
-    float cy = g.yres/2.0;
+	    float cx = g.xres/3.0;
+	    float cy = g.yres/2.0;
 
-    /*if (g.gflag == 0) {
-      Rect r;
-      unsigned int c = 0x0000ff00;
-      r.bot = g.yres/2;
-      r.left = g.xres/2;
-      r.center = 50;
-      ggprint8b(&r, 16, c, "Feature Modes: ");
-      ggprint8b(&r, 16, c, "Geno's Feature Mode: 1");
-      ggprint8b(&r, 16, c, "Jose's Feature Mode: SHIFT-J");
-      ggprint8b(&r, 16, c, "Brian's Feature Mode: 2");
-      ggprint8b(&r, 16, c, "Jesse's Feature Mode: J");
-      }*/
+	    /*if (g.gflag == 0) {
+	      Rect r;
+	      unsigned int c = 0x0000ff00;
+	      r.bot = g.yres/2;
+	      r.left = g.xres/2;
+	      r.center = 50;
+	      ggprint8b(&r, 16, c, "Feature Modes: ");
+	      ggprint8b(&r, 16, c, "Geno's Feature Mode: 1");
+	      ggprint8b(&r, 16, c, "Jose's Feature Mode: SHIFT-J");
+	      ggprint8b(&r, 16, c, "Brian's Feature Mode: 2");
+	      ggprint8b(&r, 16, c, "Jesse's Feature Mode: J");
+	      }*/
 
-    //Display Background
-    glColor3f(1.0, 1.0, 1.0);
-    glBindTexture(GL_TEXTURE_2D, g.tex.backTexture);
-    display_map(g.tex.xc[0], g.tex.xc[1],
-            g.tex.yc[0], g.tex.yc[1],
-            g.xres, 	 g.yres);
+	    //Display Background
+	    glColor3f(1.0, 1.0, 1.0);
+	    glBindTexture(GL_TEXTURE_2D, g.tex.backTexture);
+	    display_map(g.tex.xc[0], g.tex.xc[1],
+		    g.tex.yc[0], g.tex.yc[1],
+		    g.xres, 	 g.yres);
 
-    //Centers Background; 
-    //will combine with ^this later
-    if (g.mapCenter != 0) {
-        g.tex.xc[0] = 0.083;
-        g.tex.xc[1] = 1.083;
-        g.mapCenter = 0;
-    }
+	    //Centers Background; 
+	    //will combine with ^this later
+	    if (g.mapCenter != 0) {
+		g.tex.xc[0] = 0.083;
+		g.tex.xc[1] = 1.083;
+		g.mapCenter = 0;
+	    }
 
-    //glClear(GL_COLOR_BUFFER_BIT);
-    //static float pos[2] = {g.xres/2.0f, g.yres/2.0f};
-    //Player1:
-    if (player1.dead == 1) {
-        player_hitbox(player1.h, player1.w, player1.pos[0], player1.w);
-        restartScreen(1, g.yres, g.xres);
-    } else {
-        player_hitbox(player1.w, player1.h, player1.pos[0], player1.pos[1]);
-        // Player 1 punch box
-        if (player1.punch == 1) {
-            int pw2 = player1.pw2 * g.punchflip;
-            int pw1 = player1.pw1 * g.punchflip;
-            punch_hitbox(pw2, pw1, player1.ph, player1.pos[0], player1.pos[1] + 40.0f);
-        }
-        // Player 1 block
-        if (player1.block) {
-            playerBlocking(player1.w, player1.h, player1.pos[0], player1.pos[1], g.punchflip);
-        }
-    }
-    //Player2:
-    if (player2.dead == 1) {
-        player_hitbox(player2.h, player2.w, player2.pos[0], player2.w);
-        restartScreen(2, g.yres, g.xres);
-    } else {
-        player_hitbox(player2.w, player2.h, player2.pos[0], player2.pos[1]);
-        // Player 2 punch box
-        if (player2.punch == 1) {
-            int pw2 = player2.pw2 * g.punchflip;
-            int pw1 = player2.pw1 * g.punchflip;
-            punch_hitbox(pw1, pw2, player2.ph, player2.pos[0], player2.pos[1] + 40.0f);
-        }
-        // Player 2 block
-        if (player2.block) {
-            playerBlocking(player2.w, player2.h, player2.pos[0], player2.pos[1], g.punchflip*-1);
-        }
-    }
+	    //glClear(GL_COLOR_BUFFER_BIT);
+	    //static float pos[2] = {g.xres/2.0f, g.yres/2.0f};
+	    //Player1:
+	    if (player1.dead == 1) {
+			player_hitbox(player1.h, player1.w, player1.pos[0], player1.w);
+		restartScreen(1, g.yres, g.xres);
+	    } else {
+			player_hitbox(player1.w, player1.h, player1.pos[0], player1.pos[1]);
+		// Player 1 punch box
+		if (player1.punch == 1) {
+		    int pw2 = player1.pw2 * g.punchflip;
+			int pw1 = player1.pw1 * g.punchflip;
+			punch_hitbox(pw2, pw1, player1.ph, player1.pos[0], player1.pos[1] + 40.0f);
+		}
+		// Player 1 block
+		if (player1.block) {
+		    playerBlocking(player1.w, player1.h, player1.pos[0], player1.pos[1], g.punchflip);
+		}
+	    }
+	    //Player2:
+	    if (player2.dead == 1) {
+			player_hitbox(player2.h, player2.w, player2.pos[0], player2.w);
+		restartScreen(2, g.yres, g.xres);
+	    } else {
+			player_hitbox(player2.w, player2.h, player2.pos[0], player2.pos[1]);
+		// Player 2 punch box
+		if (player2.punch == 1) {
+				int pw2 = player2.pw2 * g.punchflip;
+			int pw1 = player2.pw1 * g.punchflip;
+			punch_hitbox(pw1, pw2, player2.ph, player2.pos[0], player2.pos[1] + 40.0f);
+		}
+		// Player 2 block
+		if (player2.block) {
+		    playerBlocking(player2.w, player2.h, player2.pos[0], player2.pos[1], g.punchflip*-1);
+		}
+	    }
 
-    //Jesse- This resets the players stats if the users wants to restart the game
-    if ( (player1.dead == 1 || player2.dead == 1) && g.restart == 1) {
-        player1.health = reset.health;
-        player2.health = reset.health;
-        player1.pos[0] = reset.player1posX;
-        player2.pos[0] = reset.player2posX;
-        player1.dead = reset.dead;
-        player2.dead = reset.dead;
-        g.restart = 0;
-    }
-    //JOSE: I JUST HAVE TO KEEP THIS; OTHERWISE, MAP MOVING DOENS'T WORK
-    //if (!g.feature_mode) {
-    //	extern void display_controls(int wf, int yres);
-    //    display_controls(g.walkFrame, g.yres);
-    //}
+	    //Jesse- This resets the players stats if the users wants to restart the game
+	    if ( (player1.dead == 1 || player2.dead == 1) && g.restart == 1) {
+		    player1.health = reset.health;
+		    player2.health = reset.health;
+		    player1.pos[0] = reset.player1posX;
+		    player2.pos[0] = reset.player2posX;
+		    player1.dead = reset.dead;
+		    player2.dead = reset.dead;
+		    g.restart = 0;
+		}
 
-    //
-    if(g.gflag == 1) {	
+	    //JOSE: I think this is part of Sprite stuff
+	    if (g.bflag == 1) {
+		float h = 250.0;
+		float w = h * 0.5;
+		glPushMatrix();
+		glColor3f(1.0, 1.0, 1.0);
+		glBindTexture(GL_TEXTURE_2D, g.walkTexture);
 
-        //Genos functions
-        extern void playSound();
-        playSound();
+		//JOSE: Sprite stuff; can use later
+		glEnable(GL_ALPHA_TEST);
+		glAlphaFunc(GL_GREATER, 0.0f);
+		glColor4ub(255,255,255,255);
+		int ix = g.walkFrame % 8;
+		int iy = 0;
+		if (g.walkFrame >= 8)
+		    iy = 1;
+		float tx = (float)ix / 10.0;
+		float ty = (float)iy / 10.0;
+		glBegin(GL_QUADS);
+		glTexCoord2f(tx,      ty+.5); 	glVertex2i(cx-w, cy-h-150);
+		glTexCoord2f(tx,      ty );    	glVertex2i(cx-w, cy+h-150);
+		glTexCoord2f(tx+.125, ty);    	glVertex2i(cx+w, cy+h-150);
+		glTexCoord2f(tx+.125, ty+.5); 	glVertex2i(cx+w, cy-h-150);
+		glEnd();
+		glPopMatrix();
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glDisable(GL_ALPHA_TEST);
+	    }
+
+	    //JOSE: I JUST HAVE TO KEEP THIS; OTHERWISE, MAP MOVING DOENS'T WORK
+	    //if (!g.feature_mode) {
+	    //	extern void display_controls(int wf, int yres);
+	    //    display_controls(g.walkFrame, g.yres);
+	    //}
+
+	    //
+	    if(g.gflag == 1) {	
+
+		//Genos functions
+		extern void playSound();
+		playSound();
 
 
-        // extern void newText(int yres, int xres);
-        // newText(g.yres, g.xres);
+		// extern void newText(int yres, int xres);
+		// newText(g.yres, g.xres);
 
-        //glColor3f(0.5, 0.5, 0.5);
-        //glRecti(300, 400, 500, 450);
-        //glColor3f(1, 1, 1);
-        //glRasterPos2i(350, 420);
-    }
+		//glColor3f(0.5, 0.5, 0.5);
+		//glRecti(300, 400, 500, 450);
+		//glColor3f(1, 1, 1);
+		//glRasterPos2i(350, 420);
+	    }
 
-    //GENO - Random Platforms 
+	    //GENO - Random Platforms 
 
-    rplat[0].set_width(150.0f);
-    rplat[0].set_height(25.0f);
-    rplat[1].set_width(150.0f);
-    rplat[1].set_height(25.0f);
-    rplat[2].set_width(150.0f);
-    rplat[2].set_height(25.0f);
+	    rplat[0].set_width(150.0f);
+	    rplat[0].set_height(25.0f);
+	    rplat[1].set_width(150.0f);
+	    rplat[1].set_height(25.0f);
+	    rplat[2].set_width(150.0f);
+	    rplat[2].set_height(25.0f);
 
 
-    //top
-    rplat[0].set_xres(g.xres + 25.0f);
-    rplat[0].set_yres(g.yres + 130.0f);
+	    //top
+	    rplat[0].set_xres(g.xres + 25.0f);
+	    rplat[0].set_yres(g.yres + 130.0f);
 
-    //right
-    rplat[1].set_xres(g.xres + 1700.0f);
-    rplat[1].set_yres(g.yres - 50.0f);
+	    //right
+	    rplat[1].set_xres(g.xres + 1700.0f);
+	    rplat[1].set_yres(g.yres - 50.0f);
 
-    //left 
-    rplat[2].set_xres(g.xres - 1000.0f);
-    rplat[2].set_yres(g.yres - 50.0f );
+	    //left 
+	    rplat[2].set_xres(g.xres - 1000.0f);
+	    rplat[2].set_yres(g.yres - 50.0f );
+
+
+	    extern void rForms(float w, float h, unsigned char color[3], float pos0, float pos1);
+
+	    if(player1.health <= rNum || player2.health <= rNum){
+
+		pltFlg = 1;
+
+		for(int i = 0; i < 3; i++){
+
+		    unsigned char c3[3] = {184, 2, 2};
+
+		    rplat[i].set_color(c3);
+
+		    rForms(rplat[i].w, rplat[i].h,  rplat[i].color, rplat[i].pos[0], rplat[i].pos[1]);
+		}
+
+	    }
+
+
+	    //
+	    if(g.jeflag == 1) {
+		//Jesses function
+		extern void greenBoxes(int ywin, int xwin);
+		greenBoxes(g.yres, g.xres);
+	    }
+	    //
+
+	    //
+	    if (g.joflag == 1) {
+		//Joses function
+		extern void fmBorder(int xres, int yres);
+		fmBorder(g.xres, g.yres);
+
+
+
+	    extern void health(float w, float h, unsigned char color[3], float pos0, float pos1, int player, int health);
+
+	    unsigned char c4[3] = {0, 128, 0};
+	    //Geno, Jesse health bar for players
+
+	    hbar[0].set_width(player1.health);
+	    hbar[0].set_height(20.0f);
+	    hbar[0].set_xres(g.xres - 1080.0f);
+	    hbar[0].set_yres(g.yres + 1000.0f);
+	    hbar[0].set_color(c4);
+
+
+
 
     if (g.bflag == 1) {
         draw_power_ups(Power_up.w, Power_up.h, g.xres, g.yres);
@@ -1171,76 +1265,17 @@ void render(void)
         sprite(player2.w + player2.pos[0], player2.h + player2.pos[1], g.walk2Frame, g.walk2Texture);
     }
 
-    extern void rForms(float w, float h, unsigned char color[3], float pos0, float pos1);
-
-    if(player1.health <= rNum || player2.health <= rNum){
-
-        pltFlg = 1;
-
-        for(int i = 0; i < 3; i++){
-
-            unsigned char c3[3] = {184, 2, 2};
-
-            rplat[i].set_color(c3);
-
-            rForms(rplat[i].w, rplat[i].h,  rplat[i].color, rplat[i].pos[0], rplat[i].pos[1]);
-        }
-
-    }
+	    health(hbar[0].w, hbar[0].h, hbar[0].color, hbar[0].pos[0], hbar[0].pos[1], 1, player1.health);
+	    health(hbar[1].w, hbar[1].h, hbar[1].color, hbar[1].pos[0], hbar[1].pos[1], 2, player2.health);
+	    
+    } else if (g.start == 0) {
+       
+	//Clear the screen
 
 
-    //
-    if(g.jeflag == 1) {
-        //Jesses function
-        extern void greenBoxes(int ywin, int xwin);
-        greenBoxes(g.yres, g.xres);
-    }
-    //
+        glClearColor(0.1, 0.1, 0.1, 1.0);
+        glClear(GL_COLOR_BUFFER_BIT);
 
-    //
-    if (g.joflag == 1) {
-        //Joses function
-        extern void fmBorder(int xres, int yres);
-        fmBorder(g.xres, g.yres);
-
-        //extern void test_text (int xres, int yres);
-        //test_text(g.xres, g.yres);
-
-        extern void display_controls(int wf, int yres);
-        display_controls(g.walkFrame, g.yres);
-    }
-
-
-    Rect r;
-    unsigned int c = 0x0000ff00;
-    r.bot = g.yres - 20;
-    r.left = g.xres/2;
-    r.center = 50;
-    ggprint8b(&r, 16, c, "Player 1 Health: %i", player1.health);
-    ggprint8b(&r, 16, c, "Player 2 Health: %i", player2.health);
-
-
-    extern void health(float w, float h, unsigned char color[3], float pos0, float pos1, int player, int health);
-
-    unsigned char c4[3] = {0, 128, 0};
-    //Geno, Jesse health bar for players
-
-    hbar[0].set_width(player1.health);
-    hbar[0].set_height(20.0f);
-    hbar[0].set_xres(g.xres - 1080.0f);
-    hbar[0].set_yres(g.yres + 1000.0f);
-    hbar[0].set_color(c4);
-
-    hbar[1].set_width(player2.health);
-    hbar[1].set_height(20.0f);
-    hbar[1].set_xres(g.xres + 1080.0f);
-    hbar[1].set_yres(g.yres + 1000.0f);
-    hbar[1].set_color(c4);
-
-
-
-    health(hbar[0].w, hbar[0].h, hbar[0].color, hbar[0].pos[0], hbar[0].pos[1], 1, player1.health);
-    health(hbar[1].w, hbar[1].h, hbar[1].color, hbar[1].pos[0], hbar[1].pos[1], 2, player2.health);
 
 }
 

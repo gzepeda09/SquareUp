@@ -57,7 +57,7 @@ extern void rForms(float w, float h, unsigned char color[3], float pos0,
 				   float pos1);
 extern void health(float w, float h, unsigned char color[3], float pos0, 
 				   float pos1, int player, int health);
-
+extern void strMenu(int yres, int xres);
 
 // extern void pltPhysics(double plPos0, double plPos1, double plVel,
 //                       float rPos0, float rPos1, float rW, float rH);  
@@ -284,3 +284,89 @@ extern void health(float w, float h, unsigned char color[3], float pos0, float p
 
 
 // }
+
+
+
+extern void strMenu(int yres, int xres)
+{
+
+    Rect r;
+
+
+    unsigned int d = 0xffffff;
+
+
+    Box sMenu[3];
+
+    int y = 0;
+
+
+    for (int i = 0; i < 3; i++){
+        sMenu[i].set_width(100.0f);
+        sMenu[i].set_height(25.0f);
+        sMenu[i].set_xres(xres);
+        sMenu[i].set_yres(yres - y);
+
+        y += 200;
+    }
+
+    r.bot = yres - sMenu[0].pos[1];
+    r.left = sMenu[0].pos[0] - 10.0f;
+    r.center = 0;
+
+
+
+    unsigned char c[3] = {0, 128, 0};
+    unsigned char c2[3] = {0, 128, 0};
+    unsigned char c3[3] = {184, 2, 2};
+
+
+
+    sMenu[0].set_color(c2);
+    sMenu[1].set_color(c);
+    sMenu[2].set_color(c3);
+
+
+    unsigned char bc[3] = {255, 255, 255};
+
+
+
+     
+
+    for (int i = 0; i < 3; ++i){
+
+        glPushMatrix();
+        glColor3ubv(sMenu[i].color);
+        glTranslatef(sMenu[i].pos[0], sMenu[i].pos[1], 0.0f);
+        glBegin(GL_QUADS);
+            glVertex2f(-sMenu[i].w, -sMenu[i].h);
+            glVertex2f(-sMenu[i].w,  sMenu[i].h);
+            glVertex2f( sMenu[i].w,  sMenu[i].h);
+            glVertex2f( sMenu[i].w, -sMenu[i].h);
+        glEnd();
+        glPopMatrix();
+
+
+
+    }
+
+    ggprint8b(&r, 16, d, "(F1)-Start");
+
+
+    r.bot = yres - sMenu[1].pos[1] - 300.0f;
+    r.left = sMenu[1].pos[0] - 15.5f;
+    r.center = 0;
+
+    ggprint8b(&r, 16, d, "(F2)-Controls");
+
+
+    r.bot = yres - sMenu[2].pos[1] - 300.0f;
+    r.left = sMenu[2].pos[0] - 10.0f;
+    r.center = 0;
+
+    ggprint8b(&r, 16, d, "(F3)-Quit");
+
+
+}
+
+
