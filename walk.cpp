@@ -24,8 +24,7 @@
 #include <thread>
 #include "box.h"
 #include <GL/glut.h>
-
-
+#include "image.h"
 
 using namespace std;
 //#include <windows.h>
@@ -63,57 +62,18 @@ extern void punch_hitbox(int w1, int w2, int h, float x, float y);
 //--- Jesse ---
 extern void restartScreen(int player, int ywin, int xwin);
 extern void playerBlocking(float w, float h, float x, float y, int flipped);
+//--- Brian ---
+extern void draw_power_ups(int w, int h, float x, float y);
+extern void power_ups_effects();
+extern void sprite(int cx, int cy, int walkFrame, GLuint walkTexture);
 
 
 
 
-class Image {
-    public:
-        int width, height;
-        unsigned char *data;
-        ~Image() { delete [] data; }
-        Image(const char *fname) {
-            if (fname[0] == '\0')
-                return;
-            //printf("fname **%s**\n", fname);
-            char name[40];
-            strcpy(name, fname);
-            int slen = strlen(name);
-            name[slen-4] = '\0';
-            //printf("name **%s**\n", name);
-            char ppmname[80];
-            sprintf(ppmname,"%s.ppm", name);
-            //printf("ppmname **%s**\n", ppmname);
-            char ts[100];
-            //system("convert eball.jpg eball.ppm");
-            sprintf(ts, "convert %s %s", fname, ppmname);
-            system(ts);
-            //sprintf(ts, "%s", name);
-            FILE *fpi = fopen(ppmname, "r");
-            if (fpi) {
-                char line[200];
-                fgets(line, 200, fpi);
-                fgets(line, 200, fpi);
-                while (line[0] == '#')
-                    fgets(line, 200, fpi);
-                sscanf(line, "%i %i", &width, &height);
-                fgets(line, 200, fpi);
-                //get pixel data
-                int n = width * height * 3;			
-                data = new unsigned char[n];			
-                for (int i=0; i<n; i++)
-                    data[i] = fgetc(fpi);
-                fclose(fpi);
-            } else {
-                printf("ERROR opening image: %s\n",ppmname);
-                exit(0);
-            }
-            unlink(ppmname);
-        }
-};
 //JOSE: THIS IS WHERE ANY IMAGES WE USE GO
-Image img[2] = {"images/scott.gif",
-    "images/map1.gif"};
+Image img[3] = {"images/Freddy2.png",
+        "images/map1.gif",
+        "images/scott.gif"};
 
 //JOSE: sets up variables used for creating the background.
 class Texture {
@@ -164,6 +124,16 @@ class Player_2 {
         float punchcooldown = 250.0f;
         int health = 100;
 } player2;
+
+class Power_up {
+    public:
+        Vec pos;
+        float w = 20.0f;
+        float h = 20.0f;
+        float power_cooldown = 150.0f;
+        float power_life_span = 100;
+} Power_up;
+
 //-----------------------------------------------------------------------------
 //Setup timers
 class Timers {
@@ -172,6 +142,7 @@ class Timers {
         double oobillion;
         struct timespec timeStart, timeEnd, timeCurrent;
         struct timespec walkTime;
+        struct timespec walk2Time;
         Timers() {
             physicsRate = 1.0 / 30.0;
             oobillion = 1.0 / 1e9;
@@ -195,13 +166,14 @@ class Global {
         int xres, yres;
         int walk;
         int walkFrame;
+        int walk2Frame;
         int gflag, bflag;
         int jeflag, joflag;
         double delay;
         int feature_mode;
         int restart;
         GLuint walkTexture;
-        //GLuint map1Texture;
+        GLuint walk2Texture;
         int mapCenter;
         int punchflip = 1;
         Texture tex;
@@ -218,6 +190,7 @@ class Global {
             restart = 0;
             memset(keyStates, 0, 65536);
             walkFrame=0;
+            walk2Frame=0;
             delay = 0.1;
             for (int i=0; i<20; i++) {
                 box[i][0] = rnd() * xres;
@@ -457,6 +430,25 @@ void initOpengl(void)
     g.tex.xc[1] = 1.0f;
     g.tex.yc[0] = 0.0f;
     g.tex.yc[1] = 1.0f;
+    //==========================================================================
+    int w2 = img[2].width;
+    int h2 = img[2].height;
+    //
+    //create opengl texture elements
+    glGenTextures(1, &g.walk2Texture);
+    //-------------------------------------------------------------------------
+    //silhouette
+    //this is similar to a sprite graphic
+    //
+    glBindTexture(GL_TEXTURE_2D, g.walk2Texture);
+    //
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    //
+    //must build a new set of data...
+    unsigned char *walk2Data = buildAlphaData(&img[2]);	
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w2, h2, 0,
+            GL_RGBA, GL_UNSIGNED_BYTE, walk2Data);
 
 }
 void init() {
@@ -477,8 +469,8 @@ void checkMouse(XEvent *e)
     static int savey = 0;
 
     if (e->type != ButtonPress
-        && e->type != ButtonRelease
-        && e->type != MotionNotify) {
+            && e->type != ButtonRelease
+            && e->type != MotionNotify) {
         return;
     }
 
@@ -491,7 +483,7 @@ void checkMouse(XEvent *e)
         if (e->xbutton.button==3) {
         }
     }
-    
+
     if (e->type == MotionNotify) {
         if (savex != e->xbutton.x || savey != e->xbutton.y) {
             //Mouse moved
@@ -637,8 +629,8 @@ void physics(void)
         }
         for (int i=0; i<20; i++) {
             g.box[i][0] -= 2.0 * (0.05 / g.delay);
-            if (g.box[i][0] < -10.0)
-                g.box[i][0] += g.xres + 10.0;
+            if (g.box[i][0] < -16.0)
+                g.box[i][0] += g.xres + 16.0;
         }
     }
 
@@ -649,6 +641,22 @@ void physics(void)
         if (player1.pos[0] > player1.w) {
             player1.pos[0] -= player1.vel[0];
             std::cout << player1.pos[0] << std::endl;
+            //man is walking...
+            //when time is up, advance the frame.
+            timers.recordTime(&timers.timeCurrent);
+            double timeSpan = timers.timeDiff(&timers.walkTime, &timers.timeCurrent);
+            if (timeSpan > g.delay) {
+                //advance
+                ++g.walkFrame;
+                if (g.walkFrame >= 16)
+                    g.walkFrame -= 16;
+                timers.recordTime(&timers.walkTime);
+            }
+            for (int i=0; i<20; i++) {
+                g.box[i][0] -= 2.0 * (0.05 / g.delay);
+                if (g.box[i][0] < -16.0)
+                    g.box[i][0] += g.xres + 16.0;
+            }
         }
         else if (player1.pos[0] <= 20.0f && g.tex.xc[0] >= 0) {
             g.tex.xc[0] -= 0.001;
@@ -661,6 +669,22 @@ void physics(void)
         if (player1.pos[0] < (float)g.xres - player1.w) {
             player1.pos[0] += player1.vel[0];
             std::cout << player1.pos[0] << std::endl;
+            //man is walking...
+            //when time is up, advance the frame.
+            timers.recordTime(&timers.timeCurrent);
+            double timeSpan = timers.timeDiff(&timers.walkTime, &timers.timeCurrent);
+            if (timeSpan > g.delay) {
+                //advance
+                ++g.walkFrame;
+                if (g.walkFrame >= 16)
+                    g.walkFrame -= 16;
+                timers.recordTime(&timers.walkTime);
+            }
+            for (int i=0; i<20; i++) {
+                g.box[i][0] -= 2.0 * (0.05 / g.delay);
+                if (g.box[i][0] < -16.0)
+                    g.box[i][0] += g.xres + 16.0;
+            }
         }
         else if (player1.pos[0] >= 1420.0f && g.tex.xc[0] <= 0.166) {
             g.tex.xc[0] += 0.001;
@@ -699,8 +723,8 @@ void physics(void)
     if (g.keyStates[XK_b] && player1.punch == 0 && player1.dead == 0) {
 
         //Functions can be found in gzepeda.cpp
-            extern void playPunchSound();
-            playPunchSound();
+        extern void playPunchSound();
+        playPunchSound();
 
         player1.punch = 1;
 
@@ -780,6 +804,22 @@ void physics(void)
     if (g.keyStates[XK_Left] && player2.dead == 0) {
         if (player2.pos[0] > player2.w) {
             player2.pos[0] -= player2.vel[0];
+            //man is walking...
+            //when time is up, advance the frame.
+            timers.recordTime(&timers.timeCurrent);
+            double timeSpan = timers.timeDiff(&timers.walk2Time, &timers.timeCurrent);
+            if (timeSpan > g.delay) {
+                //advance
+                ++g.walk2Frame;
+                if (g.walk2Frame >= 16)
+                    g.walk2Frame -= 16;
+                timers.recordTime(&timers.walk2Time);
+            }
+            for (int i=0; i<20; i++) {
+                g.box[i][0] -= 2.0 * (0.05 / g.delay);
+                if (g.box[i][0] < -16.0)
+                    g.box[i][0] += g.xres + 16.0;
+            }
         }
         else if (player2.pos[0] <= 20.0f && g.tex.xc[0] >= 0) {
             g.tex.xc[0] -= 0.001;
@@ -791,6 +831,22 @@ void physics(void)
     if (g.keyStates[XK_Right] && player2.dead == 0) {
         if (player2.pos[0] < (float)g.xres - player2.w) {
             player2.pos[0] += player2.vel[0];
+            //man is walking...
+            //when time is up, advance the frame.
+            timers.recordTime(&timers.timeCurrent);
+            double timeSpan = timers.timeDiff(&timers.walk2Time, &timers.timeCurrent);
+            if (timeSpan > g.delay) {
+                //advance
+                ++g.walk2Frame;
+                if (g.walk2Frame >= 16)
+                    g.walk2Frame -= 16;
+                timers.recordTime(&timers.walk2Time);
+            }
+            for (int i=0; i<20; i++) {
+                g.box[i][0] -= 2.0 * (0.05 / g.delay);
+                if (g.box[i][0] < -16.0)
+                    g.box[i][0] += g.xres + 16.0;
+            }
         }
         else if (player2.pos[0] >= 1420.0f && g.tex.xc[0] <= 0.166) {
             g.tex.xc[0] += 0.001;
@@ -902,13 +958,13 @@ void physics(void)
     else if (player1.pos[0] < player2.pos[0]) {
         g.punchflip = 1;
     }
-	
-	// //Geno - rand platform detection
+
+    // //Geno - rand platform detection
     // extern void pltPhysics(double plPos0, double plPos1, double plVel,
     //               float rPos0, float rPos1, float rW, float rH, int yres);
 
- 
-   
+
+
     bool onPlat = false;
 
     double gRav = 0.0000001;
@@ -918,14 +974,14 @@ void physics(void)
 
         for (int i = 0; i < 3; i++) {
             if (player1.pos[0] >= rplat[i].pos[0] - rplat[i].w &&
-                player1.pos[0] <= rplat[i].pos[0] + rplat[i].w &&
-                player1.pos[1] >= rplat[i].pos[1] - rplat[i].h &&
-                player1.pos[1] <= rplat[i].pos[1] + rplat[i].h) {
+                    player1.pos[0] <= rplat[i].pos[0] + rplat[i].w &&
+                    player1.pos[1] >= rplat[i].pos[1] - rplat[i].h &&
+                    player1.pos[1] <= rplat[i].pos[1] + rplat[i].h) {
                 // The player is on this platform, so set their vertical position
                 // to the top of the platform
                 if(!top){
                     player1.pos[1] = rplat[i].pos[1] + rplat[i].h/2 + 
-                                     player1.h/2;
+                        player1.h/2;
 
                 }
                 prevI = i;
@@ -939,34 +995,34 @@ void physics(void)
         }
 
 
-            if (onPlat) {
-                // Player is on a platform, so their vertical velocity should be zero
-                player1.vel[1] = 0.0f;
-                top = true;
+        if (onPlat) {
+            // Player is on a platform, so their vertical velocity should be zero
+            player1.vel[1] = 0.0f;
+            top = true;
 
-               
 
-            } else {
 
-                if(activate == 1){
-                    // Player is not on a platform, so make them fall
-                    player1.vel[1] -= gRav;
-                    // Check if player has reached the bottom of the screen
-                    if (player1.pos[1] <= 0.0f) {
-                        // Player has fallen off the bottom of the screen, so reset their position
-                        if(!stop){
-                            player1.pos[1] = g.yres/2 - 440.5f;
-                            player1.vel[1] = 0.0;
-                            stop = true;
-                            activate = 0;
-                        }
+        } else {
+
+            if(activate == 1){
+                // Player is not on a platform, so make them fall
+                player1.vel[1] -= gRav;
+                // Check if player has reached the bottom of the screen
+                if (player1.pos[1] <= 0.0f) {
+                    // Player has fallen off the bottom of the screen, so reset their position
+                    if(!stop){
+                        player1.pos[1] = g.yres/2 - 440.5f;
+                        player1.vel[1] = 0.0;
+                        stop = true;
+                        activate = 0;
                     }
-
-                    stop = false;
-
                 }
+
+                stop = false;
+
             }
-        
+        }
+
 
     }
 
@@ -977,7 +1033,7 @@ void physics(void)
 }
 
 
-    bool brend = true;
+bool brend = true;
 
 
 void render(void)
@@ -1021,15 +1077,15 @@ void render(void)
     //static float pos[2] = {g.xres/2.0f, g.yres/2.0f};
     //Player1:
     if (player1.dead == 1) {
-		player_hitbox(player1.h, player1.w, player1.pos[0], player1.w);
+        player_hitbox(player1.h, player1.w, player1.pos[0], player1.w);
         restartScreen(1, g.yres, g.xres);
     } else {
-		player_hitbox(player1.w, player1.h, player1.pos[0], player1.pos[1]);
+        player_hitbox(player1.w, player1.h, player1.pos[0], player1.pos[1]);
         // Player 1 punch box
         if (player1.punch == 1) {
             int pw2 = player1.pw2 * g.punchflip;
-        	int pw1 = player1.pw1 * g.punchflip;
-        	punch_hitbox(pw2, pw1, player1.ph, player1.pos[0], player1.pos[1] + 40.0f);
+            int pw1 = player1.pw1 * g.punchflip;
+            punch_hitbox(pw2, pw1, player1.ph, player1.pos[0], player1.pos[1] + 40.0f);
         }
         // Player 1 block
         if (player1.block) {
@@ -1038,15 +1094,15 @@ void render(void)
     }
     //Player2:
     if (player2.dead == 1) {
-		player_hitbox(player2.h, player2.w, player2.pos[0], player2.w);
+        player_hitbox(player2.h, player2.w, player2.pos[0], player2.w);
         restartScreen(2, g.yres, g.xres);
     } else {
-		player_hitbox(player2.w, player2.h, player2.pos[0], player2.pos[1]);
+        player_hitbox(player2.w, player2.h, player2.pos[0], player2.pos[1]);
         // Player 2 punch box
         if (player2.punch == 1) {
-			int pw2 = player2.pw2 * g.punchflip;
-        	int pw1 = player2.pw1 * g.punchflip;
-        	punch_hitbox(pw1, pw2, player2.ph, player2.pos[0], player2.pos[1] + 40.0f);
+            int pw2 = player2.pw2 * g.punchflip;
+            int pw1 = player2.pw1 * g.punchflip;
+            punch_hitbox(pw1, pw2, player2.ph, player2.pos[0], player2.pos[1] + 40.0f);
         }
         // Player 2 block
         if (player2.block) {
@@ -1056,44 +1112,14 @@ void render(void)
 
     //Jesse- This resets the players stats if the users wants to restart the game
     if ( (player1.dead == 1 || player2.dead == 1) && g.restart == 1) {
-            player1.health = reset.health;
-            player2.health = reset.health;
-            player1.pos[0] = reset.player1posX;
-            player2.pos[0] = reset.player2posX;
-            player1.dead = reset.dead;
-            player2.dead = reset.dead;
-            g.restart = 0;
-        }
-
-    //JOSE: I think this is part of Sprite stuff
-    if (g.bflag == 1) {
-        float h = 250.0;
-        float w = h * 0.5;
-        glPushMatrix();
-        glColor3f(1.0, 1.0, 1.0);
-        glBindTexture(GL_TEXTURE_2D, g.walkTexture);
-
-        //JOSE: Sprite stuff; can use later
-        glEnable(GL_ALPHA_TEST);
-        glAlphaFunc(GL_GREATER, 0.0f);
-        glColor4ub(255,255,255,255);
-        int ix = g.walkFrame % 8;
-        int iy = 0;
-        if (g.walkFrame >= 8)
-            iy = 1;
-        float tx = (float)ix / 10.0;
-        float ty = (float)iy / 10.0;
-        glBegin(GL_QUADS);
-        glTexCoord2f(tx,      ty+.5); 	glVertex2i(cx-w, cy-h-150);
-        glTexCoord2f(tx,      ty );    	glVertex2i(cx-w, cy+h-150);
-        glTexCoord2f(tx+.125, ty);    	glVertex2i(cx+w, cy+h-150);
-        glTexCoord2f(tx+.125, ty+.5); 	glVertex2i(cx+w, cy-h-150);
-        glEnd();
-        glPopMatrix();
-        glBindTexture(GL_TEXTURE_2D, 0);
-        glDisable(GL_ALPHA_TEST);
+        player1.health = reset.health;
+        player2.health = reset.health;
+        player1.pos[0] = reset.player1posX;
+        player2.pos[0] = reset.player2posX;
+        player1.dead = reset.dead;
+        player2.dead = reset.dead;
+        g.restart = 0;
     }
-
     //JOSE: I JUST HAVE TO KEEP THIS; OTHERWISE, MAP MOVING DOENS'T WORK
     //if (!g.feature_mode) {
     //	extern void display_controls(int wf, int yres);
@@ -1125,12 +1151,12 @@ void render(void)
     rplat[1].set_height(25.0f);
     rplat[2].set_width(150.0f);
     rplat[2].set_height(25.0f);
-    
+
 
     //top
     rplat[0].set_xres(g.xres + 25.0f);
     rplat[0].set_yres(g.yres + 130.0f);
-    
+
     //right
     rplat[1].set_xres(g.xres + 1700.0f);
     rplat[1].set_yres(g.yres - 50.0f);
@@ -1139,6 +1165,11 @@ void render(void)
     rplat[2].set_xres(g.xres - 1000.0f);
     rplat[2].set_yres(g.yres - 50.0f );
 
+    if (g.bflag == 1) {
+        draw_power_ups(Power_up.w, Power_up.h, g.xres, g.yres);
+        sprite(player1.w + player1.pos[0], player1.h + player1.pos[1], g.walkFrame, g.walkTexture);
+        sprite(player2.w + player2.pos[0], player2.h + player2.pos[1], g.walk2Frame, g.walk2Texture);
+    }
 
     extern void rForms(float w, float h, unsigned char color[3], float pos0, float pos1);
 
@@ -1178,8 +1209,7 @@ void render(void)
         extern void display_controls(int wf, int yres);
         display_controls(g.walkFrame, g.yres);
     }
-    if (g.bflag == 1) {
-    }
+
 
     Rect r;
     unsigned int c = 0x0000ff00;
@@ -1188,8 +1218,8 @@ void render(void)
     r.center = 50;
     ggprint8b(&r, 16, c, "Player 1 Health: %i", player1.health);
     ggprint8b(&r, 16, c, "Player 2 Health: %i", player2.health);
-	
-	
+
+
     extern void health(float w, float h, unsigned char color[3], float pos0, float pos1, int player, int health);
 
     unsigned char c4[3] = {0, 128, 0};
