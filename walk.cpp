@@ -1174,9 +1174,7 @@ void render(void)
 		//
 		if(g.gflag == 1) {	
 
-			//Genos functions
-			extern void playSound();
-			playSound();
+			
 
 
 			// extern void newText(int yres, int xres);
@@ -1244,18 +1242,40 @@ void render(void)
 			fmBorder(g.xres, g.yres);
 
 
+            //extern void test_text (int xres, int yres);
+            //test_text(g.xres, g.yres);
 
-			extern void health(float w, float h, unsigned char color[3], float pos0, float pos1, int player, int health);
+            extern void display_controls(int wf, int yres);
+            display_controls(g.walkFrame, g.yres);
+        }
+
+
+
 
 			unsigned char c4[3] = {0, 128, 0};
-			//Geno, Jesse health bar for players
+				  
+	        extern void health(float w, float h, unsigned char color[3], float pos0, float pos1, int player, int health);
 
-			hbar[0].set_width(player1.health);
-			hbar[0].set_height(20.0f);
-			hbar[0].set_xres(g.xres - 1080.0f);
-			hbar[0].set_yres(g.yres + 1000.0f);
-			hbar[0].set_color(c4);
+	        //Geno, Jesse health bar for players
 
+	        hbar[0].set_width(player1.health);
+	        hbar[0].set_height(20.0f);
+	        hbar[0].set_xres(g.xres - 1080.0f);
+	        hbar[0].set_yres(g.yres + 1000.0f);
+	        hbar[0].set_color(c4);
+
+	        hbar[1].set_width(player2.health);
+	        hbar[1].set_height(20.0f);
+	        hbar[1].set_xres(g.xres + 1080.0f);
+	        hbar[1].set_yres(g.yres + 1000.0f);
+	        hbar[1].set_color(c4);
+
+
+
+
+
+			health(hbar[0].w, hbar[0].h, hbar[0].color, hbar[0].pos[0], hbar[0].pos[1], 1, player1.health);
+			health(hbar[1].w, hbar[1].h, hbar[1].color, hbar[1].pos[0], hbar[1].pos[1], 2, player2.health);
 
 
 
@@ -1265,9 +1285,6 @@ void render(void)
 				sprite(player2.w + player2.pos[0], player2.h + player2.pos[1], g.walk2Frame, g.walk2Texture);
 			}
 
-			health(hbar[0].w, hbar[0].h, hbar[0].color, hbar[0].pos[0], hbar[0].pos[1], 1, player1.health);
-			health(hbar[1].w, hbar[1].h, hbar[1].color, hbar[1].pos[0], hbar[1].pos[1], 2, player2.health);
-
 		} else if (g.start == 0) {
 
 			//Clear the screen
@@ -1276,7 +1293,8 @@ void render(void)
 			glClearColor(0.1, 0.1, 0.1, 1.0);
 			glClear(GL_COLOR_BUFFER_BIT);
 
+			strMenu(g.yres, g.xres);
+
 
 		}
-	}
 }
