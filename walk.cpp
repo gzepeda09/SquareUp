@@ -72,6 +72,9 @@ extern void sprite(int cx, int cy, int walkFrame, GLuint walkTexture);
 // Geno
 extern void playSound();
 extern void strMenu(int yres, int xres);
+extern void powBar(float w, float h, unsigned char color[3], float pos0, 
+				   float pos1, int bar);
+extern void superPunch(int w, int w2, int h, float x, float y, int flipped);
 
 
 //JOSE: THIS IS WHERE ANY IMAGES WE USE GO
@@ -103,6 +106,8 @@ class Player_1 {
 		Vec vel;
 		int dead = 0;
 		int block = 0;
+		int sPunch = 0;
+		int pBar = 0;
 		float w = 20.0f;
 		float h = 100.0f;
 		float pw1 = 20.0f;
@@ -110,7 +115,7 @@ class Player_1 {
 		float ph = 10.0f;
 		int punch;
 		float punchcooldown = 250.0f;
-		int health = 100;
+		int health = 150;
 } player1;
 
 class Player_2 {
@@ -119,6 +124,7 @@ class Player_2 {
 		Vec vel;
 		int dead = 0;
 		int block = 0;
+		int pBar = 0;
 		float w = 20.0f;
 		float h = 100.0f;
 		float pw1 = 20.0f;
@@ -126,7 +132,7 @@ class Player_2 {
 		float ph = 10.0f;
 		int punch;
 		float punchcooldown = 250.0f;
-		int health = 100;
+		int health = 150;
 } player2;
 
 class Power_up {
@@ -210,6 +216,7 @@ class Global {
 //Geno -  random platform for 
 Box rplat[3];
 Box hbar[2];
+Box powerBar[2];
 
 // Box rpl[3] = {Box(g.yres, g.xres), Box(g.yres, g.xres), Box(g.yres, g.xres)};
 
@@ -618,13 +625,28 @@ bool stop = false;
 bool top = false;
 bool endIt = false;
 
+bool stop2 = false;
+bool top2 = false;
+bool endIt2 = false;
+
 
 //Geno - flag for physics
 int activate = 0;
+int activate2 = 0;
 
 
 int prevI = 0;
 int pltFlg = 0;
+
+
+//Geno - flags for charge up
+bool chargeUp = false;
+bool chargeUp2 = false;
+
+//Geno - for super punch
+bool once = false;
+
+bool ePressed = false; 
 
 void physics(void)
 {
@@ -646,6 +668,28 @@ void physics(void)
 			if (g.box[i][0] < -16.0)
 				g.box[i][0] += g.xres + 16.0;
 		}
+	}
+	//Super-Punch
+	
+
+
+	if (g.keyStates[XK_e]) {
+	    if (!ePressed) { // Check if the key is not already held down
+	        ePressed = true; // Set the flag to indicate that the key is held down
+	        if (player1.pBar <= 152 && player1.pBar >= 20) {
+	            player1.pBar -= 20;
+
+	       		 player1.sPunch = 1;
+	           	
+	        }
+	        std::cout << "super punch" << std::endl;
+	        std::cout << "power bar" << player1.pBar << std::endl;
+
+
+	    }
+	} else {
+	    ePressed = false;
+	    player1.sPunch = 0; // Reset the flag if the key is released
 	}
 
 	//--Player 1 Movement & Abilites--
@@ -734,14 +778,19 @@ void physics(void)
 	  }*/
 
 	// Punch player 1
-	if (g.keyStates[XK_b] && player1.punch == 0 && player1.dead == 0) {
+	if ((g.keyStates[XK_b] && player1.punch == 0 && player1.dead == 0) ||
+		(g.keyStates[XK_e] && player1.punch == 0 && player1.dead == 0)) {
 
 		//Functions can be found in gzepeda.cpp
 		extern void playPunchSound();
 		playPunchSound();
 
-		player1.punch = 1;
-
+		if(player1.sPunch == 1){
+			player1.punch = 0;
+		}
+		else{
+			player1.punch = 1;
+		}
 		// Punch Detection player 1
 		if (player1.pos[0] + player1.pw2 >= player2.pos[0] + (-player2.w) && player1.pos[0] < player2.pos[0]) {
 			std::cout << "Player 1 hits Player 2!" << std::endl;
@@ -750,10 +799,21 @@ void physics(void)
 			if (g.jeflag == 1 && player2.dead == 0) {
 				player2.health -= 50;
 			} else if (player2.dead == 0){
-				if (!player2.block) {    
-					player2.health -= 10;
+				if (!player2.block) { 
+					if(player1.sPunch == 1){
+						player2.health -= 20;
+					}   else {
+						player2.health -= 10;
+					}
+					
 				} else {
-					player2.health -=5;
+					
+
+					if(player1.sPunch == 1){
+						player2.health -=10;
+					} else {
+						player2.health -=5;
+					}
 				}
 				//Jesse - reaction to punches
 				player2.pos[1] += 50.0f;
@@ -980,6 +1040,9 @@ void physics(void)
 
 
 	bool onPlat = false;
+	bool onPlat2 = false;
+	// bool p1 = false;
+	// bool p2 = false;
 
 	double gRav = 0.0000001;
 	if(pltFlg == 1){
@@ -989,18 +1052,37 @@ void physics(void)
 		for (int i = 0; i < 3; i++) {
 			if (player1.pos[0] >= rplat[i].pos[0] - rplat[i].w &&
 					player1.pos[0] <= rplat[i].pos[0] + rplat[i].w &&
-					player1.pos[1] >= rplat[i].pos[1] - rplat[i].h &&
-					player1.pos[1] <= rplat[i].pos[1] + rplat[i].h) {
+					player1.pos[1] - 100.0f >= rplat[i].pos[1] - rplat[i].h &&
+					player1.pos[1] - 100.0f <= rplat[i].pos[1] + rplat[i].h) {
 				// The player is on this platform, so set their vertical position
 				// to the top of the platform
 				if(!top){
 					player1.pos[1] = rplat[i].pos[1] + rplat[i].h/2 + 
 						player1.h/2;
+						
 
 				}
 				prevI = i;
 				onPlat = true;
 				activate = 1;
+
+
+			}
+			if (player2.pos[0] >= rplat[i].pos[0] - rplat[i].w &&
+					player2.pos[0] <= rplat[i].pos[0] + rplat[i].w &&
+					player2.pos[1] - 100.0f >= rplat[i].pos[1] - rplat[i].h &&
+					player2.pos[1] - 100.0f <= rplat[i].pos[1] + rplat[i].h) {
+				// The player is on this platform, so set their vertical position
+				// to the top of the platform
+				if(!top2){
+					player2.pos[1] = rplat[i].pos[1] + rplat[i].h/2 + 
+						player2.h/2;
+					
+
+				}
+				prevI = i;
+				onPlat2 = true;
+				activate2 = 1;
 
 
 			}
@@ -1013,8 +1095,7 @@ void physics(void)
 			// Player is on a platform, so their vertical velocity should be zero
 			player1.vel[1] = 0.0f;
 			top = true;
-
-
+		
 
 		} else {
 
@@ -1025,7 +1106,7 @@ void physics(void)
 				if (player1.pos[1] <= 0.0f) {
 					// Player has fallen off the bottom of the screen, so reset their position
 					if(!stop){
-						player1.pos[1] = g.yres/2 - 440.5f;
+						player1.pos[1] = g.yres/2 - 405.0f;
 						player1.vel[1] = 0.0;
 						stop = true;
 						activate = 0;
@@ -1034,13 +1115,63 @@ void physics(void)
 
 				stop = false;
 
+
 			}
 		}
+
+
+		if (onPlat2) {
+			// Player is on a platform, so their vertical velocity should be zero
+
+
+			player2.vel[1] = 0.0f;
+			top2 = true;
+
+
+		} else {
+
+
+			if(activate2 == 1){
+				// Player is not on a platform, so make them fall
+				player2.vel[1] -= gRav;
+				// Check if player has reached the bottom of the screen
+				if (player2.pos[1] <= 0.0f) {
+					// Player has fallen off the bottom of the screen, so reset their position
+					if(!stop2){
+						player2.pos[1] = g.yres/2 - 405.0f;
+						player2.vel[1] = 0.0;
+						stop2 = true;
+						activate2 = 0;
+					}
+				}
+
+				stop2 = false;
+
+			}
+		}
+
 
 
 	}
 
 
+
+	//Geno - physics for charge up
+	if (g.keyStates[XK_c] && player1.pBar <= 150 && player1.pBar >= 0) {
+		
+		player1.pBar++;
+
+		std::cout << "Charging up" << std::endl;
+		chargeUp = true;
+	} 
+	if (g.keyStates[XK_slash] && player2.pBar != 150) {
+		
+		player2.pBar++;
+
+		std::cout << "Charging up" << std::endl;
+		chargeUp2 = true;
+	} 
+	once = false;
 
 
 
@@ -1097,10 +1228,13 @@ void render(void)
 		} else {
 			player_hitbox(player1.w, player1.h, player1.pos[0], player1.pos[1]);
 			// Player 1 punch box
-			if (player1.punch == 1) {
-				int pw2 = player1.pw2 * g.punchflip;
-				int pw1 = player1.pw1 * g.punchflip;
-				punch_hitbox(pw2, pw1, player1.ph, player1.pos[0], player1.pos[1] + 40.0f);
+			if(player1.sPunch == 0){
+				if (player1.punch == 1 ) {
+					int pw2 = player1.pw2 * g.punchflip;
+					int pw1 = player1.pw1 * g.punchflip;
+					punch_hitbox(pw2, pw1, player1.ph, player1.pos[0], player1.pos[1] + 40.0f);
+
+				}
 			}
 			// Player 1 block
 			if (player1.block) {
@@ -1261,14 +1395,19 @@ void render(void)
 	        hbar[0].set_width(player1.health);
 	        hbar[0].set_height(20.0f);
 	        hbar[0].set_xres(g.xres - 1080.0f);
-	        hbar[0].set_yres(g.yres + 1000.0f);
+	        hbar[0].set_yres(g.yres + 900.0f);
 	        hbar[0].set_color(c4);
 
 	        hbar[1].set_width(player2.health);
 	        hbar[1].set_height(20.0f);
 	        hbar[1].set_xres(g.xres + 1080.0f);
-	        hbar[1].set_yres(g.yres + 1000.0f);
+	        hbar[1].set_yres(g.yres + 900.0f);
 	        hbar[1].set_color(c4);
+
+
+
+
+
 
 
 
@@ -1277,6 +1416,43 @@ void render(void)
 			health(hbar[0].w, hbar[0].h, hbar[0].color, hbar[0].pos[0], hbar[0].pos[1], 1, player1.health);
 			health(hbar[1].w, hbar[1].h, hbar[1].color, hbar[1].pos[0], hbar[1].pos[1], 2, player2.health);
 
+
+
+
+
+			unsigned char c5[3] = {0, 0, 255};
+
+
+
+		   powerBar[0].set_width(player1.pBar);
+		   powerBar[0].set_height(15.0f);
+		   powerBar[0].set_xres(g.xres - 1080.0f);
+		   powerBar[0].set_yres(g.yres + 830.0f);
+		   powerBar[0].set_color(c5);
+		   
+		  
+
+		   powerBar[1].set_width(player2.pBar);
+		   powerBar[1].set_height(15.0f);
+		   powerBar[1].set_xres(g.xres + 1080.0f);
+		   powerBar[1].set_yres(g.yres + 830.0f);
+		   powerBar[1].set_color(c5);
+
+
+		  	if(chargeUp){
+
+	      		powBar(powerBar[0].w, powerBar[0].h, powerBar[0].color, powerBar[0].pos[0],powerBar[0].pos[1], player1.pBar);
+			}
+
+			if(chargeUp2){
+				powBar(powerBar[1].w, powerBar[1].h, powerBar[1].color, powerBar[1].pos[0],powerBar[1].pos[1], player2.pBar);
+			}
+
+			if(player1.sPunch == 1) {
+				int pw2 = player1.pw2 * g.punchflip;
+				int pw1 = player1.pw1 * g.punchflip;
+				superPunch(pw1, pw2, player1.ph, player1.pos[0], player1.pos[1], g.punchflip);
+			}
 
 
 			if (g.bflag == 1) {

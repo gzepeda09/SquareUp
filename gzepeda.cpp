@@ -57,7 +57,9 @@ extern void rForms(float w, float h, unsigned char color[3], float pos0,
 				   float pos1);
 extern void health(float w, float h, unsigned char color[3], float pos0, 
 				   float pos1, int player, int health);
+extern void powBar(float w, float h, unsigned char color[3], float pos0, float pos1, int bar);
 extern void strMenu(int yres, int xres);
+extern void superPunch(int w, int w2, int h, float x, float y, int flipped);
 
 // extern void pltPhysics(double plPos0, double plPos1, double plVel,
 //                       float rPos0, float rPos1, float rW, float rH);  
@@ -201,7 +203,7 @@ extern void health(float w, float h, unsigned char color[3], float pos0, float p
 
 	unsigned int c = 0x000000;
 
-	r.bot = pos1 - 50.0f;
+	r.bot = pos1 - 65.0f;
     r.left = pos0;
     r.center = 10;
     // ggprint8b(&r, 16, c, "Player 1 Health: %i", player1.health);
@@ -368,5 +370,64 @@ extern void strMenu(int yres, int xres)
 
 
 }
+extern void powBar(float w, float h, unsigned char color[3], float pos0, float pos1, int bar)
+{
+	Rect r;
+	unsigned int d = 0x000000;
 
 
+    r.bot = pos1 - 8.0f;
+    r.left = pos0;
+    r.center = 20;
+
+
+
+   //draw power bars
+
+
+    glPushMatrix();
+    glColor3ubv(color);
+    glTranslatef(pos0, pos1, 0.0f);
+    glBegin(GL_QUADS);
+        glVertex2f(-w, -h);
+        glVertex2f(-w,  h);
+        glVertex2f( w,  h);
+        glVertex2f( w, -h);
+    glEnd();
+    glPopMatrix();
+
+
+
+    ggprint8b(&r, 16, d, "ENERGY");
+}
+extern void superPunch(int w, int w2, int h, float x, float y, int flipped)
+{
+    if (flipped == 1) { 
+
+		glPushMatrix();
+		glTranslatef(x , y, 0.0f);
+		glBegin(GL_QUADS);
+		//glColor3ub(0, 0, 0);
+        glColor3ub(255, 0, 0);
+	        glVertex2f( w2,  -h);
+	        glVertex2f( w2,   h);
+	        glVertex2f( -w,   h);
+	        glVertex2f( -w,  -h);
+		glEnd();
+		glPopMatrix();
+    
+    } else { 
+
+        //after elbow
+        glPushMatrix();
+        glTranslatef(x, y+20.0f, 0.0f);
+        glBegin(GL_QUADS);
+        glColor3ub(0, 150, 0);
+	        glVertex2f( -w2,  -h);
+	        glVertex2f( -w2,   h);
+	        glVertex2f(  w,   h);
+	        glVertex2f(  w,  -h);
+		glEnd();
+        glPopMatrix();
+    }
+}
