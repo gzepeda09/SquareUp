@@ -30,6 +30,7 @@ Purpose: Draws text
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "image.h"
 
 
 using namespace std;
@@ -60,6 +61,7 @@ extern void health(float w, float h, unsigned char color[3], float pos0,
 extern void powBar(float w, float h, unsigned char color[3], float pos0, float pos1, int bar);
 extern void strMenu(int yres, int xres);
 extern void superPunch(int w, int w2, int h, float x, float y, int flipped);
+extern void cntrlMenu(int yres, int xres);
 
 // extern void pltPhysics(double plPos0, double plPos1, double plVel,
 //                       float rPos0, float rPos1, float rW, float rH);  
@@ -71,9 +73,12 @@ ALuint punchBuffer;
 ALuint punchSource;
 
 
+GLuint menuBgrnd; //my strMenu bacground
+GLuint cntrlBg;
 
 
-
+Image sMenuBg("images/strtBackground.jpg");
+Image cMenuBG("images/controls.jpg");
 
 // Following code taken from snake framework 
 // with modifications for our game
@@ -292,81 +297,104 @@ extern void health(float w, float h, unsigned char color[3], float pos0, float p
 extern void strMenu(int yres, int xres)
 {
 
-    Rect r;
+    	//for player menu
 
 
-    unsigned int d = 0xffffff;
+		glEnable(GL_TEXTURE_2D);
+		glGenTextures(1, &menuBgrnd);
+
+		glBindTexture(GL_TEXTURE_2D, menuBgrnd);
+		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+		glTexImage2D(GL_TEXTURE_2D, 0, 3, sMenuBg.width, sMenuBg.height, 0,
+		                        GL_RGB, GL_UNSIGNED_BYTE, sMenuBg.data);
+	    glBegin(GL_QUADS);
+	        glTexCoord2f(0.0f, 0.0f); glVertex2i(0, yres);
+	        glTexCoord2f(0.0f, 1.0f); glVertex2i(0, 0);
+	        glTexCoord2f(1.0f, 1.0f); glVertex2i(xres, 0);
+	        glTexCoord2f(1.0f, 0.0f); glVertex2i(xres, yres);
+	    glEnd();
+
+		glBindTexture(GL_TEXTURE_2D, 0);
 
 
-    Box sMenu[3];
-
-    int y = 0;
+    // Rect r;
 
 
-    for (int i = 0; i < 3; i++){
-        sMenu[i].set_width(100.0f);
-        sMenu[i].set_height(25.0f);
-        sMenu[i].set_xres(xres);
-        sMenu[i].set_yres(yres - y);
-
-        y += 200;
-    }
-
-    r.bot = yres - sMenu[0].pos[1];
-    r.left = sMenu[0].pos[0] - 10.0f;
-    r.center = 0;
+    // unsigned int d = 0xffffff;
 
 
+    // Box sMenu[3];
 
-    unsigned char c[3] = {0, 128, 0};
-    unsigned char c2[3] = {0, 128, 0};
-    unsigned char c3[3] = {184, 2, 2};
-
+    // int y = 0;
 
 
-    sMenu[0].set_color(c2);
-    sMenu[1].set_color(c);
-    sMenu[2].set_color(c3);
+    // for (int i = 0; i < 3; i++){
+    //     sMenu[i].set_width(100.0f);
+    //     sMenu[i].set_height(25.0f);
+    //     sMenu[i].set_xres(xres);
+    //     sMenu[i].set_yres(yres - y);
+
+    //     y += 200;
+    // }
+
+    // r.bot = yres - sMenu[0].pos[1];
+    // r.left = sMenu[0].pos[0] - 10.0f;
+    // r.center = 0;
 
 
-    unsigned char bc[3] = {255, 255, 255};
+
+    // unsigned char c[3] = {0, 128, 0};
+    // unsigned char c2[3] = {0, 128, 0};
+    // unsigned char c3[3] = {184, 2, 2};
+
+
+
+    // sMenu[0].set_color(c2);
+    // sMenu[1].set_color(c);
+    // sMenu[2].set_color(c3);
+
+
+    // unsigned char bc[3] = {255, 255, 255};
 
 
 
      
 
-    for (int i = 0; i < 3; ++i){
+    // for (int i = 0; i < 3; ++i){
 
-        glPushMatrix();
-        glColor3ubv(sMenu[i].color);
-        glTranslatef(sMenu[i].pos[0], sMenu[i].pos[1], 0.0f);
-        glBegin(GL_QUADS);
-            glVertex2f(-sMenu[i].w, -sMenu[i].h);
-            glVertex2f(-sMenu[i].w,  sMenu[i].h);
-            glVertex2f( sMenu[i].w,  sMenu[i].h);
-            glVertex2f( sMenu[i].w, -sMenu[i].h);
-        glEnd();
-        glPopMatrix();
-
-
-
-    }
-
-    ggprint8b(&r, 16, d, "(F1)-Start");
+    //     glPushMatrix();
+    //     glColor3ubv(sMenu[i].color);
+    //     glTranslatef(sMenu[i].pos[0], sMenu[i].pos[1], 0.0f);
+    //     glBegin(GL_QUADS);
+    //         glVertex2f(-sMenu[i].w, -sMenu[i].h);
+    //         glVertex2f(-sMenu[i].w,  sMenu[i].h);
+    //         glVertex2f( sMenu[i].w,  sMenu[i].h);
+    //         glVertex2f( sMenu[i].w, -sMenu[i].h);
+    //     glEnd();
+    //     glPopMatrix();
 
 
-    r.bot = yres - sMenu[1].pos[1] - 300.0f;
-    r.left = sMenu[1].pos[0] - 15.5f;
-    r.center = 0;
 
-    ggprint8b(&r, 16, d, "(F2)-Controls");
+    // }
+
+    // ggprint8b(&r, 16, d, "(F1)-Start");
 
 
-    r.bot = yres - sMenu[2].pos[1] - 300.0f;
-    r.left = sMenu[2].pos[0] - 10.0f;
-    r.center = 0;
+    // r.bot = yres - sMenu[1].pos[1] - 300.0f;
+    // r.left = sMenu[1].pos[0] - 15.5f;
+    // r.center = 0;
 
-    ggprint8b(&r, 16, d, "(F3)-Quit");
+    // ggprint8b(&r, 16, d, "(F2)-Controls");
+
+
+    // r.bot = yres - sMenu[2].pos[1] - 300.0f;
+    // r.left = sMenu[2].pos[0] - 10.0f;
+    // r.center = 0;
+
+    // ggprint8b(&r, 16, d, "(F3)-Quit");
+
+
 
 
 }
@@ -430,4 +458,28 @@ extern void superPunch(int w, int w2, int h, float x, float y, int flipped)
 		glEnd();
         glPopMatrix();
     }
+}
+
+extern void cntrlMenu(int yres, int xres)
+{
+
+    	//for player menu
+
+
+		glEnable(GL_TEXTURE_2D);
+		glGenTextures(1, &cntrlBg);
+
+		glBindTexture(GL_TEXTURE_2D, cntrlBg);
+		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+		glTexImage2D(GL_TEXTURE_2D, 0, 3, cMenuBG.width, cMenuBG.height, 0,
+		                        GL_RGB, GL_UNSIGNED_BYTE, cMenuBG.data);
+	    glBegin(GL_QUADS);
+	        glTexCoord2f(0.0f, 0.0f); glVertex2i(0, yres);
+	        glTexCoord2f(0.0f, 1.0f); glVertex2i(0, 0);
+	        glTexCoord2f(1.0f, 1.0f); glVertex2i(xres, 0);
+	        glTexCoord2f(1.0f, 0.0f); glVertex2i(xres, yres);
+	    glEnd();
+
+		glBindTexture(GL_TEXTURE_2D, 0);
 }

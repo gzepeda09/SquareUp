@@ -75,6 +75,7 @@ extern void strMenu(int yres, int xres);
 extern void powBar(float w, float h, unsigned char color[3], float pos0, 
 				   float pos1, int bar);
 extern void superPunch(int w, int w2, int h, float x, float y, int flipped);
+extern void cntrlMenu(int yres, int xres);
 
 
 //JOSE: THIS IS WHERE ANY IMAGES WE USE GO
@@ -592,6 +593,13 @@ int checkKeys(XEvent *e)
 		case XK_F1:
 			g.start = 1;
 			break;
+		case XK_F2:
+			if(g.start != 2){
+				g.start = 2;
+			} else {
+				g.start = 0;
+			}
+			break;
 		case XK_d:
 			break;
 		case XK_r:
@@ -676,8 +684,8 @@ void physics(void)
 	if (g.keyStates[XK_e]) {
 	    if (!ePressed) { // Check if the key is not already held down
 	        ePressed = true; // Set the flag to indicate that the key is held down
-	        if (player1.pBar <= 152 && player1.pBar >= 20) {
-	            player1.pBar -= 20;
+	        if (player1.pBar >= 150) {
+	            player1.pBar -= 150;
 
 	       		 player1.sPunch = 1;
 	           	
@@ -804,8 +812,7 @@ void physics(void)
 						player2.health -= 20;
 					}   else {
 						player2.health -= 10;
-					}
-					
+					}	
 				} else {
 					
 
@@ -1225,6 +1232,7 @@ void render(void)
 		if (player1.dead == 1) {
 			player_hitbox(player1.h, player1.w, player1.pos[0], player1.w);
 			restartScreen(1, g.yres, g.xres);
+			player1.pBar = 0;
 		} else {
 			player_hitbox(player1.w, player1.h, player1.pos[0], player1.pos[1]);
 			// Player 1 punch box
@@ -1245,6 +1253,7 @@ void render(void)
 		if (player2.dead == 1) {
 			player_hitbox(player2.h, player2.w, player2.pos[0], player2.w);
 			restartScreen(2, g.yres, g.xres);
+			player2.pBar = 0;
 		} else {
 			player_hitbox(player2.w, player2.h, player2.pos[0], player2.pos[1]);
 			// Player 2 punch box
@@ -1472,5 +1481,10 @@ void render(void)
 			strMenu(g.yres, g.xres);
 
 
+		} else if (g.start == 2){
+			glClearColor(0.1, 0.1, 0.1, 1.0);
+			glClear(GL_COLOR_BUFFER_BIT);
+
+			cntrlMenu(g.yres, g.xres);
 		}
 }
