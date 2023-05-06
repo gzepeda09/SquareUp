@@ -180,6 +180,7 @@ class Global {
 		int walk2Frame;
 		int gflag, bflag;
 		int start;
+		int ctrls;
 		int jeflag, joflag;
 		double delay;
 		int feature_mode;
@@ -200,6 +201,7 @@ class Global {
 			bflag = jeflag = joflag = 0;
 			gflag = 1;
 			start = 0;
+			ctrls = 0;
 			restart = 0;
 			memset(keyStates, 0, 65536);
 			walkFrame=0;
@@ -305,6 +307,13 @@ class X11_wrapper {
 		}
 		void swapBuffers() {
 			glXSwapBuffers(dpy, win);
+		}
+
+		void destroyWin(){
+
+			XDestroyWindow(dpy, win);
+		    XCloseDisplay(dpy);
+		    exit(0);
 		}
 
 } x11;
@@ -591,7 +600,9 @@ int checkKeys(XEvent *e)
 
 			break;
 		case XK_F1:
-			g.start = 1;
+			if(g.start != 1){
+				g.start = 1;
+			}
 			break;
 		case XK_F2:
 			if(g.start != 2){
@@ -601,6 +612,13 @@ int checkKeys(XEvent *e)
 			}
 			break;
 		case XK_d:
+			break;
+		case XK_q:
+			if(g.ctrls != 1){
+				g.ctrls = 1;
+			} else {
+				g.ctrls = 0;
+			}
 			break;
 		case XK_r:
 			g.restart =! g.restart;
@@ -1190,10 +1208,15 @@ bool brend = true;
 
 void render(void)
 {
+
+
+
+
 	if(g.start == 1){
 		//Clear the screen
 		glClearColor(0.1, 0.1, 0.1, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT);
+
 
 		float cx = g.xres/3.0;
 		float cy = g.yres/2.0;
@@ -1469,6 +1492,7 @@ void render(void)
 				sprite(player1.w + player1.pos[0], player1.h + player1.pos[1], g.walkFrame, g.walkTexture);
 				sprite(player2.w + player2.pos[0], player2.h + player2.pos[1], g.walk2Frame, g.walk2Texture);
 			}
+
 
 		} else if (g.start == 0) {
 
