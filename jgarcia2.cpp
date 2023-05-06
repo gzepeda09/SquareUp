@@ -18,6 +18,8 @@
 #include <X11/keysym.h>
 #include <GL/glx.h>
 #include "fonts.h"
+#include <stdlib.h>     /* srand, rand */
+#include <time.h>       /* time */
 
 
 class Global {
@@ -25,6 +27,7 @@ public:
      GLuint menu; //my menus texture
      GLuint restartBox;
      GLuint menuBox;
+     GLuint mysBox;
 }gl;
 
 class Image {
@@ -74,8 +77,9 @@ public:
                 if (!ppmFlag)
                         unlink(ppmname);
         }
-} player1Menu("menuP1.png"), player2Menu("menuP2.png"),
-menuSquare("menuWhiteSquare.png"), restartSquare("restartWhiteSquare.png");
+} player1Menu("menuPics/menuP1.png"), player2Menu("menuPics/menuP2.png"),
+menuSquare("menuPics/menuWhiteSquare.png"), restartSquare("menuPics/restartWhiteSquare.png"),
+mysBoxPic("images/mysteryBox.jpg");
 
 
 void greenBoxes(int ywin, int xwin)
@@ -160,6 +164,259 @@ void playerBlocking(float w, float h, float x, float y, int flipped)
     }
 }
 
+void holdingWeapon(float w, float h, float x, float y, int flipped, int weapon) //fix the colors when done
+{
+    if (weapon == 1) {
+        if (flipped == 1) { //fliped = 1 so player is facing right holding weapon
+            //arm
+            glPushMatrix();
+            glTranslatef(x, y+50.0, 0.0);
+            glBegin(GL_QUADS);
+            glColor3ub(0, 0, 0);
+                glVertex2i(-w, -w);
+                glVertex2i(-w, 0);
+                glVertex2i(h, 0);
+                glVertex2i(h, -w);
+            glEnd();
+            glPopMatrix();
+
+            //handle
+            glPushMatrix();
+            glTranslatef(x+h, y+50.0, 0.0);
+            glBegin(GL_QUADS);
+            glColor3ub(1, 200, 1);
+                glVertex2i(-10, 0);
+                glVertex2i(-10, 10);
+                glVertex2i(0, 10);
+                glVertex2i(0, 0);
+            glEnd();
+            glPopMatrix();
+
+            //handle protector
+            glPushMatrix();
+            glTranslatef(x+h, y+60.0, 0.0);
+            glBegin(GL_QUADS);
+            glColor3ub(200, 1, 1);
+                glVertex2i(-20, 0);
+                glVertex2i(-20, 5);
+                glVertex2i(10, 5);
+                glVertex2i(10, 0);
+            glEnd();
+            glPopMatrix();
+
+            //blade
+            glPushMatrix();
+            glTranslatef(x+h, y+65.0, 0.0);
+            glBegin(GL_QUADS);
+            glColor3ub(1, 200, 1);
+                glVertex2i(-10, 0);
+                glVertex2i(-10, h);
+                glVertex2i(0, h);
+                glVertex2i(0, 0);
+            glEnd();
+            glPopMatrix();
+        } else { //player is facing left holding weapon
+            //arm           
+            glPushMatrix();
+            glTranslatef(x, y+50.0, 0.0);
+            glBegin(GL_QUADS);
+            glColor3ub(0, 0, 0);
+                glVertex2i(w, -w);
+                glVertex2i(w, 0);
+                glVertex2i(-h, 0);
+                glVertex2i(-h, -w);
+            glEnd();
+            glPopMatrix();
+
+            //handle
+            glPushMatrix();
+            glTranslatef(x-h, y+50.0, 0.0);
+            glBegin(GL_QUADS);
+            glColor3ub(1, 200, 1);
+                glVertex2i(10, 0);
+                glVertex2i(10, 10);
+                glVertex2i(0, 10);
+                glVertex2i(0, 0);
+            glEnd();
+            glPopMatrix();
+
+            //handle protector
+            glPushMatrix();
+            glTranslatef(x-h, y+60.0, 0.0);
+            glBegin(GL_QUADS);
+            glColor3ub(200, 1, 1);
+                glVertex2i(20, 0);
+                glVertex2i(20, 5);
+                glVertex2i(-10, 5);
+                glVertex2i(-10, 0);
+            glEnd();
+            glPopMatrix();
+
+            //blade
+            glPushMatrix();
+            glTranslatef(x-h, y+65.0, 0.0);
+            glBegin(GL_QUADS);
+            glColor3ub(1, 200, 1);
+                glVertex2i(10, 0);
+                glVertex2i(10, h);
+                glVertex2i(0, h);
+                glVertex2i(0, 0);
+            glEnd();
+            glPopMatrix();
+        }
+    }
+}
+
+void useWeapon(float w, float h, float x, float y, int flipped, int weapon) 
+{
+    //code here
+    if (weapon == 1) {
+        if (flipped == 1) { //fliped = 1 so player is facing right using weapon
+            //arm
+            glPushMatrix();
+            glTranslatef(x, y+50.0, 0.0);
+            glBegin(GL_QUADS);
+            glColor3ub(0, 0, 0);
+                glVertex2i(-w, -w);
+                glVertex2i(-w, 0);
+                glVertex2i(h, 0);
+                glVertex2i(h, -w);
+            glEnd();
+            glPopMatrix();
+
+            //handle
+            glPushMatrix();
+            glTranslatef(x+h, y+40.0, 0.0);
+            glBegin(GL_QUADS);
+            glColor3ub(1, 200, 1);
+                glVertex2i(0, 0);
+                glVertex2i(0, 10);
+                glVertex2i(10, 10);
+                glVertex2i(10, 0);
+            glEnd();
+            glPopMatrix();
+
+            //handle protector
+            glPushMatrix();
+            glTranslatef(x+h+10, y+40.0, 0.0);
+            glBegin(GL_QUADS);
+            glColor3ub(200, 1, 1);
+                glVertex2i(0, -10);
+                glVertex2i(0, 20);
+                glVertex2i(5, 20);
+                glVertex2i(5, -10);
+            glEnd();
+            glPopMatrix();
+
+            //blade
+            glPushMatrix();
+            glTranslatef(x+h+15, y+40.0, 0.0);
+            glBegin(GL_QUADS);
+            glColor3ub(1, 200, 1);
+                glVertex2i(0, 0);
+                glVertex2i(0, 10);
+                glVertex2i(h, 10);
+                glVertex2i(h, 0);
+            glEnd();
+            glPopMatrix();
+        } else { //player facing left using weapon
+            //arm
+            glPushMatrix();
+            glTranslatef(x, y+50.0, 0.0);
+            glBegin(GL_QUADS);
+            glColor3ub(0, 0, 0);
+                glVertex2i(w, -w);
+                glVertex2i(w, 0);
+                glVertex2i(-h, 0);
+                glVertex2i(-h, -w);
+            glEnd();
+            glPopMatrix();
+
+            //handle
+            glPushMatrix();
+            glTranslatef(x-h, y+50.0, 0.0);
+            glBegin(GL_QUADS);
+            glColor3ub(1, 200, 1);
+                glVertex2i(0, 0);
+                glVertex2i(0, -10);
+                glVertex2i(-10, -10);
+                glVertex2i(-10, 0);
+            glEnd();
+            glPopMatrix();
+
+            //handle protector
+            glPushMatrix();
+            glTranslatef(x-h-10, y+40.0, 0.0);
+            glBegin(GL_QUADS);
+            glColor3ub(200, 1, 1);
+                glVertex2i(0, -10);
+                glVertex2i(0, 20);
+                glVertex2i(-5, 20);
+                glVertex2i(-5, -10);
+            glEnd();
+            glPopMatrix();
+
+            //blade
+            glPushMatrix();
+            glTranslatef(x-h-15, y+40.0, 0.0);
+            glBegin(GL_QUADS);
+            glColor3ub(1, 200, 1);
+                glVertex2i(0, 0);
+                glVertex2i(0, 10);
+                glVertex2i(-h, 10);
+                glVertex2i(-h, 0);
+            glEnd();
+            glPopMatrix();
+        }
+    }
+}
+
+int randLimit = 0;
+int randX = 0;
+int mysteryBox(int x, int mbn)
+{
+    //spawn a mystery box randomly with a fixed y. 
+    //x is the only number that will be random
+
+    x -= 50;
+    /* initialize random seed: */
+    srand (time(NULL));
+    if (randLimit == mbn) {
+        randX = (rand() % x);
+        randLimit += 1;
+        if (randLimit >= 2) {
+            randLimit = 0;
+        }
+    }
+    
+    //for mystery box
+    glEnable(GL_TEXTURE_2D);
+    glGenTextures(1, &gl.mysBox);
+
+    int w = mysBoxPic.width;
+    int h = mysBoxPic.height;
+
+    glBindTexture(GL_TEXTURE_2D, gl.mysBox);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
+                        GL_RGB, GL_UNSIGNED_BYTE, mysBoxPic.data);
+    
+
+    glBindTexture(GL_TEXTURE_2D, gl.mysBox);
+    glColor3f(1.0, 1.0, 1.0);
+
+    glBegin(GL_QUADS);
+        glTexCoord2f(0.0f, 1.0f); glVertex2i(randX, 100);
+        glTexCoord2f(0.0f, 0.0f); glVertex2i(randX, 150);
+        glTexCoord2f(1.0f, 0.0f); glVertex2i(randX+50, 150);
+        glTexCoord2f(1.0f, 1.0f); glVertex2i(randX+50, 100);
+    glEnd();
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    return randX;
+}
+
 int flasher = 0; //variable to flash menu options in menu
 void restartScreen(int player, int ywin, int xwin)
 {
@@ -213,7 +470,7 @@ void restartScreen(int player, int ywin, int xwin)
     glBindTexture(GL_TEXTURE_2D, 0);
     
     
-    if (flasher < 3) {
+    if (flasher < 20) {
     //for white restart box//////////////////////////////////////////////////////
         //printf("flasher: %i\n", flasher);
         glEnable(GL_TEXTURE_2D);
@@ -274,7 +531,7 @@ void restartScreen(int player, int ywin, int xwin)
     
         flasher += 1;
 
-    if (flasher > 6) {
+    if (flasher > 40) {
         printf("flasher: %i\n", flasher);
         flasher = 0;
     }
