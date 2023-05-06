@@ -1579,6 +1579,9 @@ void render(void)
 		rplat[2].set_yres(g.yres - 50.0f );
 
 
+		unsigned char c3[3] = {184, 2, 2};
+
+
 		extern void rForms(float w, float h, unsigned char color[3], float pos0, float pos1);
 
 		if((player1.health >= 100 && player1.health <= 130) || (player2.health >= 100 && player2.health <= 130)){
@@ -1589,7 +1592,6 @@ void render(void)
 
 			for(int i = 0; i < 3; i++){
 
-				unsigned char c3[3] = {184, 2, 2};
 
 				rplat[i].set_color(c3);
 
@@ -1646,6 +1648,8 @@ void render(void)
 
 				rForms(rplat[i].w, rplat[i].h,  rplat[i].color, rplat[i].pos[0], rplat[i].pos[1]);
 			}
+		} else{
+			pltFlg = 0;
 		}
 
 
