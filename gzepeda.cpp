@@ -58,10 +58,18 @@ extern void rForms(float w, float h, unsigned char color[3], float pos0,
 				   float pos1);
 extern void health(float w, float h, unsigned char color[3], float pos0, 
 				   float pos1, int player, int health);
-extern void powBar(float w, float h, unsigned char color[3], float pos0, float pos1, int bar);
+extern void powBar(float w, float h, unsigned char color[3], float pos0, float pos1);
 extern void strMenu(int yres, int xres);
-extern void superPunch(int w, int w2, int h, float x, float y, int flipped);
+extern void superPunch(int w, int w2, int h, float x, float y, int flipped, int player);
 extern void cntrlMenu(int yres, int xres);
+extern void chrgPhys(int *pBar, bool *chrg);
+extern void rplatPhys(float ph, float rh, float rw, float rPos0, float rPos1, float pos0, 
+						  double *pos1,
+						  bool *onPlt, bool *tp, int *activate);
+extern void rplatPhys2(double *pos1, double *vel, bool *onPlt, 
+	                   bool *tp, bool *stp, int *activate, int yres);
+extern void supPunchPhys1(bool *btnPress, int *pB, int *sPnch);
+extern void supPunchPhys2(bool *btnPress, int *sPnch);
 
 // extern void pltPhysics(double plPos0, double plPos1, double plVel,
 //                       float rPos0, float rPos1, float rW, float rH);  
@@ -75,10 +83,12 @@ ALuint punchSource;
 
 GLuint menuBgrnd; //my strMenu bacground
 GLuint cntrlBg;
+GLuint pltText; //my platform textures
 
 
 Image sMenuBg("images/strtBackground.jpg");
 Image cMenuBG("images/controls.jpg");
+Image pltBG("images/plt.jpg");
 
 // Following code taken from snake framework 
 // with modifications for our game
@@ -187,17 +197,42 @@ extern void playPunchSound()
 extern void rForms(float w, float h, unsigned char color[3], float pos0, float pos1)
 {
 
+	glEnable(GL_TEXTURE_2D);
+	glGenTextures(1, &pltText);
+
+
+		glBindTexture(GL_TEXTURE_2D, pltText);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, pltBG.width, pltBG.height, 0,
+	                        GL_RGB, GL_UNSIGNED_BYTE, pltBG.data);
 
 	glPushMatrix();
-	glColor3ubv(color);
 	glTranslatef(pos0, pos1, 0.0f);
+	glColor3ubv(color);
 	glBegin(GL_QUADS);
-	    glVertex2f(-w, -h);
-	    glVertex2f(-w,  h);
-	    glVertex2f( w,  h);
-	    glVertex2f( w, -h);
+	    glTexCoord2f(0.0f, 0.0f); glVertex2f(-w, -h);
+	    glTexCoord2f(0.0f, 1.0f); glVertex2f(-w, h);
+	    glTexCoord2f(1.0f, 1.0f); glVertex2f(w, h);
+	    glTexCoord2f(1.0f, 0.0f); glVertex2f(w, -h);
 	glEnd();
 	glPopMatrix();
+
+
+
+
+	// glBegin(GL_QUADS);
+	//     glTexCoord2f(0.0f, 0.0f); glVertex2f(-w, -h);
+	//     glTexCoord2f(0.0f, 1.0f); glVertex2f(-w, h);
+	//     glTexCoord2f(1.0f, 1.0f); glVertex2f(w, h);
+	//     glTexCoord2f(1.0f, 0.0f); glVertex2f(w, -h);
+	// glEnd();
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+
+
+
 }
 
 
@@ -398,7 +433,7 @@ extern void strMenu(int yres, int xres)
 
 
 }
-extern void powBar(float w, float h, unsigned char color[3], float pos0, float pos1, int bar)
+extern void powBar(float w, float h, unsigned char color[3], float pos0, float pos1)
 {
 	Rect r;
 	unsigned int d = 0x000000;
@@ -428,42 +463,69 @@ extern void powBar(float w, float h, unsigned char color[3], float pos0, float p
 
     ggprint8b(&r, 16, d, "ENERGY");
 }
-extern void superPunch(int w, int w2, int h, float x, float y, int flipped)
+extern void superPunch(int w, int w2, int h, float x, float y, int flipped, int player)
 {
-    if (flipped == 1) { 
+	if(player == 1){
+	    if (flipped == 1) { 
 
-		glPushMatrix();
-		glTranslatef(x , y, 0.0f);
-		glBegin(GL_QUADS);
-		//glColor3ub(0, 0, 0);
-        glColor3ub(255, 0, 0);
-	        glVertex2f( w2,  -h);
-	        glVertex2f( w2,   h);
-	        glVertex2f( -w,   h);
-	        glVertex2f( -w,  -h);
-		glEnd();
-		glPopMatrix();
-    
-    } else { 
+			glPushMatrix();
+			glTranslatef(x + 40.0f, y, 0.0f);
+			glBegin(GL_QUADS);
+	        glColor3ub(255, 215, 0);
+		        glVertex2f( w2,  -h);
+		        glVertex2f( w2,   h);
+		        glVertex2f( -w,   h);
+		        glVertex2f( -w,  -h);
+			glEnd();
+			glPopMatrix();
+	    
+	    } else { 
+	    	//reverse the super punch
+	        glPushMatrix();
+	        glTranslatef(x + 40.0f, y, 0.0f);
+	        glBegin(GL_QUADS);
+	        glColor3ub(255, 215, 0);
+				glVertex2f(w2, h);
+				glVertex2f(w2, -h);
+				glVertex2f(-w, -h);
+				glVertex2f(-w, h);
+			glEnd();
+	        glPopMatrix();
+	    }
+	} else if(player == 2) {
+	    if (flipped == 1) { 
 
-        //after elbow
-        glPushMatrix();
-        glTranslatef(x, y+20.0f, 0.0f);
-        glBegin(GL_QUADS);
-        glColor3ub(0, 150, 0);
-	        glVertex2f( -w2,  -h);
-	        glVertex2f( -w2,   h);
-	        glVertex2f(  w,   h);
-	        glVertex2f(  w,  -h);
-		glEnd();
-        glPopMatrix();
-    }
+			glPushMatrix();
+			glTranslatef(x - 115.0f, y , 0.0f);
+			glBegin(GL_QUADS);
+	        glColor3ub(255, 215, 0);
+				glVertex2f( w2,  -h);
+		        glVertex2f( w2,   h);
+		        glVertex2f( -w,   h);
+		        glVertex2f( -w,  -h);
+			glEnd();
+			glPopMatrix();
+	    
+	    } else { 
+	    	//reverse the super punch
+	        glPushMatrix();
+	        glTranslatef(x + 115.0f, y, 0.0f);
+	        glBegin(GL_QUADS);
+	        glColor3ub(255, 215, 0);
+		        glVertex2f(w2, h);
+				glVertex2f(w2, -h);
+				glVertex2f(-w, -h);
+				glVertex2f(-w, h);
+			glEnd();
+	        glPopMatrix();
+	    }
+	}
 }
 
 extern void cntrlMenu(int yres, int xres)
 {
 
-    	//for player menu
+    	//for control menu
 
 
 		glEnable(GL_TEXTURE_2D);
@@ -482,4 +544,105 @@ extern void cntrlMenu(int yres, int xres)
 	    glEnd();
 
 		glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+extern void chrgPhys(int *pBar, bool *chrg)
+{
+		(*pBar)++;
+
+		std::cout << "Charging up" << std::endl;
+		(*chrg) = true;
+
+}
+
+
+
+
+extern void rplatPhys(float ph, float rh, float rw, float rPos0, float rPos1, float pos0, 
+						  double *pos1, 
+						  bool *onPlt, bool *tp, int *activate)
+{
+
+		
+	if (pos0 >= rPos0 - rw &&
+			pos0 <= rPos0 + rw &&
+			(*pos1) - 100.0f >= rPos1 - rh &&
+			(*pos1) - 100.0f <= rPos1 + rh) {
+		// The player is on this platform, so set their vertical position
+		// to the top of the platform
+		if(!tp){
+			(*pos1) = rPos1 + rh/2 + 
+				ph/2;
+				
+
+		}
+
+		(*onPlt) = true;
+		(*activate) = 1;
+
+
+	}
+
+
+
+
+}
+
+extern void rplatPhys2(double *pos1, double *vel, bool *onPlt, 
+	                   bool *tp, bool *stp, int *activate, int yres)
+{
+
+	double gRav = 0.0000001;
+
+
+	if ((*onPlt)) {
+	// Player is on a platform, so their vertical velocity should be zero
+	(*vel) = 0.0f;
+	(*tp) = true;
+
+
+	} else {
+
+		if((*activate) == 1){
+			// Player is not on a platform, so make them fall
+			(*vel) -= gRav;
+			// Check if player has reached the bottom of the screen
+			if ((*pos1) <= 0.0f) {
+				// Player has fallen off the bottom of the screen, so reset their position
+				if(!(*stp)){
+					(*pos1) = yres/2 - 405.0f;
+					(*vel) = 0.0;
+					(*stp) = true;
+					(*activate) = 0;
+				}
+			}
+
+			(*stp) = false;
+
+
+		}
+	}
+
+}
+extern void supPunchPhys1(bool *btnPress, int *pB, int *sPnch)
+{
+        if (!(*btnPress)) { // Check if the key is not already held down
+	        (*btnPress) = true; // Set the flag to indicate that the key is held down
+	        if ((*pB) >= 150) {
+	            (*pB) -= 150;
+
+	       		 (*sPnch) = 1;
+	           	
+	        }
+
+
+	    }
+}
+
+
+
+extern void supPunchPhys2(bool *btnPress, int *sPnch)
+{
+		(*btnPress) = false;
+	    (*sPnch) = 0;
 }
