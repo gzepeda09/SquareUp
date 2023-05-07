@@ -63,7 +63,7 @@ extern void punch_hitbox(int w1, int w2, int h, float x, float y);
 extern void restartScreen(int player, int ywin, int xwin);
 extern void playerBlocking(float w, float h, float x, float y, int flipped);
 extern int mysteryBox(int x, int mbn);
-extern void holdingWeapon(float w, float h, float x, float y, int flipped, int weapon); //1=sword 2=whip
+extern void holdingWeapon(float w, float h, float x, float y, int flipped, int weapon);
 extern void useWeapon(float w, float h, float x, float y, int flipped, int weapon);
 //--- Brian ---
 extern void draw_power_ups(int w, int h, float x, float y);
@@ -112,8 +112,9 @@ class Player_1 {
 		int block = 0;
 		int sPunch = 0;
 		int pBar = 0;
-        int weapon = 0;
-        int hitLimit = 0; //max sword hits = 3
+        int weapon = 0; 
+		time_t timeLimit = 0; //power up time limit
+		int puLimit = 0;
 		float w = 20.0f;
 		float h = 100.0f;
 		float pw1 = 20.0f;
@@ -133,7 +134,8 @@ class Player_2 {
 		int pBar = 0;
 		int sPunch = 0;
         int weapon = 0;
-        int hitLimit = 0; //max sword hits = 3
+		time_t timeLimit = 0; //power up time limit
+		int puLimit = 0;
 		float w = 20.0f;
 		float h = 100.0f;
 		float pw1 = 20.0f;
@@ -214,7 +216,7 @@ class Global {
 			ctrls = 0;
 			restart = 0;
             mysteryBoxSpawn = 0;
-            nextMysteryBox = 75;
+            nextMysteryBox = 100;
 			memset(keyStates, 0, 65536);
 			walkFrame=0;
 			walk2Frame=0;
@@ -827,100 +829,95 @@ void physics(void)
 		}
 
         // Punch Detection player 1
-        if (player1.pos[0] + player1.pw2 >= player2.pos[0] + (-player2.w) && player1.pos[0] < player2.pos[0] && player1.weapon==0) {
-            std::cout << "Player 1 hits Player 2!" << std::endl;
-            //player2.health -= 10;
-            //For testing. delete once testing is done
-            if (g.jeflag == 1 && player2.dead == 0) {
-                player2.health -= 50;
-            } else if (player2.dead == 0){
-                if (!player2.block) {    
-                    if(player1.sPunch == 1){
-						player2.health -= 20;
-					}   else {
-						player2.health -= 10;
-					}
-                } else {
-                    if(player1.sPunch == 1){
-						player2.health -=10;
+		if (player2.pos[1] >= (player1.pos[1]-50.0) && player2.pos[1] <= (player1.pos[1] + 50.0)) { //height boundary
+			if (player1.pos[0] + player1.pw2 >= player2.pos[0] + (-player2.w) && 
+			player1.pos[0] < player2.pos[0] && player1.weapon!=1) {
+				std::cout << "Player 1 hits Player 2!" << std::endl;
+				//player2.health -= 10;
+				//For testing. delete once testing is done
+				if (g.jeflag == 1 && player2.dead == 0) {
+					player2.health -= 25;
+				} else if (player2.dead == 0){
+					if (!player2.block) {    
+						if(player1.sPunch == 1){
+							player2.health -= 20;
+						}   else {
+							player2.health -= 10;
+						}
 					} else {
-						player2.health -=5;
+						if(player1.sPunch == 1){
+							player2.health -=10;
+						} else {
+							player2.health -=5;
+						}
 					}
-                }
-                //Jesse - reaction to punches
-                player2.pos[1] += 50.0f;
-                player2.vel[1] += 20.0f;
-                player2.pos[0] += 35.0f;
-            }
-        }
-        // Punch Detection (Flipped)
-        else if (player1.pos[0] - player1.pw2 <= player2.pos[0] + (player2.w) && player1.pos[0] > player2.pos[0] && player1.weapon==0) {
-            std::cout << "Player 1 hits Player 2!" << std::endl;
-            //player2.health -= 10;
-            //For testing. delete once testing is done
-            if (g.jeflag == 1 && player2.dead == 0) {
-                player2.health -= 50;
-            } else if (player2.dead == 0){
-                if (!player2.block) {    
-                    if(player1.sPunch == 1){
-						player2.health -= 20;
-					}   else {
-						player2.health -= 10;
-					}
-                } else {
-                    if(player1.sPunch == 1){
-						player2.health -=10;
+					//Jesse - reaction to punches
+					player2.pos[1] += 50.0f;
+					player2.vel[1] += 20.0f;
+					player2.pos[0] += 35.0f;
+				}
+			}
+			// Punch Detection (Flipped)
+			else if (player1.pos[0] - player1.pw2 <= player2.pos[0] + (player2.w) && 
+			player1.pos[0] > player2.pos[0] && player1.weapon!=1) {
+				std::cout << "Player 1 hits Player 2!" << std::endl;
+				//player2.health -= 10;
+				//For testing. delete once testing is done
+				if (g.jeflag == 1 && player2.dead == 0) {
+					player2.health -= 25;
+				} else if (player2.dead == 0){
+					if (!player2.block) {    
+						if(player1.sPunch == 1){
+							player2.health -= 20;
+						}   else {
+							player2.health -= 10;
+						}
 					} else {
-						player2.health -=5;
+						if(player1.sPunch == 1){
+							player2.health -=10;
+						} else {
+							player2.health -=5;
+						}
 					}
-                }
-                //Jesse - reaction to punches
-                player2.pos[1] += 50.0f;
-                player2.vel[1] += 20.0f;
-                player2.pos[0] -= 35.0f;
-            }
-        }
-        //Sword detected for jesse feature
-        else if (player1.weapon==1 && (player1.pos[0] < player2.pos[0]) && ((player2.pos[0] - player1.pos[0]) <= 230)) {
-            if (player2.block and !player2.dead) { //player 2 is blocking and is not dead
-                player2.health -= 10;
-            } else if (!player2.dead) { //player 2 is not blocking and is not dead
-                player2.health -= 20;
-            }
-            //player may only use sword 3 times
-            player1.hitLimit += 1; 
-            //Reaction to punches
-            player2.pos[1] += 50.0f;
-            player2.vel[1] += 20.0f;
-            player2.pos[0] += 35.0f;
-            //if player1.hitLimit >= 3 then player1.hitLimit = 0 and player1.weapon = 0 //reset variables 
-            if (player1.hitLimit >= 3) {
-                player1.hitLimit = 0;
-                player1.weapon = 0;
-            }
-            printf("player 1 swings sword\n");
-        }
-        //Sword detected flipped
-        else if (player1.weapon==1 && (player2.pos[0] < player1.pos[0]) && ((player1.pos[0] - player2.pos[0]) <= 230)) { 
-            if (player2.block and !player2.dead) { //player 2 is blocking and is not dead
-                player2.health -= 10;
-            } else if (!player2.dead) { //player 2 is not blocking and is not dead
-                player2.health -= 20;
-            }
-            //player may only use sword 3 times
-            player1.hitLimit += 1; 
-            //Reaction to punches
-            player2.pos[1] += 50.0f;
-            player2.vel[1] += 20.0f;
-            player2.pos[0] -= 35.0f;
-            //if player1.hitLimit >= 3 then player1.hitLimit = 0 and player1.weapon = 0 //reset variables 
-            if (player1.hitLimit >= 3) {
-                player1.hitLimit = 0;
-                player1.weapon = 0;
-            }
-            printf("player 1 swings sword\n");
-        }
+					//Jesse - reaction to punches
+					player2.pos[1] += 50.0f;
+					player2.vel[1] += 20.0f;
+					player2.pos[0] -= 35.0f;
+				}
+			}
+			//Sword detected for jesse feature
+			else if (player1.weapon==1 && (player1.pos[0] < player2.pos[0]) && 
+			((player2.pos[0] - player1.pos[0]) <= 230)) {
+				if (player2.block and !player2.dead) { //player 2 is blocking and is not dead
+					player2.health -= 10;
+				} else if (!player2.dead) { //player 2 is not blocking and is not dead
+					player2.health -= 20;
+				}
 
+				//Reaction to punches
+				player2.pos[1] += 50.0f;
+				player2.vel[1] += 20.0f;
+				player2.pos[0] += 35.0f;
+
+				printf("player 1 swings sword\n");
+			}
+			//Sword detected flipped
+			else if (player1.weapon==1 && (player2.pos[0] < player1.pos[0]) && 
+			((player1.pos[0] - player2.pos[0]) <= 230)) { 
+				if (player2.block and !player2.dead) { //player 2 is blocking and is not dead
+					player2.health -= 10;
+				} else if (!player2.dead) { //player 2 is not blocking and is not dead
+					player2.health -= 20;
+				}
+
+				//Reaction to punches
+				player2.pos[1] += 50.0f;
+				player2.vel[1] += 20.0f;
+				player2.pos[0] -= 35.0f;
+
+				printf("player 1 swings sword\n");
+			}
+		}
         //check if player 2 has died
         if (player2.health <= 0) {
             player2.health = 0;
@@ -935,6 +932,37 @@ void physics(void)
 		player1.block = 1;
 	} else {
 		player1.block = 0;
+	}
+
+	//Player 1 powerups and time limit
+	if (player1.timeLimit) {
+		if (player1.weapon == 2 && player1.puLimit == 0) { //speed
+			player1.puLimit += 1;
+			player1.vel[0] += 10.0f;
+			printf("player 1 speed upgrade\n");
+		} else if (player1.weapon == 3 && player1.puLimit == 0) {//slow other player
+			player1.puLimit += 1;
+			player2.vel[0] -= 8.0f;
+			printf("player 2 slowed down\n");
+		} else if (player1.weapon == 4 && player1.puLimit == 0) {//add health
+			player1.puLimit += 1;
+			player1.health += 25;
+			printf("player 1 health gain +25\n");
+		} else if (player1.weapon == 5 && player1.puLimit == 0) {//damage
+			//code after pull
+			player1.puLimit += 1;
+		}
+		if ((time(NULL) - player1.timeLimit) > 10) {
+			//reset player time limit to take power up away
+			player1.timeLimit = 0;
+			printf("power time limit up for player 1\n");
+		}
+	} else if (player2.timeLimit == 0) {
+		//take power up away
+		player1.weapon = 0;
+		player1.puLimit = 0;
+		player1.vel[0] = 10.0f;
+		player2.vel[0] = 10.0f;
 	}
 
 	// Punch cooldown player 1
@@ -1037,97 +1065,93 @@ void physics(void)
 		}
 
         // Punch detection player 2
-        if (player2.pos[0] - player2.pw2 <= player1.pos[0] + (player1.w) && player2.pos[0] > player1.pos[0] && player2.weapon == 0) {
-            std::cout << "Player 2 hits Player 1!" << std::endl;
-            //player1.health -= 10;
-            //For testing. delete once testing is done
-            if (g.jeflag == 1 && player1.dead == 0) {
-                player1.health -= 50;
-            } else if (player1.dead == 0){
-                if (!player1.block) {    
-                    if(player2.sPunch == 1){
-						player1.health -= 20;
-					}   else {
-						player1.health -= 10;
-					}
-                } else {
-                    if(player2.sPunch == 1){
-						player1.health -=10;
+		if (player2.pos[1] >= (player1.pos[1]-50.0) && player2.pos[1] <= (player1.pos[1] + 50.0)) { //height boundary 
+			if (player2.pos[0] - player2.pw2 <= player1.pos[0] + (player1.w) && 
+			player2.pos[0] > player1.pos[0] && player2.weapon!=1) {
+				std::cout << "Player 2 hits Player 1!" << std::endl;
+				//player1.health -= 10;
+				//For testing. delete once testing is done
+				if (g.jeflag == 1 && player1.dead == 0) {
+					player1.health -= 25;
+				} else if (player1.dead == 0){
+					if (!player1.block) {    
+						if(player2.sPunch == 1){
+							player1.health -= 20;
+						}   else {
+							player1.health -= 10;
+						}
 					} else {
-						player1.health -=5;
+						if(player2.sPunch == 1){
+							player1.health -=10;
+						} else {
+							player1.health -=5;
+						}
 					}
-                }
-                //Jesse - reaction to punches
-                player1.pos[1] += 50.0f;
-                player1.vel[1] += 20.0f;
-                player1.pos[0] -= 35.0f;
-            }
-        }
-        // Punch Detection (Flipped)
-        else if (player2.pos[0] + player2.pw2 >= player1.pos[0] + (-player1.w) && player2.pos[0] < player1.pos[0] && player2.weapon == 0) {
-            std::cout << "Player 1 hits Player 2!" << std::endl;
-            //player1.health -= 10;
-            //For testing. delete once testing is done
-            if (g.jeflag == 1 && player1.dead == 0) {
-                player1.health -= 50;
-            } else if (player1.dead == 0) {
-                if (!player1.block) {    
-                    if(player2.sPunch == 1){
-						player1.health -= 20;
-					}   else {
-						player1.health -= 10;
-					}
-                } else {
-                    if(player2.sPunch == 1){
-						player1.health -=10;
+					//Jesse - reaction to punches
+					player1.pos[1] += 50.0f;
+					player1.vel[1] += 20.0f;
+					player1.pos[0] -= 35.0f;
+				}
+			}
+			// Punch Detection (Flipped)
+			else if (player2.pos[0] + player2.pw2 >= player1.pos[0] + (-player1.w) && 
+			player2.pos[0] < player1.pos[0] && player2.weapon!=1) {
+				std::cout << "Player 1 hits Player 2!" << std::endl;
+				//player1.health -= 10;
+				//For testing. delete once testing is done
+				if (g.jeflag == 1 && player1.dead == 0) {
+					player1.health -= 25;
+				} else if (player1.dead == 0) {
+					if (!player1.block) {    
+						if(player2.sPunch == 1){
+							player1.health -= 20;
+						}   else {
+							player1.health -= 10;
+						}
 					} else {
-						player1.health -=5;
+						if(player2.sPunch == 1){
+							player1.health -=10;
+						} else {
+							player1.health -=5;
+						}
 					}
-                }
-                //Jesse - raction to punches
-                player1.pos[1] += 50.0f;
-                player1.vel[1] += 20.0f;
-                player1.pos[0] += 35.0f;
-            }
-        } else if (player2.weapon==1 && (player1.pos[0] < player2.pos[0]) && ((player2.pos[0] - player1.pos[0]) <= 230)) {
-            //not flipped 
-            if (player1.block and !player1.dead) { //player 1 is blocking and is not dead
-                player1.health -= 10;
-            } else if (!player1.dead) { //player 1 is not blocking and is not dead
-                player1.health -= 20;
-            }
-            //player may only use sword 3 times
-            player2.hitLimit += 1; 
-            //Reaction to punches
-            player1.pos[1] += 50.0f;
-            player1.vel[1] += 20.0f;
-            player1.pos[0] -= 35.0f;
-            //if player1.hitLimit >= 3 then player1.hitLimit = 0 and player1.weapon = 0 //reset variables 
-            if (player2.hitLimit >= 3) {
-                player2.hitLimit = 0;
-                player2.weapon = 0;
-            }
-            printf("player 2 swings sword\n");
-        } else if (player2.weapon==1 && (player2.pos[0] < player1.pos[0]) && ((player1.pos[0] - player2.pos[0]) <= 230)) {
-            //flipped
-            if (player1.block and !player1.dead) { //player 1 is blocking and is not dead
-                player1.health -= 10;
-            } else if (!player1.dead) { //player 1 is not blocking and is not dead
-                player1.health -= 20;
-            }
-            //player may only use sword 3 times
-            player2.hitLimit += 1; 
-            //Reaction to punches
-            player1.pos[1] += 50.0f;
-            player1.vel[1] += 20.0f;
-            player1.pos[0] += 35.0f;
-            //if player1.hitLimit >= 3 then player1.hitLimit = 0 and player1.weapon = 0 //reset variables 
-            if (player2.hitLimit >= 3) {
-                player2.hitLimit = 0;
-                player2.weapon = 0;
-            }
-            printf("player 2 swings sword\n");
-        }
+					//Jesse - raction to punches
+					player1.pos[1] += 50.0f;
+					player1.vel[1] += 20.0f;
+					player1.pos[0] += 35.0f;
+				}
+			} else if (player2.weapon==1 && (player1.pos[0] < player2.pos[0]) && 
+			((player2.pos[0] - player1.pos[0]) <= 230)) {
+				//not flipped 
+				if (player1.block and !player1.dead) { //player 1 is blocking and is not dead
+					player1.health -= 10;
+				} else if (!player1.dead) { //player 1 is not blocking and is not dead
+					player1.health -= 20;
+				}
+ 
+				//Reaction to punches
+				player1.pos[1] += 50.0f;
+				player1.vel[1] += 20.0f;
+				player1.pos[0] -= 35.0f;
+
+				printf("player 2 swings sword\n");
+			} else if (player2.weapon==1 && (player2.pos[0] < player1.pos[0]) && 
+			((player1.pos[0] - player2.pos[0]) <= 230)) {
+				//flipped
+				if (player1.block and !player1.dead) { //player 1 is blocking and is not dead
+					player1.health -= 10;
+				} else if (!player1.dead) { //player 1 is not blocking and is not dead
+					player1.health -= 20;
+				}
+
+				//Reaction to punches
+				player1.pos[1] += 50.0f;
+				player1.vel[1] += 20.0f;
+				player1.pos[0] += 35.0f;
+
+				printf("player 2 swings sword\n");
+			}
+		}
         //player 1 dies
         if (player1.health <= 0) {
             player1.health = 0;
@@ -1142,6 +1166,37 @@ void physics(void)
 		player2.block = 1;
 	} else {
 		player2.block = 0;
+	}
+
+	//Player 2 powerups and time limit
+	if (player2.timeLimit) {
+		if (player2.weapon == 2 && player2.puLimit == 0) { //speed
+			player2.puLimit += 1;
+			player2.vel[0] += 10.0f;
+			printf("player 2 speed upgrade\n");
+		} else if (player2.weapon == 3 && player2.puLimit == 0) {//slow other player
+			player2.puLimit += 1;
+			player1.vel[0] -= 8.0f;
+			printf("player 1 slowed down\n");
+		} else if (player2.weapon == 4 && player2.puLimit == 0) {//add health
+			player2.puLimit += 1;
+			player2.health += 25;
+			printf("player 2 health gain +25\n");
+		} else if (player2.weapon == 5 && player2.puLimit == 0) {//damage
+			//code after pull
+			player2.puLimit += 1;
+		}
+		if ((time(NULL) - player2.timeLimit) > 10) {
+			//reset player time limit to take power up away
+			player2.timeLimit = 0;
+			printf("power time limit up for player 2\n");
+		}
+	} else if (player1.timeLimit == 0){
+		//take power up away
+		player2.weapon = 0;
+		player2.puLimit = 0;
+		player2.vel[0] = 10.0f;
+		player1.vel[0] = 10.0f;
 	}
 
 	// Punch cooldown player 2
@@ -1445,33 +1500,41 @@ void render(void)
             player2.dead = reset.dead;
             player1.weapon = 0;
             player2.weapon = 0;
+			player1.timeLimit = 0;
+			player2.timeLimit = 0;
             g.restart = 0;
-            g.nextMysteryBox = 75;
+            g.nextMysteryBox = 100;
             g.mysteryBoxSpawn = 0;
     }
 
     //Spawn Mystery Box
-    if (player1.health <= g.nextMysteryBox || player2.health <= g.nextMysteryBox) { // && g.mysteryBoxLimit == 0
+    if (player1.health <= g.nextMysteryBox || player2.health <= g.nextMysteryBox) {
         int temp = mysteryBox(g.xres, g.mysteryBoxSpawn);
         
         if (player1.pos[0] >= temp-20 && player1.pos[0] <= (temp+75)
-            && (player1.pos[1]-100) <= 150) { //if player within box parameters
+            && (player1.pos[1]-100) <= 150) { //if player 1 within box parameters
             g.mysteryBoxSpawn += 1;
             g.nextMysteryBox -= 25;
+			player1.timeLimit = time(NULL);
+			srand (time(NULL));
             if (g.jeflag) { // for jesse feature
                 player1.weapon = 1;
             } else {
-                //give player.weapon = ranNum%4+1 this will only give players powerups and no weapons
+				//power up 2-4
+				player1.weapon = (rand()%3)+2;
             }
         }
         if (player2.pos[0] >= temp-20 && player2.pos[0] <= (temp+75)
-            && (player2.pos[1]-100) <= 150) { //if player within box parameters
+            && (player2.pos[1]-100) <= 150) { //if player 2 within box parameters
             g.mysteryBoxSpawn += 1;
             g.nextMysteryBox -= 25;
+			player2.timeLimit = time(NULL);
+			srand (time(NULL));
             if (g.jeflag) { // for jesse feature
                 player2.weapon = 1;
             } else {
-                //give player.weapon = ranNum%4+1 this will only give players powerups and no weapons
+				//power up 2-4
+				player2.weapon = (rand()%3)+2;
             }
         }
     }

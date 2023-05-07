@@ -384,7 +384,7 @@ int mysteryBox(int x, int mbn)
     if (randLimit == mbn) {
         randX = (rand() % x);
         randLimit += 1;
-        if (randLimit >= 2) {
+        if (randLimit >= 3) { //was 2 adding one for health at 100
             randLimit = 0;
         }
     }
@@ -443,6 +443,8 @@ void restartScreen(int player, int ywin, int xwin)
         h = player2Menu.height;
     }
 
+    //Consider changing the look of the menu? add a flashing wins in the middle of the menu?
+    //add a temp image of what power up the player got
     //for player menu
     glBindTexture(GL_TEXTURE_2D, gl.menu);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
@@ -490,7 +492,9 @@ void restartScreen(int player, int ywin, int xwin)
 
         int sizeRestart = 200;
         int adjustYBox = 36;
-        int adjustXBox = 285;
+        int adjustXBox = 285; //the x seems to be a little off for player 2 it looks like it needs to be 
+                              //pushed to the right a little bit.
+                              
     
         glBegin(GL_QUADS);
             glTexCoord2f(0.0f, 1.0f); glVertex2i(xwin/3+adjustXBox, ywin/2+adjustYBox);
