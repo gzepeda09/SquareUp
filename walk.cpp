@@ -847,7 +847,7 @@ void physics(void)
 			player1.punch = 1;
 		}
 
-        punchAbilityPlayer1(&player1.punch, g.jeflag,
+        punchAbilityPlayer1(&player1.punch, &player1.sPunch, g.jeflag,
                             &player1.pos[0], &player1.pos[1], player1.pw2,
                             &player2.pos[0], &player2.pos[1], player2.w,
                             &player2.vel[1], &player2.dead,
@@ -1095,7 +1095,7 @@ void physics(void)
 			player2.punch = 1;
 		}
 
-        punchAbilityPlayer1(&player2.punch, g.jeflag,
+        punchAbilityPlayer2(&player2.punch, &player2.sPunch, g.jeflag,
                             &player2.pos[0], &player2.pos[1], player2.pw2,
                             &player1.pos[0], &player1.pos[1], player1.w,
                             &player1.vel[1], &player1.dead,

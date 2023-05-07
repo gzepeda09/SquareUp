@@ -237,13 +237,22 @@ void movePlayerRight(double* pos_x, double* pos2_x,
     *pos_y -= 12.5f;
 }
 
-/*extern*/ void punchAbilityPlayer1(int* p1_punch, int jeflag,
+/*extern*/ void punchAbilityPlayer1(int* p1_punch, int* sPunch, int jeflag,
                                 double* p1_pos_x, double* p1_y, float p1_pw2,
                                 double* p2_pos_x, double* p2_pos_y, float p2_w, 
                                 double* p2_vel_1, int* p2_dead,
                                 int p2_block, int* p2_health)
 {
-    *p1_punch = 1;
+
+    
+
+    if((*sPunch) == 1){
+        *p1_punch = 0;
+    }
+    else{
+        *p1_punch = 1;
+    }
+
     // Punch Detection
     if (*p1_pos_x + p1_pw2 >= *p2_pos_x + (-p2_w) && 
         *p1_pos_x < *p2_pos_x &&
@@ -253,10 +262,18 @@ void movePlayerRight(double* pos_x, double* pos2_x,
         }
         else if (*p2_dead == 0) {
             if (!p2_block) {
-                *p2_health -= 10;
+                if((*sPunch) == 1){
+                     *p2_health -= 20;
+                }   else {
+                     *p2_health -= 10;
+                }
             }
             else {
-                *p2_health -= 5;
+                if((*sPunch) == 1){
+                     *p2_health -= 10;
+                }   else {
+                     *p2_health -= 5;
+                }
             }
             *p2_pos_y += 50.0f;
             *p2_vel_1 += 20.0f;
@@ -276,10 +293,18 @@ void movePlayerRight(double* pos_x, double* pos2_x,
         }
         else if (*p2_dead == 0) {
             if (!p2_block) {
-                *p2_health -= 10;
+                if((*sPunch) == 1){
+                     *p2_health -= 20;
+                }   else {
+                     *p2_health -= 10;
+                }
             }
             else {
-                *p2_health -= 5;
+                if((*sPunch) == 1){
+                     *p2_health -= 10;
+                }   else {
+                     *p2_health -= 5;
+                }
             }
             *p2_pos_y += 50.0f;
             *p2_vel_1 += 20.0f;
@@ -292,13 +317,19 @@ void movePlayerRight(double* pos_x, double* pos2_x,
     }
 }
 
-/*extern*/ void punchAbilityPlayer2(int* p2_punch, int jeflag,
+/*extern*/ void punchAbilityPlayer2(int* p2_punch, int* sPunch, int jeflag,
                                 double* p2_pos_x, double* p2_y, float p2_pw2,
                                 double* p1_pos_x, double* p1_pos_y, float p1_w, 
                                 double* p1_vel_1, int* p1_dead,
                                 int p1_block, int* p1_health)
 {
-    *p2_punch = 1;
+    if((*sPunch) == 1){
+        *p2_punch = 0;
+    }
+    else{
+        *p2_punch = 1;
+    }
+
     // Punch Detection
     if (*p2_pos_x - p2_pw2 <= *p1_pos_x + (p1_w) && 
         *p2_pos_x > *p1_pos_x &&
@@ -308,11 +339,19 @@ void movePlayerRight(double* pos_x, double* pos2_x,
         }
         else if (*p1_dead == 0) {
             if (!p1_block) {
-                *p1_health -= 10;
-            }
-            else {
-                *p1_health -= 5;
-            }
+                if((*sPunch) == 1){
+                         *p1_health -= 20;
+                } else {
+                         *p1_health -= 10;
+                    }
+                }
+                else {
+                    if((*sPunch) == 1){
+                         *p1_health -= 10;
+                    }   else {
+                         *p1_health -= 5;
+                    }
+                }
             *p1_pos_y += 50.0f;
             *p1_vel_1 += 20.0f;
             *p1_pos_x -= 35.0f;
@@ -331,11 +370,19 @@ void movePlayerRight(double* pos_x, double* pos2_x,
         }
         else if (*p1_dead == 0) {
             if (!p1_block) {
-                *p1_health -= 10;
-            }
-            else {
-                *p1_health -= 5;
-            }
+                if((*sPunch) == 1){
+                         *p1_health -= 20;
+                } else {
+                         *p1_health -= 10;
+                    }
+                }
+                else {
+                    if((*sPunch) == 1){
+                         *p1_health -= 10;
+                    }   else {
+                         *p1_health -= 5;
+                    }
+                }
             *p1_pos_y += 50.0f;
             *p1_vel_1 += 20.0f;
             *p1_pos_x += 35.0f;

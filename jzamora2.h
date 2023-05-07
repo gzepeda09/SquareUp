@@ -48,13 +48,13 @@ extern void movePlayerUp(double* vel_up, double* pos_y);
 
 extern void movePlayerDown(double* vel_down, double* pos_y);
 
-extern void punchAbilityPlayer1(int* p1_punch, int jeflag,
+extern void punchAbilityPlayer1(int* p1_punch,int* sPunch, int jeflag,
                                 double* p1_pos_x, double* p1_y, float p1_pw2,
                                 double* p2_pos_x, double* p2_pos_y, float p2_w,
                                 double* p2_vel_1, int* p2_dead,
                                 int p2_block, int* p2_health);
 
-extern void punchAbilityPlayer2(int* p2_punch, int jeflag,
+extern void punchAbilityPlayer2(int* p2_punch, int* sPunch, int jeflag,
                                 double* p2_pos_x, double* p2_y, float p2_pw2,
                                 double* p1_pos_x, double* p1_pos_y, float p1_w,
                                 double* p1_vel_1, int* p1_dead,
