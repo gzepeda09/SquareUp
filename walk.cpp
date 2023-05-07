@@ -853,7 +853,7 @@ void physics(void)
                             &player1.pos[0], &player1.pos[1], player1.pw2,
                             &player2.pos[0], &player2.pos[1], player2.w,
                             &player2.vel[1], &player2.dead,
-                            player2.block, &player2.health);
+                            player2.block, &player2.health, player1.weapon);
         // Punch Detection player 1
         /*if (player1.pos[0] + player1.pw2 >= player2.pos[0] + (-player2.w) && 
             player1.pos[0] < player2.pos[0] && player1.weapon==0) {
@@ -979,10 +979,10 @@ void physics(void)
 			player1.health += 25;
 			printf("player 1 health gain +25\n");
 		} else if (player1.weapon == 5 && player1.puLimit == 0) {//damage
-			//code after pull
+			printf("player 1 damage upgrade\n");
 			player1.puLimit += 1;
 		}
-		if ((time(NULL) - player1.timeLimit) > 10) {
+		if ((time(NULL) - player1.timeLimit) > 15) {
 			//reset player time limit to take power up away
 			player1.timeLimit = 0;
 			printf("power time limit up for player 1\n");
@@ -1119,7 +1119,7 @@ void physics(void)
                             &player2.pos[0], &player2.pos[1], player2.pw2,
                             &player1.pos[0], &player1.pos[1], player1.w,
                             &player1.vel[1], &player1.dead,
-                            player1.block, &player1.health);
+                            player1.block, &player1.health, player2.weapon);
         // Punch detection player 2
         /*if (player2.pos[0] - player2.pw2 <= player1.pos[0] + (player1.w) && 
             player2.pos[0] > player1.pos[0] && player2.weapon == 0) {
@@ -1244,10 +1244,10 @@ void physics(void)
 			player2.health += 25;
 			printf("player 2 health gain +25\n");
 		} else if (player2.weapon == 5 && player2.puLimit == 0) {//damage
-			//code after pull
+			printf("player 2 damage upgrade\n");
 			player2.puLimit += 1;
 		}
-		if ((time(NULL) - player2.timeLimit) > 10) {
+		if ((time(NULL) - player2.timeLimit) > 15) {
 			//reset player time limit to take power up away
 			player2.timeLimit = 0;
 			printf("power time limit up for player 2\n");
@@ -1616,7 +1616,7 @@ void render(void)
                 player1.weapon = 1;
             } else {
 				//power up 2-4
-				player1.weapon = (rand()%3)+2;
+				player1.weapon = (rand()%4)+2;
             }
         }
         if (player2.pos[0] >= temp-20 && player2.pos[0] <= (temp+75)
@@ -1631,7 +1631,7 @@ void render(void)
                 player2.weapon = 1;
             } else {
 				//power up 2-4
-				player2.weapon = (rand()%3)+2;
+				player2.weapon = (rand()%4)+2;
             }
         }
     }

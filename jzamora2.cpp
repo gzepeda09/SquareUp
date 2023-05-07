@@ -241,7 +241,7 @@ void movePlayerRight(double* pos_x, double* pos2_x,
                                 double* p1_pos_x, double* p1_y, float p1_pw2,
                                 double* p2_pos_x, double* p2_pos_y, float p2_w, 
                                 double* p2_vel_1, int* p2_dead,
-                                int p2_block, int* p2_health)
+                                int p2_block, int* p2_health, int weapon)
 {
 
     
@@ -256,20 +256,21 @@ void movePlayerRight(double* pos_x, double* pos2_x,
     // Punch Detection
     if (*p1_pos_x + p1_pw2 >= *p2_pos_x + (-p2_w) && 
         *p1_pos_x < *p2_pos_x &&
-        *p1_y - 40.0f < *p2_pos_y) {
-        if (jeflag == 1 && p2_dead == 0) {
-            *p2_health -= 50;
+        *p1_y - 40.0f < *p2_pos_y &&
+        *p2_pos_y < *p1_y + 40.0f) {
+        if (jeflag == 1 && *p2_dead == 0) {
+            *p2_health -= 25;
         }
         else if (*p2_dead == 0) {
             if (!p2_block) {
-                if((*sPunch) == 1){
+                if((*sPunch) == 1 || weapon == 5){
                      *p2_health -= 20;
                 }   else {
                      *p2_health -= 10;
                 }
             }
             else {
-                if((*sPunch) == 1){
+                if((*sPunch) == 1 || weapon == 5){
                      *p2_health -= 10;
                 }   else {
                      *p2_health -= 5;
@@ -287,20 +288,21 @@ void movePlayerRight(double* pos_x, double* pos2_x,
     // Punch Detection (Flipped)
     else if (*p1_pos_x - p1_pw2 <= *p2_pos_x + p2_w && 
              *p1_pos_x > *p2_pos_x &&
-             *p1_y - 40.0f < *p2_pos_y) {
+             *p1_y - 40.0f < *p2_pos_y &&
+             *p2_pos_y < *p1_y + 40.0f) {
         if (jeflag == 1 && *p2_dead == 0) {
-            *p2_health -= 50;
+            *p2_health -= 25;
         }
         else if (*p2_dead == 0) {
             if (!p2_block) {
-                if((*sPunch) == 1){
+                if((*sPunch) == 1 || weapon == 5){
                      *p2_health -= 20;
                 }   else {
                      *p2_health -= 10;
                 }
             }
             else {
-                if((*sPunch) == 1){
+                if((*sPunch) == 1 || weapon == 5){
                      *p2_health -= 10;
                 }   else {
                      *p2_health -= 5;
@@ -321,7 +323,7 @@ void movePlayerRight(double* pos_x, double* pos2_x,
                                 double* p2_pos_x, double* p2_y, float p2_pw2,
                                 double* p1_pos_x, double* p1_pos_y, float p1_w, 
                                 double* p1_vel_1, int* p1_dead,
-                                int p1_block, int* p1_health)
+                                int p1_block, int* p1_health, int weapon)
 {
     if((*sPunch) == 1){
         *p2_punch = 0;
@@ -333,20 +335,21 @@ void movePlayerRight(double* pos_x, double* pos2_x,
     // Punch Detection
     if (*p2_pos_x - p2_pw2 <= *p1_pos_x + (p1_w) && 
         *p2_pos_x > *p1_pos_x &&
-        *p2_y - 40.0f < *p1_pos_y) {
-        if (jeflag == 1 && p1_dead == 0) {
-            *p1_health -= 50;
+        *p2_y - 40.0f < *p1_pos_y &&
+        *p1_pos_y < *p2_y + 40.0f) {
+        if (jeflag == 1 && *p1_dead == 0) {
+            *p1_health -= 25;
         }
         else if (*p1_dead == 0) {
             if (!p1_block) {
-                if((*sPunch) == 1){
+                if((*sPunch) == 1 || weapon == 5){
                          *p1_health -= 20;
                 } else {
                          *p1_health -= 10;
                     }
                 }
                 else {
-                    if((*sPunch) == 1){
+                    if((*sPunch) == 1 || weapon == 5){
                          *p1_health -= 10;
                     }   else {
                          *p1_health -= 5;
@@ -364,20 +367,21 @@ void movePlayerRight(double* pos_x, double* pos2_x,
     // Punch Detection (Flipped)
     else if (*p2_pos_x + p2_pw2 >= *p1_pos_x - p1_w && 
              *p2_pos_x < *p1_pos_x &&
-             *p2_y - 40.0f < *p1_pos_y) {
+             *p2_y - 40.0f < *p1_pos_y &&
+             *p1_pos_y < *p2_y + 40.0f) {
         if (jeflag == 1 && *p1_dead == 0) {
-            *p1_health -= 50;
+            *p1_health -= 25;
         }
         else if (*p1_dead == 0) {
             if (!p1_block) {
-                if((*sPunch) == 1){
+                if((*sPunch) == 1 || weapon == 5){
                          *p1_health -= 20;
                 } else {
                          *p1_health -= 10;
                     }
                 }
                 else {
-                    if((*sPunch) == 1){
+                    if((*sPunch) == 1 || weapon == 5){
                          *p1_health -= 10;
                     }   else {
                          *p1_health -= 5;

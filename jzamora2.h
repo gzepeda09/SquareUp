@@ -52,13 +52,13 @@ extern void punchAbilityPlayer1(int* p1_punch,int* sPunch, int jeflag,
                                 double* p1_pos_x, double* p1_y, float p1_pw2,
                                 double* p2_pos_x, double* p2_pos_y, float p2_w,
                                 double* p2_vel_1, int* p2_dead,
-                                int p2_block, int* p2_health);
+                                int p2_block, int* p2_health, int weapon);
 
 extern void punchAbilityPlayer2(int* p2_punch, int* sPunch, int jeflag,
                                 double* p2_pos_x, double* p2_y, float p2_pw2,
                                 double* p1_pos_x, double* p1_pos_y, float p1_w,
                                 double* p1_vel_1, int* p1_dead,
-                                int p1_block, int* p1_health);
+                                int p1_block, int* p1_health, int weapon);
 
 extern void punchCooldownPlayer(float* cooldown, int* punch);
 
