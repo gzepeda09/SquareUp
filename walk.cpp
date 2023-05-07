@@ -81,9 +81,11 @@ extern void cntrlMenu(int yres, int xres);
 
 
 //JOSE: THIS IS WHERE ANY IMAGES WE USE GO
-Image img[3] = {"images/Freddy2.png",
+Image img[5] = {"images/Freddy2.png",
             	"images/map1-06.png",
-            	"images/scott.gif"};
+            	"images/scott.gif",
+                "images/ryu_walking_lar2.png",
+                "images/ryu_walking_lar2_2.png"};
 
 //JOSE: sets up variables used for creating the background.
 class Texture {
@@ -94,6 +96,13 @@ class Texture {
         GLuint map2Texture;
 		float xc[2];
 		float yc[2];
+        GLuint ryu;
+        GLuint ryu2;
+        GLuint ryu_punch;
+        float ryu_wx[8];
+        float ryu_wy[8];
+        float ryu_walkx[8];
+        float ryu_walky[8];
 };
 
 class Player_1 {
@@ -197,6 +206,8 @@ class Global {
 		char keyStates[65536];
         int loadMap = 0;
         int time_scroll = 0;
+        int time_walk = 0;
+        int time_walk2 = 0;
         float scroll = 0.0f;
 		Vec box[20];
 		Global() {
@@ -456,11 +467,6 @@ void initOpengl(void)
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
 	glTexImage2D(GL_TEXTURE_2D, 0, 3, w1, h1, 0,
 			GL_RGB, GL_UNSIGNED_BYTE, img[1].data);
-	g.tex.xc[0] = 0.0f;
-	g.tex.xc[1] = 1.0f;
-	g.tex.yc[0] = 0.0f;
-	//g.tex.yc[1] = 1.0f;
-	g.tex.yc[1] = 0.125f;
 	//==========================================================================
 	int w2 = img[2].width;
 	int h2 = img[2].height;
@@ -481,6 +487,51 @@ void initOpengl(void)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w2, h2, 0,
 			GL_RGBA, GL_UNSIGNED_BYTE, walk2Data);
 
+    //-------------------------------------------
+    //TEXTURE COORDINATES
+    //-------------------------------------------
+    //BACKGROUND:
+	g.tex.xc[0] = 0.0f;
+	g.tex.xc[1] = 1.0f;
+	g.tex.yc[0] = 0.0f;
+	//g.tex.yc[1] = 1.0f;
+	g.tex.yc[1] = 0.125f;
+
+    //PLAYER 1 TEXTURE COORDINATES: MOVING RIGHT
+    g.tex.ryu_wx[0] = 0.0f;
+    g.tex.ryu_wx[1] = 0.125f;
+    g.tex.ryu_wy[0] = 0.0f;
+    g.tex.ryu_wy[1] = 0.5f;
+
+    //PLAYER 1 TEXTURE COORDINATES: MOVING LEFT
+    g.tex.ryu_wx[2] = 0.875f;
+    g.tex.ryu_wx[3] = 1.0f;
+    g.tex.ryu_wy[2] = 0.5f;
+    g.tex.ryu_wy[3] = 1.0f;
+
+    //SETTING CHARACTER TEXTURES FOR PLAYER 1:
+    g.tex.ryu_walkx[0] = g.tex.ryu_wx[0];
+    g.tex.ryu_walkx[1] = g.tex.ryu_wx[1];
+    g.tex.ryu_walky[0] = g.tex.ryu_wy[0];
+    g.tex.ryu_walky[1] = g.tex.ryu_wy[1];
+
+    //PLAYER 2 TEXTURE COORDINATES: MOVING RIGHT
+    g.tex.ryu_wx[4] = 0.0f;
+    g.tex.ryu_wx[5] = 0.125f;
+    g.tex.ryu_wy[4] = 0.0f;
+    g.tex.ryu_wy[5] = 0.5f;
+
+    //PLAYER 2 TEXTURE COORDINATES: MOVING LEFT
+    g.tex.ryu_wx[6] = 0.875f;
+    g.tex.ryu_wx[7] = 1.0f;
+    g.tex.ryu_wy[6] = 0.5f;
+    g.tex.ryu_wy[7] = 1.0f;
+
+    //SETTING CHARACTER TEXTURES FOR PLAYER 2:
+    g.tex.ryu_walkx[4] = g.tex.ryu_wx[4];
+    g.tex.ryu_walkx[5] = g.tex.ryu_wx[5];
+    g.tex.ryu_walky[4] = g.tex.ryu_wy[4];
+    g.tex.ryu_walky[5] = g.tex.ryu_wy[5];
 }
 void init() {
 	// Initialize Player 1 stats
@@ -763,8 +814,36 @@ void physics(void)
                        player1.vel[0],  player2.w,
                        player1.w,       &g.tex.xc[0],    &g.tex.xc[1]);
 
-        cout << player1.pos[0] << endl;
-        cout << player2.pos[0] << endl;
+        if (player1.pos[0] > player2.pos[0]) {
+            g.time_walk2++;
+            if (g.time_walk2 % 6 == 0) {
+                if (g.tex.ryu_wx[5] < -0.5f) {
+                    g.tex.ryu_wx[4] = 0.0f;
+                    g.tex.ryu_wx[5] = 0.125f;
+                }
+                g.tex.ryu_wx[4] -= 0.132f;
+                g.tex.ryu_wx[5] -= 0.132f;
+                g.tex.ryu_walkx[4] = -g.tex.ryu_wx[4];
+                g.tex.ryu_walkx[5] = -g.tex.ryu_wx[5];
+                g.tex.ryu_walky[4] = g.tex.ryu_wy[4];
+                g.tex.ryu_walky[5] = g.tex.ryu_wy[5];
+            }
+        }
+        else if (player1.pos[0] < player2.pos[0]) {            
+            g.time_walk2++;
+            if (g.time_walk2 % 6 == 0) {
+                if (g.tex.ryu_wx[7] < 0.5f) {
+                    g.tex.ryu_wx[6] = 0.875f;
+                    g.tex.ryu_wx[7] = 1.0f;
+                }
+                g.tex.ryu_wx[6] -= 0.1262f;
+                g.tex.ryu_wx[7] -= 0.1262f;
+                g.tex.ryu_walkx[4] = g.tex.ryu_wx[6];
+                g.tex.ryu_walkx[5] = g.tex.ryu_wx[7];
+                g.tex.ryu_walky[4] = g.tex.ryu_wy[6];
+                g.tex.ryu_walky[5] = g.tex.ryu_wy[7];
+            }
+        }
 	}
 
 	// Move right player 1
@@ -800,6 +879,39 @@ void physics(void)
                         player1.vel[0],  player2.w,
                         player1.w,       &g.tex.xc[0],    
                         &g.tex.xc[1],    g.xres);
+
+
+        if (player1.pos[0] > player2.pos[0]) {
+            g.time_walk2++;
+            if (g.time_walk2 % 6 == 0) {
+                if (g.tex.ryu_wx[7] > -0.5f) {
+                    g.tex.ryu_wx[6] = -0.75f;
+                    g.tex.ryu_wx[7] = -0.875f;
+                }
+                g.tex.ryu_wx[6] += 0.1234f;
+                g.tex.ryu_wx[7] += 0.1234f;
+                g.tex.ryu_walkx[4] = g.tex.ryu_wx[6];
+                g.tex.ryu_walkx[5] = g.tex.ryu_wx[7];
+                g.tex.ryu_walky[4] = g.tex.ryu_wy[6];
+                g.tex.ryu_walky[5] = g.tex.ryu_wy[7];
+            }
+        }
+        else if (player1.pos[0] < player2.pos[0]) {            
+            g.time_walk2++;
+            if (g.time_walk2 % 6 == 0) {
+                if (g.tex.ryu_wx[5] > 0.625f) {
+                    g.tex.ryu_wx[4] = 0.0f;
+                    g.tex.ryu_wx[5] = 0.125f;
+                }
+                g.tex.ryu_wx[4] += 0.132f;
+                g.tex.ryu_wx[5] += 0.132f;
+                g.tex.ryu_walkx[4] = g.tex.ryu_wx[4];
+                g.tex.ryu_walkx[5] = g.tex.ryu_wx[5];
+                g.tex.ryu_walky[4] = g.tex.ryu_wy[4];
+                g.tex.ryu_walky[5] = g.tex.ryu_wy[5];
+            }
+        }
+
 	}
 
 	// Jump player 1
@@ -1008,6 +1120,7 @@ void physics(void)
         punchCooldownPlayer(&player1.punchcooldown, &player1.punch);
 	}
 
+
 	// --Player 2 Movement & Abilites--
 
 	// Move left player 2
@@ -1041,6 +1154,37 @@ void physics(void)
                        &player2.pos[1], &player1.pos[1],
                        player2.vel[0], player1.w,
                        player2.w, &g.tex.xc[0], &g.tex.xc[1]);
+
+        if (player2.pos[0] > player1.pos[0]) {
+            g.time_walk++;
+            if (g.time_walk % 6 == 0) {
+                if (g.tex.ryu_wx[1] < -0.5f) {
+                    g.tex.ryu_wx[0] = 0.0f;
+                    g.tex.ryu_wx[1] = 0.125f;
+                }
+                g.tex.ryu_wx[0] -= 0.132f;
+                g.tex.ryu_wx[1] -= 0.132f;
+                g.tex.ryu_walkx[0] = -g.tex.ryu_wx[0];
+                g.tex.ryu_walkx[1] = -g.tex.ryu_wx[1];
+                g.tex.ryu_walky[0] = g.tex.ryu_wy[0];
+                g.tex.ryu_walky[1] = g.tex.ryu_wy[1];
+            }
+        }
+        else if (player2.pos[0] < player1.pos[0]) {            
+            g.time_walk++;
+            if (g.time_walk % 6 == 0) {
+                if (g.tex.ryu_wx[3] < 0.5f) {
+                    g.tex.ryu_wx[2] = 0.875f;
+                    g.tex.ryu_wx[3] = 1.0f;
+                }
+                g.tex.ryu_wx[2] -= 0.1262f;
+                g.tex.ryu_wx[3] -= 0.1262f;
+                g.tex.ryu_walkx[0] = g.tex.ryu_wx[2];
+                g.tex.ryu_walkx[1] = g.tex.ryu_wx[3];
+                g.tex.ryu_walky[0] = g.tex.ryu_wy[2];
+                g.tex.ryu_walky[1] = g.tex.ryu_wy[3];
+            }
+        }
 	}
 
 	// Move right player 2
@@ -1075,6 +1219,37 @@ void physics(void)
                         player2.vel[0], player1.w,
                         player2.w, &g.tex.xc[0],
                         &g.tex.xc[1], g.xres);
+
+        if (player2.pos[0] > player1.pos[0]) {
+            g.time_walk++;
+            if (g.time_walk % 6 == 0) {
+                if (g.tex.ryu_wx[3] > -0.5f) {
+                    g.tex.ryu_wx[2] = -0.75f;
+                    g.tex.ryu_wx[3] = -0.875f;
+                }
+                g.tex.ryu_wx[2] += 0.1234f;
+                g.tex.ryu_wx[3] += 0.1234f;
+                g.tex.ryu_walkx[0] = g.tex.ryu_wx[2];
+                g.tex.ryu_walkx[1] = g.tex.ryu_wx[3];
+                g.tex.ryu_walky[0] = g.tex.ryu_wy[2];
+                g.tex.ryu_walky[1] = g.tex.ryu_wy[3];
+            }
+        }
+        else if (player2.pos[0] < player1.pos[0]) {            
+            g.time_walk++;
+            if (g.time_walk % 6 == 0) {
+                if (g.tex.ryu_wx[1] > 0.625f) {
+                    g.tex.ryu_wx[0] = 0.0f;
+                    g.tex.ryu_wx[1] = 0.125f;
+                }
+                g.tex.ryu_wx[0] += 0.132f;
+                g.tex.ryu_wx[1] += 0.132f;
+                g.tex.ryu_walkx[0] = g.tex.ryu_wx[0];
+                g.tex.ryu_walkx[1] = g.tex.ryu_wx[1];
+                g.tex.ryu_walky[0] = g.tex.ryu_wy[0];
+                g.tex.ryu_walky[1] = g.tex.ryu_wy[1];
+            }
+        }
 	}
 
 	// Jump player 2
@@ -1487,6 +1662,7 @@ void render(void)
 			g.mapCenter = 0;
 		}
 
+
         //BACKGROUND 1
         if (g.loadMap == 1) {
             g.time_scroll++;
@@ -1505,6 +1681,32 @@ void render(void)
                               g.xres, g.yres,
                               img[1].width, img[1].height,
                               g.tex.map1Texture, img[1].data);
+
+            //PLAYER 1 SPIRTE:
+            unsigned char *Data1 = buildAlphaData(&img[3]);
+            displayCharacter(g.tex.ryu_walkx[4], g.tex.ryu_walkx[5],
+                             g.tex.ryu_walky[4], g.tex.ryu_walky[5],
+                             player1.pos[0] + player1.w,
+                             player1.pos[0] - player1.w,
+                             player1.pos[1] + player1.h,
+                             player1.pos[1] - player1.h,
+                             img[3].width, img[3].height,
+                             img[3].width, img[3].height,
+                             g.tex.ryu, Data1);
+
+
+
+            //PLAYER 2 SPRITE: 
+            unsigned char *Data2 = buildAlphaData(&img[4]);
+            displayCharacter(g.tex.ryu_walkx[0], g.tex.ryu_walkx[1],
+                             g.tex.ryu_walky[0], g.tex.ryu_walky[1],
+                             player2.pos[0] + player2.w,
+                             player2.pos[0] - player2.w,
+                             player2.pos[1] + player2.h,
+                             player2.pos[1] - player2.h,
+                             img[4].width, img[4].height,
+                             img[4].width, img[4].height,
+                             g.tex.ryu2, Data2);
         }
 
 		//glClear(GL_COLOR_BUFFER_BIT);
