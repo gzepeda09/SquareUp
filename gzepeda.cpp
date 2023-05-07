@@ -197,26 +197,43 @@ extern void playPunchSound()
 extern void rForms(float w, float h, unsigned char color[3], float pos0, float pos1)
 {
 
+
+
+
+    // glPushMatrix();
+    // glColor3ubv(color);
+    // glTranslatef(pos0, pos1, 0.0f);
+    // glBegin(GL_QUADS);
+    //     glVertex2f(-w, -h);
+    //     glVertex2f(-w,  h);
+    //     glVertex2f( w,  h);
+    //     glVertex2f( w, -h);
+    // glEnd();
+    // glPopMatrix();
+
+
+
+
 	glEnable(GL_TEXTURE_2D);
 	glGenTextures(1, &pltText);
 
 
 		glBindTexture(GL_TEXTURE_2D, pltText);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
 	glTexImage2D(GL_TEXTURE_2D, 0, 3, pltBG.width, pltBG.height, 0,
 	                        GL_RGB, GL_UNSIGNED_BYTE, pltBG.data);
-
-	glPushMatrix();
-	glTranslatef(pos0, pos1, 0.0f);
-	glColor3ubv(color);
-	glBegin(GL_QUADS);
-	    glTexCoord2f(0.0f, 0.0f); glVertex2f(-w, -h);
-	    glTexCoord2f(0.0f, 1.0f); glVertex2f(-w, h);
-	    glTexCoord2f(1.0f, 1.0f); glVertex2f(w, h);
-	    glTexCoord2f(1.0f, 0.0f); glVertex2f(w, -h);
-	glEnd();
-	glPopMatrix();
+    glPushMatrix();
+    glColor3ubv(color);
+    glTranslatef(pos0, pos1, 0.0f); // move the platform
+    glBindTexture(GL_TEXTURE_2D, pltText);
+    glBegin(GL_QUADS);
+        glTexCoord2f(0.0f, 0.0f); glVertex2f(-w, -h);
+        glTexCoord2f(0.0f, 1.0f); glVertex2f(-w, h);
+        glTexCoord2f(1.0f, 1.0f); glVertex2f(w, h);
+        glTexCoord2f(1.0f, 0.0f); glVertex2f(w, -h);
+    glEnd();
+    glPopMatrix();
 
 
 
@@ -469,7 +486,7 @@ extern void superPunch(int w, int w2, int h, float x, float y, int flipped, int 
 	    if (flipped == 1) { 
 
 			glPushMatrix();
-			glTranslatef(x + 40.0f, y, 0.0f);
+			glTranslatef(x + 30.0f, y, 0.0f);
 			glBegin(GL_QUADS);
 	        glColor3ub(255, 215, 0);
 		        glVertex2f( w2,  -h);
@@ -482,7 +499,7 @@ extern void superPunch(int w, int w2, int h, float x, float y, int flipped, int 
 	    } else { 
 	    	//reverse the super punch
 	        glPushMatrix();
-	        glTranslatef(x + 40.0f, y, 0.0f);
+	        glTranslatef(x - 30.0f, y, 0.0f);
 	        glBegin(GL_QUADS);
 	        glColor3ub(255, 215, 0);
 				glVertex2f(w2, h);
