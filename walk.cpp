@@ -63,6 +63,7 @@ extern void playerBlocking(float w, float h, float x, float y, int flipped);
 extern int mysteryBox(int x, int mbn);
 extern void holdingWeapon(float w, float h, float x, float y, int flipped, int weapon);
 extern void useWeapon(float w, float h, float x, float y, int flipped, int weapon);
+extern void showPowerUp(int weapon, int ywin, int xwin);
 //--- Brian ---
 extern void draw_power_ups(int w, int h, float x, float y);
 extern void power_ups_effects();
@@ -1635,6 +1636,17 @@ void render(void)
             }
         }
     }
+
+	//render power up for player 1
+	if ((time(NULL) - player1.timeLimit) <= 4) {
+		//render for 4 seconds
+		showPowerUp(player1.weapon, g.yres, g.xres); 
+	}
+	//render power up for player 2
+	if ((time(NULL) - player2.timeLimit) <= 4) {
+		//render for 4 seconds
+		showPowerUp(player2.weapon, g.yres, g.xres); 
+	}
 
 		//JOSE: I think this is part of Sprite stuff
 		if (g.bflag == 1) {

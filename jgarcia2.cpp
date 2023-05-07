@@ -24,10 +24,14 @@
 
 class Global {
 public:
-     GLuint menu; //my menus texture
-     GLuint restartBox;
-     GLuint menuBox;
+     GLuint menu; //my menus texture for both players
+     GLuint p1Red;
+     GLuint p2Red;
      GLuint mysBox;
+     GLuint speedUp;
+     GLuint slFoe;
+     GLuint health;
+     GLuint damage;
 }gl;
 
 class Image {
@@ -77,9 +81,11 @@ public:
                 if (!ppmFlag)
                         unlink(ppmname);
         }
-} player1Menu("menuPics/menuP1.png"), player2Menu("menuPics/menuP2.png"),
-menuSquare("menuPics/menuWhiteSquare.png"), restartSquare("menuPics/restartWhiteSquare.png"),
-mysBoxPic("images/mysteryBox.jpg");
+} player1Menu("menuPics/playerOneWinsMenu.png"), player2Menu("menuPics/playerTwoWinsMenu.png"),
+player2MenuRed("menuPics/playerTwoWinsMenuRed.png"), player1MenuRed("menuPics/playerOneWInsMenuRed.png"),
+mysBoxPic("images/mysteryBox.jpg"), playerSpeed("menuPics/doubleSpeed.png"),
+playerSlowF("menuPics/slowFoe.png"), playerHealth("menuPics/healthBoost.png"),
+playerDamage("menuPics/doubleDamage.png");
 
 
 void greenBoxes(int ywin, int xwin)
@@ -417,6 +423,119 @@ int mysteryBox(int x, int mbn)
     return randX;
 }
 
+void showPowerUp(int weapon, int ywin, int xwin)
+{
+    if (weapon == 2) { //speed
+        glEnable(GL_TEXTURE_2D);
+        glGenTextures(1, &gl.speedUp);
+        
+        int rbW = playerSpeed.width;
+        int rbH = playerSpeed.height;
+
+        glBindTexture(GL_TEXTURE_2D, gl.speedUp);
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+        glTexImage2D(GL_TEXTURE_2D, 0, 3, rbW, rbH, 0,
+                            GL_RGB, GL_UNSIGNED_BYTE, playerSpeed.data);
+
+        glBindTexture(GL_TEXTURE_2D, gl.speedUp);
+        glColor3f(1.0, 1.0, 1.0);
+
+        int widthR = 300;
+        int heightR = 100;
+                                
+        
+        glBegin(GL_QUADS);
+            glTexCoord2f(0.0f, 1.0f); glVertex2i(xwin/2, ywin/1.2);
+            glTexCoord2f(0.0f, 0.0f); glVertex2i(xwin/2, ywin/1.2+heightR);
+            glTexCoord2f(1.0f, 0.0f); glVertex2i(xwin/2+widthR, ywin/1.2+heightR);
+            glTexCoord2f(1.0f, 1.0f); glVertex2i(xwin/2+widthR, ywin/1.2);
+        glEnd();
+        glBindTexture(GL_TEXTURE_2D, 0);
+    } else if (weapon == 3) {//slow foe
+        glEnable(GL_TEXTURE_2D);
+        glGenTextures(1, &gl.slFoe);
+        
+        int rbW = playerSlowF.width;
+        int rbH = playerSlowF.height;
+
+        glBindTexture(GL_TEXTURE_2D, gl.slFoe);
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+        glTexImage2D(GL_TEXTURE_2D, 0, 3, rbW, rbH, 0,
+                            GL_RGB, GL_UNSIGNED_BYTE, playerSlowF.data);
+
+        glBindTexture(GL_TEXTURE_2D, gl.slFoe);
+        glColor3f(1.0, 1.0, 1.0);
+
+        int widthR = 300;
+        int heightR = 100;
+                                
+        
+        glBegin(GL_QUADS);
+            glTexCoord2f(0.0f, 1.0f); glVertex2i(xwin/2, ywin/1.2);
+            glTexCoord2f(0.0f, 0.0f); glVertex2i(xwin/2, ywin/1.2+heightR);
+            glTexCoord2f(1.0f, 0.0f); glVertex2i(xwin/2+widthR, ywin/1.2+heightR);
+            glTexCoord2f(1.0f, 1.0f); glVertex2i(xwin/2+widthR, ywin/1.2);
+        glEnd();
+        glBindTexture(GL_TEXTURE_2D, 0);
+    } else if (weapon == 4) {//health
+        glEnable(GL_TEXTURE_2D);
+        glGenTextures(1, &gl.health);
+        
+        int rbW = playerHealth.width;
+        int rbH = playerHealth.height;
+
+        glBindTexture(GL_TEXTURE_2D, gl.health);
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+        glTexImage2D(GL_TEXTURE_2D, 0, 3, rbW, rbH, 0,
+                            GL_RGB, GL_UNSIGNED_BYTE, playerHealth.data);
+
+        glBindTexture(GL_TEXTURE_2D, gl.health);
+        glColor3f(1.0, 1.0, 1.0);
+
+        int widthR = 300;
+        int heightR = 100;
+                                
+        
+        glBegin(GL_QUADS);
+            glTexCoord2f(0.0f, 1.0f); glVertex2i(xwin/2, ywin/1.2);
+            glTexCoord2f(0.0f, 0.0f); glVertex2i(xwin/2, ywin/1.2+heightR);
+            glTexCoord2f(1.0f, 0.0f); glVertex2i(xwin/2+widthR, ywin/1.2+heightR);
+            glTexCoord2f(1.0f, 1.0f); glVertex2i(xwin/2+widthR, ywin/1.2);
+        glEnd();
+        glBindTexture(GL_TEXTURE_2D, 0);
+    } else {//damage
+        glEnable(GL_TEXTURE_2D);
+        glGenTextures(1, &gl.damage);
+        
+        int rbW = playerDamage.width;
+        int rbH = playerDamage.height;
+
+        glBindTexture(GL_TEXTURE_2D, gl.damage);
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+        glTexImage2D(GL_TEXTURE_2D, 0, 3, rbW, rbH, 0,
+                            GL_RGB, GL_UNSIGNED_BYTE, playerDamage.data);
+
+        glBindTexture(GL_TEXTURE_2D, gl.damage);
+        glColor3f(1.0, 1.0, 1.0);
+
+        int widthR = 300;
+        int heightR = 100;
+                                
+        
+        glBegin(GL_QUADS);
+            glTexCoord2f(0.0f, 1.0f); glVertex2i(xwin/2, ywin/1.2);
+            glTexCoord2f(0.0f, 0.0f); glVertex2i(xwin/2, ywin/1.2+heightR);
+            glTexCoord2f(1.0f, 0.0f); glVertex2i(xwin/2+widthR, ywin/1.2+heightR);
+            glTexCoord2f(1.0f, 1.0f); glVertex2i(xwin/2+widthR, ywin/1.2);
+        glEnd();
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+}
+
 int flasher = 0; //variable to flash menu options in menu
 void restartScreen(int player, int ywin, int xwin)
 {
@@ -427,6 +546,8 @@ void restartScreen(int player, int ywin, int xwin)
 	r.left = 10;
 	r.center = 0;
     */
+
+   //player variable represents which player dies
     
     //for player menu///////////////////////////////////////////////////////////////
     glEnable(GL_TEXTURE_2D);
@@ -443,8 +564,6 @@ void restartScreen(int player, int ywin, int xwin)
         h = player2Menu.height;
     }
 
-    //Consider changing the look of the menu? add a flashing wins in the middle of the menu?
-    //add a temp image of what power up the player got
     //for player menu
     glBindTexture(GL_TEXTURE_2D, gl.menu);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
@@ -473,67 +592,66 @@ void restartScreen(int player, int ywin, int xwin)
     
     
     if (flasher < 20) {
-    //for white restart box//////////////////////////////////////////////////////
-        //printf("flasher: %i\n", flasher);
-        glEnable(GL_TEXTURE_2D);
-        glGenTextures(1, &gl.restartBox);
-    
-        int rbW = restartSquare.width;
-        int rbH = restartSquare.height;
-
-        glBindTexture(GL_TEXTURE_2D, gl.restartBox);
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-        glTexImage2D(GL_TEXTURE_2D, 0, 3, rbW, rbH, 0,
-                            GL_RGB, GL_UNSIGNED_BYTE, restartSquare.data);
-
-        glBindTexture(GL_TEXTURE_2D, gl.restartBox);
-        glColor3f(1.0, 1.0, 1.0);
-
-        int sizeRestart = 200;
-        int adjustYBox = 36;
-        int adjustXBox = 285; //the x seems to be a little off for player 2 it looks like it needs to be 
-                              //pushed to the right a little bit.
-                              
-    
-        glBegin(GL_QUADS);
-            glTexCoord2f(0.0f, 1.0f); glVertex2i(xwin/3+adjustXBox, ywin/2+adjustYBox);
-            glTexCoord2f(0.0f, 0.0f); glVertex2i(xwin/3+adjustXBox, ywin/2+sizeRestart+adjustYBox);
-            glTexCoord2f(1.0f, 0.0f); glVertex2i(xwin/3+sizeRestart+adjustXBox, ywin/2+sizeRestart+adjustYBox);
-            glTexCoord2f(1.0f, 1.0f); glVertex2i(xwin/3+sizeRestart+adjustXBox, ywin/2+adjustYBox);
-        glEnd();
-        glBindTexture(GL_TEXTURE_2D, 0);
+        if (player != 1) {
+            //for player 1 menu red//////////////////////////////////////////////////////
+            glEnable(GL_TEXTURE_2D);
+            glGenTextures(1, &gl.p1Red);
         
-        //for white menu box//////////////////////////////////////////////////////////////////
-        glEnable(GL_TEXTURE_2D);
-        glGenTextures(1, &gl.menuBox);
-    
-        int mbW = menuSquare.width;
-        int mbH = menuSquare.height;
+            int rbW = player1MenuRed.width;
+            int rbH = player1MenuRed.height;
 
-        glBindTexture(GL_TEXTURE_2D, gl.menuBox);
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-        glTexImage2D(GL_TEXTURE_2D, 0, 3, mbW, mbH, 0,
-                            GL_RGB, GL_UNSIGNED_BYTE, menuSquare.data);
+            glBindTexture(GL_TEXTURE_2D, gl.p1Red);
+            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+            glTexImage2D(GL_TEXTURE_2D, 0, 3, rbW, rbH, 0,
+                                GL_RGB, GL_UNSIGNED_BYTE, player1MenuRed.data);
 
-        glBindTexture(GL_TEXTURE_2D, gl.menuBox);
-        glColor3f(1.0, 1.0, 1.0);
+            glBindTexture(GL_TEXTURE_2D, gl.p1Red);
+            glColor3f(1.0, 1.0, 1.0);
 
-        int sizeMenu = 120;
-        int adjustYMenu = 76;
-        int adjustXMenu = 40;
-    
-        glBegin(GL_QUADS);
-            glTexCoord2f(0.0f, 1.0f); glVertex2i(xwin/3+adjustXMenu, ywin/2+adjustYMenu);
-            glTexCoord2f(0.0f, 0.0f); glVertex2i(xwin/3+adjustXMenu, ywin/2+sizeMenu+adjustYMenu);
-            glTexCoord2f(1.0f, 0.0f); glVertex2i(xwin/3+sizeMenu+adjustXMenu, ywin/2+sizeMenu+adjustYMenu);
-            glTexCoord2f(1.0f, 1.0f); glVertex2i(xwin/3+sizeMenu+adjustXMenu, ywin/2+adjustYMenu);
-        glEnd();
-        glBindTexture(GL_TEXTURE_2D, 0);
+            int widthR = 500;
+            int heightR = 500;
+                                
+        
+            glBegin(GL_QUADS);
+                glTexCoord2f(0.0f, 1.0f); glVertex2i(xwin/3, ywin/2);
+                glTexCoord2f(0.0f, 0.0f); glVertex2i(xwin/3, ywin/2+heightR);
+                glTexCoord2f(1.0f, 0.0f); glVertex2i(xwin/3+widthR, ywin/2+heightR);
+                glTexCoord2f(1.0f, 1.0f); glVertex2i(xwin/3+widthR, ywin/2);
+            glEnd();
+            glBindTexture(GL_TEXTURE_2D, 0);
+        } else {
+            //for player 2 menu red//////////////////////////////////////////////////////////////////
+            glEnable(GL_TEXTURE_2D);
+            glGenTextures(1, &gl.p2Red);
+        
+            int mbW = player2MenuRed.width;
+            int mbH = player2MenuRed.height;
+
+            glBindTexture(GL_TEXTURE_2D, gl.p2Red);
+            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+            glTexImage2D(GL_TEXTURE_2D, 0, 3, mbW, mbH, 0,
+                                GL_RGB, GL_UNSIGNED_BYTE, player2MenuRed.data);
+
+            glBindTexture(GL_TEXTURE_2D, gl.p2Red);
+            glColor3f(1.0, 1.0, 1.0);
+
+            int widthR = 500;
+            int heightR = 500;
+                                
+        
+            glBegin(GL_QUADS);
+                glTexCoord2f(0.0f, 1.0f); glVertex2i(xwin/3, ywin/2);
+                glTexCoord2f(0.0f, 0.0f); glVertex2i(xwin/3, ywin/2+heightR);
+                glTexCoord2f(1.0f, 0.0f); glVertex2i(xwin/3+widthR, ywin/2+heightR);
+                glTexCoord2f(1.0f, 1.0f); glVertex2i(xwin/3+widthR, ywin/2);
+            glEnd();
+            glBindTexture(GL_TEXTURE_2D, 0);
+        }
     }
     
-        flasher += 1;
+    flasher += 1;
 
     if (flasher > 40) {
         printf("flasher: %i\n", flasher);
