@@ -71,9 +71,6 @@ extern void rplatPhys2(double *pos1, double *vel, bool *onPlt,
 extern void supPunchPhys1(bool *btnPress, int *pB, int *sPnch);
 extern void supPunchPhys2(bool *btnPress, int *sPnch);
 
-// extern void pltPhysics(double plPos0, double plPos1, double plVel,
-//                       float rPos0, float rPos1, float rW, float rH);  
-
 
 ALuint alBufferDrip;
 ALuint alSourceDrip;
@@ -186,66 +183,32 @@ extern void playPunchSound()
 
 // End of code taken from snake framework
 
-
-// extern void newText(int yres, int xres){
-
-
-
-// }
-
-
 extern void rForms(float w, float h, unsigned char color[3], float pos0, float pos1)
 {
 
 
+    glEnable(GL_TEXTURE_2D);
+    glGenTextures(1, &pltText);
 
 
-    // glPushMatrix();
-    // glColor3ubv(color);
-    // glTranslatef(pos0, pos1, 0.0f);
-    // glBegin(GL_QUADS);
-    //     glVertex2f(-w, -h);
-    //     glVertex2f(-w,  h);
-    //     glVertex2f( w,  h);
-    //     glVertex2f( w, -h);
-    // glEnd();
-    // glPopMatrix();
-
-
-
-
-	glEnable(GL_TEXTURE_2D);
-	glGenTextures(1, &pltText);
-
-
-		glBindTexture(GL_TEXTURE_2D, pltText);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, 3, pltBG.width, pltBG.height, 0,
-	                        GL_RGB, GL_UNSIGNED_BYTE, pltBG.data);
+    glBindTexture(GL_TEXTURE_2D, pltText);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, pltBG.width, pltBG.height, 0,
+				GL_RGB, GL_UNSIGNED_BYTE, pltBG.data);
     glPushMatrix();
     glColor3ubv(color);
     glTranslatef(pos0, pos1, 0.0f); // move the platform
     glBindTexture(GL_TEXTURE_2D, pltText);
     glBegin(GL_QUADS);
-        glTexCoord2f(0.0f, 0.0f); glVertex2f(-w, -h);
-        glTexCoord2f(0.0f, 1.0f); glVertex2f(-w, h);
-        glTexCoord2f(1.0f, 1.0f); glVertex2f(w, h);
-        glTexCoord2f(1.0f, 0.0f); glVertex2f(w, -h);
+	glTexCoord2f(0.0f, 0.0f); glVertex2f(-w, -h);
+	glTexCoord2f(0.0f, 1.0f); glVertex2f(-w, h);
+	glTexCoord2f(1.0f, 1.0f); glVertex2f(w, h);
+	glTexCoord2f(1.0f, 0.0f); glVertex2f(w, -h);
     glEnd();
     glPopMatrix();
 
-
-
-
-	// glBegin(GL_QUADS);
-	//     glTexCoord2f(0.0f, 0.0f); glVertex2f(-w, -h);
-	//     glTexCoord2f(0.0f, 1.0f); glVertex2f(-w, h);
-	//     glTexCoord2f(1.0f, 1.0f); glVertex2f(w, h);
-	//     glTexCoord2f(1.0f, 0.0f); glVertex2f(w, -h);
-	// glEnd();
-
-	glBindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
 
 
@@ -255,12 +218,12 @@ extern void rForms(float w, float h, unsigned char color[3], float pos0, float p
 
 extern void health(float w, float h, unsigned char color[3], float pos0, float pos1, int player, int health)
 {
+ 
+    Rect r;
 
-	Rect r;
+    unsigned int c = 0x000000;
 
-	unsigned int c = 0x000000;
-
-	r.bot = pos1 - 65.0f;
+    r.bot = pos1 - 65.0f;
     r.left = pos0;
     r.center = 10;
     // ggprint8b(&r, 16, c, "Player 1 Health: %i", player1.health);
@@ -290,161 +253,27 @@ extern void health(float w, float h, unsigned char color[3], float pos0, float p
 
 
 
-// extern void pltPhysics(double plPos0, double plPos1, double plVel,
-//                       float rPos0, float rPos1, float rW, float rH, int yres)
-// {
-// 	bool onPlat = false;
-
-//     double gRav = 0.0000001;
-
-//         if (plPos0 >= rPos0 - rW &&
-//             plPos0 <= rPos0 + rW &&
-//             plPos1 >= rPos1 - rH &&
-//             plPos1 <= rPos1 + rH) {
-//             // The player is on this platform, so set their vertical position
-//             // to the top of the platform
-//             if(!top){
-//                 plPos1 = (rPos1 * 2) + rH;
-//                 top = true;
-//             }
-//             onPlat = true;
-//             activate = 1;
-//         }
-
-        
-
-
-//         if (onPlat) {
-//             // Player is on a platform, so their vertical velocity should be zero
-//             plVel = 0.0f;
-//             plPos1 = (rPos1 * 2) + rH;
-//         } else {
-
-//             if(activate == 1){
-//                 // Player is not on a platform, so make them fall
-//                 plVel -= gRav;
-//                 // Check if player has reached the bottom of the screen
-//                 if (plPos1 <= 0.0f) {
-//                     // Player has fallen off the bottom of the screen, so reset their position
-//                     if(!stop){
-//                         plPos1 = yres/2 - 440.5f;
-//                         plVel = 0.0;
-//                         stop = true;
-//                         activate = 0;
-//                     }
-//                 }
-
-//                 stop = false;
-//             }
-//         }
-    
-
-
-
-
-// }
-
-
-
 extern void strMenu(int yres, int xres)
 {
 
     	//for player menu
 
 
-		glEnable(GL_TEXTURE_2D);
-		glGenTextures(1, &menuBgrnd);
+	glEnable(GL_TEXTURE_2D);
+	glGenTextures(1, &menuBgrnd);
 
-		glBindTexture(GL_TEXTURE_2D, menuBgrnd);
-		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-		glTexImage2D(GL_TEXTURE_2D, 0, 3, sMenuBg.width, sMenuBg.height, 0,
-		                        GL_RGB, GL_UNSIGNED_BYTE, sMenuBg.data);
-	    glBegin(GL_QUADS);
-	        glTexCoord2f(0.0f, 0.0f); glVertex2i(0, yres);
-	        glTexCoord2f(0.0f, 1.0f); glVertex2i(0, 0);
-	        glTexCoord2f(1.0f, 1.0f); glVertex2i(xres, 0);
-	        glTexCoord2f(1.0f, 0.0f); glVertex2i(xres, yres);
-	    glEnd();
-
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-
-    // Rect r;
-
-
-    // unsigned int d = 0xffffff;
-
-
-    // Box sMenu[3];
-
-    // int y = 0;
-
-
-    // for (int i = 0; i < 3; i++){
-    //     sMenu[i].set_width(100.0f);
-    //     sMenu[i].set_height(25.0f);
-    //     sMenu[i].set_xres(xres);
-    //     sMenu[i].set_yres(yres - y);
-
-    //     y += 200;
-    // }
-
-    // r.bot = yres - sMenu[0].pos[1];
-    // r.left = sMenu[0].pos[0] - 10.0f;
-    // r.center = 0;
-
-
-
-    // unsigned char c[3] = {0, 128, 0};
-    // unsigned char c2[3] = {0, 128, 0};
-    // unsigned char c3[3] = {184, 2, 2};
-
-
-
-    // sMenu[0].set_color(c2);
-    // sMenu[1].set_color(c);
-    // sMenu[2].set_color(c3);
-
-
-    // unsigned char bc[3] = {255, 255, 255};
-
-
-
-     
-
-    // for (int i = 0; i < 3; ++i){
-
-    //     glPushMatrix();
-    //     glColor3ubv(sMenu[i].color);
-    //     glTranslatef(sMenu[i].pos[0], sMenu[i].pos[1], 0.0f);
-    //     glBegin(GL_QUADS);
-    //         glVertex2f(-sMenu[i].w, -sMenu[i].h);
-    //         glVertex2f(-sMenu[i].w,  sMenu[i].h);
-    //         glVertex2f( sMenu[i].w,  sMenu[i].h);
-    //         glVertex2f( sMenu[i].w, -sMenu[i].h);
-    //     glEnd();
-    //     glPopMatrix();
-
-
-
-    // }
-
-    // ggprint8b(&r, 16, d, "(F1)-Start");
-
-
-    // r.bot = yres - sMenu[1].pos[1] - 300.0f;
-    // r.left = sMenu[1].pos[0] - 15.5f;
-    // r.center = 0;
-
-    // ggprint8b(&r, 16, d, "(F2)-Controls");
-
-
-    // r.bot = yres - sMenu[2].pos[1] - 300.0f;
-    // r.left = sMenu[2].pos[0] - 10.0f;
-    // r.center = 0;
-
-    // ggprint8b(&r, 16, d, "(F3)-Quit");
+	glBindTexture(GL_TEXTURE_2D, menuBgrnd);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, sMenuBg.width, sMenuBg.height, 0,
+				GL_RGB, GL_UNSIGNED_BYTE, sMenuBg.data);
+	glBegin(GL_QUADS);
+		glTexCoord2f(0.0f, 0.0f); glVertex2i(0, yres);
+		glTexCoord2f(0.0f, 1.0f); glVertex2i(0, 0);
+		glTexCoord2f(1.0f, 1.0f); glVertex2i(xres, 0);
+		glTexCoord2f(1.0f, 0.0f); glVertex2i(xres, yres);
+        glEnd();
+	glBindTexture(GL_TEXTURE_2D, 0);
 
 
 
@@ -452,8 +281,8 @@ extern void strMenu(int yres, int xres)
 }
 extern void powBar(float w, float h, unsigned char color[3], float pos0, float pos1)
 {
-	Rect r;
-	unsigned int d = 0x000000;
+    Rect r;
+    unsigned int d = 0x000000;
 
 
     r.bot = pos1 - 8.0f;
@@ -544,31 +373,29 @@ extern void cntrlMenu(int yres, int xres)
 
     	//for control menu
 
-
-		glEnable(GL_TEXTURE_2D);
-		glGenTextures(1, &cntrlBg);
+       glEnable(GL_TEXTURE_2D);
+       glGenTextures(1, &cntrlBg);
 
 		glBindTexture(GL_TEXTURE_2D, cntrlBg);
 		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
 		glTexImage2D(GL_TEXTURE_2D, 0, 3, cMenuBG.width, cMenuBG.height, 0,
 		                        GL_RGB, GL_UNSIGNED_BYTE, cMenuBG.data);
-	    glBegin(GL_QUADS);
-	        glTexCoord2f(0.0f, 0.0f); glVertex2i(0, yres);
-	        glTexCoord2f(0.0f, 1.0f); glVertex2i(0, 0);
-	        glTexCoord2f(1.0f, 1.0f); glVertex2i(xres, 0);
-	        glTexCoord2f(1.0f, 0.0f); glVertex2i(xres, yres);
-	    glEnd();
-
-		glBindTexture(GL_TEXTURE_2D, 0);
+       glBegin(GL_QUADS);
+           glTexCoord2f(0.0f, 0.0f); glVertex2i(0, yres);
+           glTexCoord2f(0.0f, 1.0f); glVertex2i(0, 0);
+           glTexCoord2f(1.0f, 1.0f); glVertex2i(xres, 0);
+           glTexCoord2f(1.0f, 0.0f); glVertex2i(xres, yres);
+       glEnd();
+       glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 extern void chrgPhys(int *pBar, bool *chrg)
 {
-		(*pBar)++;
+	(*pBar)++;
 
-		std::cout << "Charging up" << std::endl;
-		(*chrg) = true;
+	std::cout << "Charging up" << std::endl;
+	(*chrg) = true;
 
 }
 
@@ -579,7 +406,6 @@ extern void rplatPhys(float ph, float rh, float rw, float rPos0, float rPos1, fl
 						  double *pos1, 
 						  bool *onPlt, bool *tp, int *activate)
 {
-
 		
 	if (pos0 >= rPos0 - rw &&
 			pos0 <= rPos0 + rw &&
@@ -589,19 +415,12 @@ extern void rplatPhys(float ph, float rh, float rw, float rPos0, float rPos1, fl
 		// to the top of the platform
 		if(!tp){
 			(*pos1) = rPos1 + rh/2 + 
-				ph/2;
-				
-
+				  ph/2;
 		}
-
+		
 		(*onPlt) = true;
 		(*activate) = 1;
-
-
 	}
-
-
-
 
 }
 
@@ -648,10 +467,8 @@ extern void supPunchPhys1(bool *btnPress, int *pB, int *sPnch)
 	        if ((*pB) >= 150) {
 	            (*pB) -= 150;
 
-	       		 (*sPnch) = 1;
-	           	
+	       		 (*sPnch) = 1;  	
 	        }
-
 
 	    }
 }
