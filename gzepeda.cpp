@@ -409,8 +409,8 @@ extern void rplatPhys(float ph, float rh, float rw, float rPos0, float rPos1, fl
 		
 	if (pos0 >= rPos0 - rw &&
 			pos0 <= rPos0 + rw &&
-			(*pos1) - 100.0f >= rPos1 - rh &&
-			(*pos1) - 100.0f <= rPos1 + rh) {
+			(*pos1) - 95.5f >= rPos1 - rh &&
+			(*pos1) - 95.5f <= rPos1 + rh){
 		// The player is on this platform, so set their vertical position
 		// to the top of the platform
 		if(!tp){
@@ -446,7 +446,7 @@ extern void rplatPhys2(double *pos1, double *vel, bool *onPlt,
 			if ((*pos1) <= 0.0f) {
 				// Player has fallen off the bottom of the screen, so reset their position
 				if(!(*stp)){
-					(*pos1) = yres/2 - 405.0f;
+					(*pos1) = yres/2 - 440.0f;
 					(*vel) = 0.0;
 					(*stp) = true;
 					(*activate) = 0;
