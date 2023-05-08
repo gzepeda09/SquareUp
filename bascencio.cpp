@@ -29,7 +29,7 @@ extern void power_up_effects()
 extern void Player_1(int cx, int cy, int walkFrame, GLuint walkTexture) 
 {
 	float h = 140.0;
-	float w = h * 0.6;
+	float w = h;
 	glPushMatrix();
 	glColor3f(1.0, 1.0, 1.0);
 	glBindTexture(GL_TEXTURE_2D, walkTexture);
@@ -58,10 +58,10 @@ extern void Player_1(int cx, int cy, int walkFrame, GLuint walkTexture)
 
 }
 
-extern void Player_2(int cx, int cy, int walkFrame, GLuint walkTexture) 
+extern void Player_1_fliped(int cx, int cy, int walkFrame, GLuint walkTexture) 
 {
 	float h = 140.0;
-	float w = h * 0.6;
+	float w = h;
 	glPushMatrix();
 	glColor3f(1.0, 1.0, 1.0);
 	glBindTexture(GL_TEXTURE_2D, walkTexture);
@@ -70,6 +70,134 @@ extern void Player_2(int cx, int cy, int walkFrame, GLuint walkTexture)
 	glColor4ub(255,255,255,255);
 	int numColumns = 8;
 	int numRows = 5;
+	int ix = walkFrame % numColumns;
+	int iy = walkFrame / numColumns;
+
+	float tx = (float)ix / (float)numColumns;
+	float ty = (float)iy / (float)numRows;
+	float tw = 1.0f / (float)numColumns;
+	float th = 1.0f / (float)numRows;
+
+	glBegin(GL_QUADS);
+	glTexCoord2f(tx + tw, ty + th); 	glVertex2i(cx - w, cy - h - 70);
+	glTexCoord2f(tx + tw, ty); 		glVertex2i(cx - w, cy + h - 70);
+	glTexCoord2f(tx, ty); 	glVertex2i(cx + w, cy + h - 70);
+	glTexCoord2f(tx, ty + th); glVertex2i(cx + w, cy - h - 70);
+	glEnd();
+	glPopMatrix();
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glDisable(GL_ALPHA_TEST);
+
+}
+
+extern void Player_2(int cx, int cy, int walkFrame, GLuint walkTexture) 
+{
+	float h = 140.0;
+	float w = h;
+	glPushMatrix();
+	glColor3f(1.0, 1.0, 1.0);
+	glBindTexture(GL_TEXTURE_2D, walkTexture);
+	glEnable(GL_ALPHA_TEST);
+	glAlphaFunc(GL_GREATER, 0.0f);
+	glColor4ub(255,255,255,255);
+	int numColumns = 8;
+	int numRows = 5;
+	int ix = walkFrame % numColumns;
+	int iy = walkFrame / numColumns;
+
+	float tx = (float)ix / (float)numColumns;
+	float ty = (float)iy / (float)numRows;
+	float tw = 1.0f / (float)numColumns;
+	float th = 1.0f / (float)numRows;
+
+	glBegin(GL_QUADS);
+	glTexCoord2f(tx, ty + th); 	glVertex2i(cx - w, cy - h - 70);
+	glTexCoord2f(tx, ty); 		glVertex2i(cx - w, cy + h - 70);
+	glTexCoord2f(tx + tw, ty); 	glVertex2i(cx + w, cy + h - 70);
+	glTexCoord2f(tx + tw, ty + th); glVertex2i(cx + w, cy - h - 70);
+	glEnd();
+	glPopMatrix();
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glDisable(GL_ALPHA_TEST);
+
+}
+
+extern void Player_2_fliped(int cx, int cy, int walkFrame, GLuint walkTexture) 
+{
+	float h = 140.0;
+	float w = h;
+	glPushMatrix();
+	glColor3f(1.0, 1.0, 1.0);
+	glBindTexture(GL_TEXTURE_2D, walkTexture);
+	glEnable(GL_ALPHA_TEST);
+	glAlphaFunc(GL_GREATER, 0.0f);
+	glColor4ub(255,255,255,255);
+	int numColumns = 8;
+	int numRows = 5;
+	int ix = walkFrame % numColumns;
+	int iy = walkFrame / numColumns;
+
+	float tx = (float)ix / (float)numColumns;
+	float ty = (float)iy / (float)numRows;
+	float tw = 1.0f / (float)numColumns;
+	float th = 1.0f / (float)numRows;
+
+	glBegin(GL_QUADS);
+	glTexCoord2f(tx + tw, ty + th); 	glVertex2i(cx - w, cy - h - 70);
+	glTexCoord2f(tx + tw, ty); 		glVertex2i(cx - w, cy + h - 70);
+	glTexCoord2f(tx, ty); 	glVertex2i(cx + w, cy + h - 70);
+	glTexCoord2f(tx, ty + th); glVertex2i(cx + w, cy - h - 70);
+	glEnd();
+	glPopMatrix();
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glDisable(GL_ALPHA_TEST);
+
+}
+extern void Player_2_spe(int cx, int cy, int walkFrame, GLuint walkTexture)
+{
+        float h = 140.0;
+        float w = h+50;
+        glPushMatrix();
+        glColor3f(1.0, 1.0, 1.0);
+        glBindTexture(GL_TEXTURE_2D, walkTexture);
+        glEnable(GL_ALPHA_TEST);
+        glAlphaFunc(GL_GREATER, 0.0f);
+        glColor4ub(255,255,255,255);
+        int numColumns = 4;
+        int numRows = 1;
+        int ix = walkFrame % numColumns;
+        int iy = walkFrame / numColumns;
+
+        float tx = (float)ix / (float)numColumns;
+        float ty = (float)iy / (float)numRows;
+        float tw = 1.0f / (float)numColumns;
+        float th = 1.0f / (float)numRows;
+
+        glBegin(GL_QUADS);
+        glTexCoord2f(tx, ty + th);      glVertex2i(cx - w, cy - h - 70);
+        glTexCoord2f(tx, ty);           glVertex2i(cx - w, cy + h - 70);
+        glTexCoord2f(tx + tw, ty);      glVertex2i(cx + w, cy + h - 70);
+        glTexCoord2f(tx + tw, ty + th); glVertex2i(cx + w, cy - h - 70);
+        glEnd();
+        glPopMatrix();
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glDisable(GL_ALPHA_TEST);
+
+}
+
+
+extern void Player_2_spe_fliped(int cx, int cy, int walkFrame, GLuint walkTexture) 
+{
+	float h = 140.0;
+	float w = h+50;
+	glPushMatrix();
+	glColor3f(1.0, 1.0, 1.0);
+	glBindTexture(GL_TEXTURE_2D, walkTexture);
+	glEnable(GL_ALPHA_TEST);
+	glAlphaFunc(GL_GREATER, 0.0f);
+	glColor4ub(255,255,255,255);
+	int numColumns = 4;
+	int numRows = 1;
 	int ix = walkFrame % numColumns;
 	int iy = walkFrame / numColumns;
 

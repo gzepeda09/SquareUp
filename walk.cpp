@@ -65,11 +65,12 @@ extern void holdingWeapon(float w, float h, float x, float y, int flipped, int w
 extern void useWeapon(float w, float h, float x, float y, int flipped, int weapon);
 extern void showPowerUp(int weapon, int ywin, int xwin);
 //--- Brian ---
-extern void draw_power_ups(int w, int h, float x, float y);
-extern void power_ups_effects();
 extern void Player_1(int cx, int cy, int walkFrame, GLuint walkTexture);
+extern void Player_1_fliped(int cx, int cy, int walkFrame, GLuint walkTexture);
 extern void Player_2(int cx, int cy, int walkFrame, GLuint walkTexture);
-
+extern void Player_2_fliped(int cx, int cy, int walkFrame, GLuint walkTexture);
+extern void Player_2_spe(int cx, int cy, int walkFrame, GLuint walkTexture);
+extern void Player_2_spe_fliped(int cx, int cy, int walkFrame, GLuint walkTexture);
 
 
 // Geno
@@ -82,9 +83,10 @@ extern void cntrlMenu(int yres, int xres);
 
 
 //JOSE: THIS IS WHERE ANY IMAGES WE USE GO
-Image img[3] = {"images/Freddy2.png",
+Image img[4] = {"images/Freddy2.png",
 	"images/map1-06.png",
-	"images/Freddy2.png"};
+	"images/Wolf.png",
+	"images/Wolf_spe.png"};
 
 //JOSE: sets up variables used for creating the background.
 class Texture {
@@ -157,6 +159,7 @@ class Timers {
 		struct timespec timeStart, timeEnd, timeCurrent;
 		struct timespec walkTime;
 		struct timespec walk2Time;
+		struct timespec speTime;
 		Timers() {
 			physicsRate = 1.0 / 30.0;
 			oobillion = 1.0 / 1e9;
@@ -181,6 +184,7 @@ class Global {
 		int walk;
 		int walkFrame;
 		int walk2Frame;
+		int speFrame;
 		int gflag, bflag;
 		int start;
 		int ctrls;
@@ -192,6 +196,7 @@ class Global {
 		int nextMysteryBox;
 		GLuint walkTexture;
 		GLuint walk2Texture;
+		GLuint speTexture;
 		int mapCenter;
 		int punchflip = 1;
 		Texture tex;
@@ -216,6 +221,7 @@ class Global {
 			memset(keyStates, 0, 65536);
 			walkFrame=0;
 			walk2Frame=0;
+			speFrame=0;
 			delay = 0.1;
 			for (int i=0; i<20; i++) {
 				box[i][0] = rnd() * xres;
@@ -424,6 +430,20 @@ void initOpengl(void)
 	glEnable(GL_TEXTURE_2D);
 	initialize_fonts();
 	//
+	//JOSE: Part of displaying map 1; will try and see if i can add to own source file
+	int w1 = img[1].width;
+	int h1 = img[1].height;
+	glBindTexture(GL_TEXTURE_2D, g.tex.backTexture);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, w1, h1, 0,
+			GL_RGB, GL_UNSIGNED_BYTE, img[1].data);
+	g.tex.xc[0] = 0.0f;
+	g.tex.xc[1] = 1.0f;
+	g.tex.yc[0] = 0.0f;
+	//g.tex.yc[1] = 1.0f;
+	g.tex.yc[1] = 0.125f;
+	//==========================================================================
 	//load the images file into a ppm structure.
 	//Brian used for displaying sprites
 	//==========================================================================
@@ -449,20 +469,6 @@ void initOpengl(void)
 	//free(walkData);
 	//unlink("./images/walk.ppm");
 	//-------------------------------------------------------------------------
-	//JOSE: Part of displaying map 1; will try and see if i can add to own source file
-	int w1 = img[1].width;
-	int h1 = img[1].height;
-	glBindTexture(GL_TEXTURE_2D, g.tex.backTexture);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, 3, w1, h1, 0,
-			GL_RGB, GL_UNSIGNED_BYTE, img[1].data);
-	g.tex.xc[0] = 0.0f;
-	g.tex.xc[1] = 1.0f;
-	g.tex.yc[0] = 0.0f;
-	//g.tex.yc[1] = 1.0f;
-	g.tex.yc[1] = 0.125f;
-	//==========================================================================
 	int w2 = img[2].width;
 	int h2 = img[2].height;
 	//
@@ -481,6 +487,26 @@ void initOpengl(void)
 	unsigned char *walk2Data = buildAlphaData(&img[2]);	
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w2, h2, 0,
 			GL_RGBA, GL_UNSIGNED_BYTE, walk2Data);
+	//-------------------------------------------------------------------------
+	int w3 = img[3].width;
+	int h3 = img[3].height;
+	//
+	//create opengl texture elements
+	glGenTextures(1, &g.speTexture);
+	//-------------------------------------------------------------------------
+	//silhouette
+	//this is similar to a sprite graphic
+	//
+	glBindTexture(GL_TEXTURE_2D, g.speTexture);
+	//
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	//
+	//must build a new set of data...
+	unsigned char *speData = buildAlphaData(&img[3]);	
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w3, h3, 0,
+			GL_RGBA, GL_UNSIGNED_BYTE, speData);
+
 
 }
 void init() {
@@ -762,8 +788,11 @@ void physics(void)
 	}
 	if(g.keyStates[XK_a] || g.keyStates[XK_d]) {
 		idle = false;
+	}else if(g.keyStates[XK_Left] || g.keyStates[XK_Right]) {
+		idle2 = false;
 	}else {
 		idle = true;
+		idle2 = true;
 	}
 	// Move left player 1
 	if(g.keyStates[XK_a] && player1.dead == 0 && !chargeUp) {
@@ -1004,6 +1033,7 @@ void physics(void)
 			player2.dead = 1;
 			g.nextMysteryBox = -10;
 			g.walkFrame = 37;
+			g.walk2Frame = 30;
 		}
 	}
 
@@ -1012,6 +1042,7 @@ void physics(void)
 			player1.punch == 0 && !chargeUp) {
 		//printf("player1 blocking");
 		player1.block = 1;
+		g.walkFrame = 26;
 	} else {
 		player1.block = 0;
 	}
@@ -1085,11 +1116,6 @@ void physics(void)
 			if (g.box[i][0] < -16.0)
 				g.box[i][0] += g.xres + 16.0;
 		}
-	}
-	if(g.keyStates[XK_Left] || g.keyStates[XK_Right]) {
-		idle2 = false;
-	}else {
-		idle2 = true;
 	}
 
 	// Move left player 2
@@ -1174,6 +1200,7 @@ void physics(void)
 		//std::cout << "Up Arrow key pressed" << std::endl;
 
 		jumpPlayer(&player2.vel[1], &player2.vel[2]);
+		g.walk2Frame = 24;
 	}
 
 	if (player2.vel[2] != 0) {
@@ -1190,13 +1217,32 @@ void physics(void)
 		movePlayerDown(&player2.vel[1], &player2.pos[1]);
 	}
 
-
+	//if (g.keyStates[XK_K]) {
+		//man is walking...
+		//when time is up, advance the frame.
+		timers.recordTime(&timers.timeCurrent);
+		double timeSpan = timers.timeDiff(&timers.speTime, 
+				&timers.timeCurrent);
+		if (timeSpan > g.delay) {
+			//advance
+			++g.speFrame;
+			if (g.speFrame >= 4)
+				g.speFrame -= 4;
+			timers.recordTime(&timers.speTime);
+		}
+		for (int i=0; i<20; i++) {
+			g.box[i][0] -= 2.0 * (0.05 / g.delay);
+			if (g.box[i][0] < -16.0)
+				g.box[i][0] += g.xres + 16.0;
+		}
+	//}
 	// Punch player 2
 	if ((g.keyStates[XK_m] && player2.punch == 0 && 
 				player2.dead == 0 && !chargeUp2) ||
 			(g.keyStates[XK_k] && player2.punch == 0 && 
 			 player2.dead == 0 && !chargeUp2)) {
-
+		
+		g.walk2Frame = 22;
 		if(player2.sPunch == 1){
 			player2.punch = 0;
 		}
@@ -1306,6 +1352,7 @@ void physics(void)
 			player1.dead = 1;
 			g.nextMysteryBox = -10;
 			g.walkFrame = 30;
+			g.walk2Frame = 37;
 		}
 	}
 
@@ -1315,6 +1362,7 @@ void physics(void)
 			!chargeUp2) {
 		//printf("player1 blocking");
 		player2.block = 1;
+		g.walk2Frame = 24;
 	} else {
 		player2.block = 0;
 	}
@@ -1738,36 +1786,42 @@ void render(void)
 		}
 
 		//JOSE: I think this is part of Sprite stuff
-		if (g.bflag == 1) {
-			float h = 250.0;
-			float w = h * 0.5;
-			glPushMatrix();
-			glColor3f(1.0, 1.0, 1.0);
-			glBindTexture(GL_TEXTURE_2D, g.walkTexture);
 
-			//JOSE: Sprite stuff; can use later
-			glEnable(GL_ALPHA_TEST);
-			glAlphaFunc(GL_GREATER, 0.0f);
-			glColor4ub(255,255,255,255);
-			int numColumns = 8;
-			int numRows = 5;
-			int ix = g.walkFrame % numColumns;
-			int iy = g.walkFrame / numColumns;
-
-			float tx = (float)ix / (float)numColumns;
-			float ty = (float)iy / (float)numRows;
-			float tw = 1.0f / (float)numColumns;
-			float th = 1.0f / (float)numRows;
-
-			glBegin(GL_QUADS);
-			glTexCoord2f(tx, ty); glVertex2i(cx - w, cy - h);
-			glTexCoord2f(tx, ty + th); glVertex2i(cx - w, cy + h);
-			glTexCoord2f(tx + tw, ty + th); glVertex2i(cx + w, cy + h);
-			glTexCoord2f(tx + tw, ty); glVertex2i(cx + w, cy - h);
-			glEnd();
-			glPopMatrix();
-			glBindTexture(GL_TEXTURE_2D, 0);
-			glDisable(GL_ALPHA_TEST);
+		if(g.bflag == 0) {
+			// Players flip
+			if(player1.pos[0] > player2.pos[0]) {
+				if (player1.dead == 0) {
+					Player_1_fliped(player1.w + player1.pos[0], player1.h + player1.pos[1], 
+							g.walkFrame, g.walkTexture);
+				}
+				if (player2.dead == 0) {
+					if(g.keyStates[XK_k] && !chargeUp2) {
+						Player_2_spe(player2.w + player2.pos[0], player2.h + player2.pos[1], 
+								g.speFrame, g.speTexture);
+					}else {
+						Player_2(player2.w + player2.pos[0], player2.h + player2.pos[1],
+							       	g.walk2Frame, g.walk2Texture);
+					}
+				}
+			}
+			
+			else if (player1.pos[0] < player2.pos[0]) {
+				if (player1.dead == 0) {
+					Player_1(player1.w + player1.pos[0], player1.h + player1.pos[1],
+						       	g.walkFrame, g.walkTexture);
+				}
+				if(g.keyStates[XK_k] && !chargeUp2) {
+					if (player2.dead == 0) {
+						Player_2_spe_fliped(player2.w + player2.pos[0], player2.h + player2.pos[1], 
+							g.speFrame, g.speTexture);
+					}
+				}else {
+					if (player2.dead == 0) {
+						Player_2_fliped(player2.w + player2.pos[0], player2.h + player2.pos[1], 
+							g.walk2Frame, g.walk2Texture);
+					}
+				}
+			}
 		}
 
 		//JOSE: I JUST HAVE TO KEEP THIS; OTHERWISE, MAP MOVING DOENS'T WORK
@@ -1928,7 +1982,7 @@ void render(void)
 		//
 
 		//
-		if (g.joflag == 1) {
+		if(g.joflag == 1) {
 			//Joses function
 			extern void fmBorder(int xres, int yres);
 			fmBorder(g.xres, g.yres);
@@ -1939,19 +1993,6 @@ void render(void)
 
 			extern void display_controls(int wf, int yres);
 			display_controls(g.walkFrame, g.yres);
-		}
-
-		if (g.bflag == 1) {
-
-			// Players flip
-			if (player1.pos[0] > player2.pos[0]) {
-				Player_2(player1.w + player1.pos[0], player1.h + player1.pos[1], g.walkFrame, g.walkTexture);
-				Player_1(player2.w + player2.pos[0], player2.h + player2.pos[1], g.walk2Frame, g.walk2Texture);
-			}
-			else if (player1.pos[0] < player2.pos[0]) {
-				Player_1(player1.w + player1.pos[0], player1.h + player1.pos[1], g.walkFrame, g.walkTexture);
-				Player_2(player2.w + player2.pos[0], player2.h + player2.pos[1], g.walk2Frame, g.walk2Texture);
-			}
 		}
 
 
