@@ -116,7 +116,7 @@ class Player_1 {
 		float pw2 = 100.0f;
 		float ph = 10.0f;
 		int punch;
-		float punchcooldown = 250.0f;
+		int punchcooldown = 250;
 		int health = 150;
 } player1;
 
@@ -137,7 +137,7 @@ class Player_2 {
 		float pw2 = 100.0f;
 		float ph = 10.0f;
 		int punch;
-		float punchcooldown = 250.0f;
+		int punchcooldown = 250;
 		int health = 150;
 } player2;
 
@@ -553,8 +553,9 @@ void checkMouse(XEvent *e)
 
 int checkKeys(XEvent *e)
 {
-	//keyboard input?
+    //keyboard input?
 	static int shift=0;
+    static int ctrl=0;
 	if (e->type != KeyRelease && e->type != KeyPress) {
 		return 0;
 	}
@@ -564,18 +565,25 @@ int checkKeys(XEvent *e)
 		g.keyStates[key] = 0;
 		if (key == XK_Shift_L || key == XK_Shift_R)
 			shift = 0;
+		if (key == XK_Control_L || key == XK_Control_R)
+			 ctrl = 0;
 		return 0;
 	}
 	if (e->type == KeyPress) {
 		g.keyStates[key] = 1;
 		if (key == XK_Shift_L || key == XK_Shift_R) {
 			shift = 1;
-			return 0;
+            return 0;
+        }
+		if (key == XK_Control_L || key == XK_Control_R) {
+			ctrl = 1;
+	        return 0;
 		}
 	}
 
 	// checks keys
 	(void)shift;
+    (void)ctrl;
 	switch (key) {
 		case XK_w:
 			timers.recordTime(&timers.walkTime);
@@ -612,9 +620,17 @@ int checkKeys(XEvent *e)
 			break;
 		case XK_Right:
 			break;
-		case XK_Up:
+        case XK_Up:
+            if (shift && g.joflag == 1) {
+                player1.vel[0] += 2.0f;
+                player2.vel[0] += 2.0f;
+            }
 			break;
 		case XK_Down:
+            if (shift && g.joflag == 1) {
+                player1.vel[0] -= 2.0f;
+                player2.vel[0] -= 2.0f;
+            }
 			break;
 		case XK_equal:
 			g.delay -= 0.005;
@@ -655,6 +671,74 @@ int checkKeys(XEvent *e)
 		case XK_r:
 			g.restart =! g.restart;
 			break;
+         case XK_7:
+            if (shift && g.joflag == 1) {
+                player1.w += 10;
+            }
+            else if (ctrl && g.joflag == 1) {
+                player1.pw1 += 10;
+                player1.pw2 += 10;
+            }
+            break;
+        case XK_F7:
+            if (shift && g.joflag == 1) {
+                player1.w -= 10;
+            }
+            else if (ctrl && g.joflag == 1) {
+                player1.pw1 -= 10;
+                player1.pw2 -= 10;
+            }
+            break;
+        case XK_8:
+            if (shift && g.joflag == 1) {
+                player1.h += 10;
+            }
+            else if (ctrl && g.joflag == 1) {
+                player1.ph += 10;
+            }
+            break;
+        case XK_F8:
+            if (shift && g.joflag == 1) {
+                player1.h -= 10;
+            }
+            else if (ctrl && g.joflag == 1) {
+                player1.ph -= 10;
+            }
+            break;
+        case XK_9:
+            if (shift && g.joflag == 1) {
+                player2.w += 10;
+            }
+            else if (ctrl && g.joflag == 1) {
+                player2.pw1 += 10;
+                player2.pw2 += 10;
+            }
+            break;
+        case XK_F9:
+            if (shift && g.joflag == 1) {
+                player2.w -= 10;
+            }
+            else if (ctrl && g.joflag == 1) {
+                player2.pw1 -= 10;
+                player2.pw2 -= 10;
+            }
+            break;
+        case XK_0:
+            if (shift && g.joflag == 1) {
+                player2.h += 10;
+            }
+            else if (ctrl && g.joflag == 1) {
+                player2.ph += 10;
+            }
+            break;
+        case XK_F10:
+            if (shift && g.joflag == 1) {
+                player2.h -= 10;
+            }
+            else if (ctrl && g.joflag == 1) {
+                player2.ph -= 10;
+            }
+            break;
 
 	}
 	return 0;
@@ -714,7 +798,7 @@ bool rndrPbar = false;
 bool rndrPbar2 = false;
 void physics(void)
 {
-	int addgrav = 1;
+	//int addgrav = 1;
 	/*
 	   if (g.walk) {
 	//man is walking...
@@ -1593,8 +1677,8 @@ void render(void)
 		//Clear the screen
 		glClearColor(0.1, 0.1, 0.1, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT);
-		float cx = g.xres/3.0;
-		float cy = g.yres/2.0;
+		//float cx = g.xres/3.0;
+		//float cy = g.yres/2.0;
 
 		/*if (g.gflag == 0) {
 		  Rect r;
@@ -1652,7 +1736,7 @@ void render(void)
 			restartScreen(1, g.yres, g.xres);
 			player1.pBar = 0;
 		} else {
-			player_hitbox(player1.w, player1.h, player1.pos[0], player1.pos[1]);
+			//player_hitbox(player1.w, player1.h, player1.pos[0], player1.pos[1]);
 			// Player 1 punch box
 			if(player1.sPunch == 0){
 				if (player1.punch == 1 ) {
@@ -1664,9 +1748,11 @@ void render(void)
 								player1.pos[0], player1.pos[1], 
 								g.punchflip, player1.weapon);
 					} else {
-						punch_hitbox(pw2, pw1, 
-								player1.ph, player1.pos[0], 
-								player1.pos[1] + 40.0f);
+                        if (g.joflag == 1) {
+						    punch_hitbox(pw2, pw1, 
+							    	player1.ph, player1.pos[0], 
+							    	player1.pos[1] + 40.0f);
+                        }
 					}
 				}
 			}
@@ -1690,7 +1776,7 @@ void render(void)
 			restartScreen(2, g.yres, g.xres);
 			player2.pBar = 0;
 		} else {
-			player_hitbox(player2.w, player2.h, player2.pos[0], player2.pos[1]);
+			//player_hitbox(player2.w, player2.h, player2.pos[0], player2.pos[1]);
 			// Player 2 punch box
 			if (player2.punch == 1) {
 				int pw2 = player2.pw2 * g.punchflip;
@@ -1700,9 +1786,11 @@ void render(void)
 							player2.pos[0], player2.pos[1], 
 							g.punchflip*-1, player2.weapon);
 				} else {
-					punch_hitbox(pw1, pw2, 
-							player2.ph, player2.pos[0], 
-							player2.pos[1] + 40.0f);
+                    if (g.joflag == 1) {
+	    				punch_hitbox(pw1, pw2, 
+		    					player2.ph, player2.pos[0], 
+			    				player2.pos[1] + 40.0f);
+                    }
 				}
 			}
 			//Player 2 sword
@@ -1984,20 +2072,17 @@ void render(void)
 		//
 		if(g.joflag == 1) {
 			//Joses function
-			extern void fmBorder(int xres, int yres);
 			fmBorder(g.xres, g.yres);
+            fmHeader(g.xres, g.yres);
 
+            //PLAYER 1 HITBOX
+		    player_hitbox(player1.w, player1.h, 
+                          player1.pos[0], player1.pos[1]);
 
-			//extern void test_text (int xres, int yres);
-			//test_text(g.xres, g.yres);
-
-			extern void display_controls(int wf, int yres);
-			display_controls(g.walkFrame, g.yres);
-		}
-
-
-
-
+            //PLAYER 2 HITBOX
+			player_hitbox(player2.w, player2.h, 
+                          player2.pos[0], player2.pos[1]);
+        }
 
 
 
