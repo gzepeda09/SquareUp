@@ -2016,11 +2016,11 @@ void render(void)
 
 			//right
 			rplat[1].set_xres(g.xres + 900.0f);
-			rplat[1].set_yres(g.yres - 40.0f);
+			rplat[1].set_yres(g.yres - 60.0f);
 
 			//left 
 			rplat[2].set_xres(g.xres - 450.0f);
-			rplat[2].set_yres(g.yres - 20.0f );
+			rplat[2].set_yres(g.yres - 60.0f );
 
 			for(int i = 0; i < 3; i++){
 
@@ -2045,7 +2045,7 @@ void render(void)
 
 			//left 
 			rplat[2].set_xres(g.xres - 1200.0f);
-			rplat[2].set_yres(g.yres  - 40.0f );
+			rplat[2].set_yres(g.yres  - 50.0f );
 
 			for(int i = 0; i < 3; i++){
 
