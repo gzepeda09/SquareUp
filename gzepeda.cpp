@@ -376,11 +376,11 @@ extern void cntrlMenu(int yres, int xres)
        glEnable(GL_TEXTURE_2D);
        glGenTextures(1, &cntrlBg);
 
-		glBindTexture(GL_TEXTURE_2D, cntrlBg);
-		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-		glTexImage2D(GL_TEXTURE_2D, 0, 3, cMenuBG.width, cMenuBG.height, 0,
-		                        GL_RGB, GL_UNSIGNED_BYTE, cMenuBG.data);
+       glBindTexture(GL_TEXTURE_2D, cntrlBg);
+       glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+       glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+       glTexImage2D(GL_TEXTURE_2D, 0, 3, cMenuBG.width, cMenuBG.height, 0,
+			GL_RGB, GL_UNSIGNED_BYTE, cMenuBG.data);
        glBegin(GL_QUADS);
            glTexCoord2f(0.0f, 0.0f); glVertex2i(0, yres);
            glTexCoord2f(0.0f, 1.0f); glVertex2i(0, 0);
