@@ -463,7 +463,8 @@ void initOpengl(void)
 	//free(walkData);
 	//unlink("./images/walk.ppm");
 	//-------------------------------------------------------------------------
-	//JOSE: Part of displaying map 1; will try and see if i can add to own source file
+	//JOSE: Part of displaying map 1; 
+    //      will try and see if i can add to own source file
 	int w1 = img[1].width;
 	int h1 = img[1].height;
 	glBindTexture(GL_TEXTURE_2D, g.tex.backTexture);
@@ -762,7 +763,6 @@ bool rndrPbar = false;
 bool rndrPbar2 = false;
 void physics(void)
 {
-	int addgrav = 1;
 	if (g.walk) {
 		//man is walking...
 		//when time is up, advance the frame.
@@ -842,36 +842,14 @@ void physics(void)
                        player1.vel[0],  player2.w,
                        player1.w,       &g.tex.xc[0],    &g.tex.xc[1]);
 
-        if (player1.pos[0] > player2.pos[0]) {
-            g.time_walk2++;
-            if (g.time_walk2 % 6 == 0) {
-                if (g.tex.ryu_wx[5] < -0.5f) {
-                    g.tex.ryu_wx[4] = 0.0f;
-                    g.tex.ryu_wx[5] = 0.125f;
-                }
-                g.tex.ryu_wx[4] -= 0.132f;
-                g.tex.ryu_wx[5] -= 0.132f;
-                g.tex.ryu_walkx[4] = -g.tex.ryu_wx[4];
-                g.tex.ryu_walkx[5] = -g.tex.ryu_wx[5];
-                g.tex.ryu_walky[4] = g.tex.ryu_wy[4];
-                g.tex.ryu_walky[5] = g.tex.ryu_wy[5];
-            }
-        }
-        else if (player1.pos[0] < player2.pos[0]) {            
-            g.time_walk2++;
-            if (g.time_walk2 % 6 == 0) {
-                if (g.tex.ryu_wx[7] < 0.5f) {
-                    g.tex.ryu_wx[6] = 0.875f;
-                    g.tex.ryu_wx[7] = 1.0f;
-                }
-                g.tex.ryu_wx[6] -= 0.1262f;
-                g.tex.ryu_wx[7] -= 0.1262f;
-                g.tex.ryu_walkx[4] = g.tex.ryu_wx[6];
-                g.tex.ryu_walkx[5] = g.tex.ryu_wx[7];
-                g.tex.ryu_walky[4] = g.tex.ryu_wy[6];
-                g.tex.ryu_walky[5] = g.tex.ryu_wy[7];
-            }
-        }
+        displayPlayerLeft(player1.pos[0], player2.pos[0], &g.time_walk2,
+                          &g.tex.ryu_wx[4], &g.tex.ryu_wx[5],
+                          &g.tex.ryu_wx[6], &g.tex.ryu_wx[7],
+                          &g.tex.ryu_wy[4], &g.tex.ryu_wy[5],
+                          &g.tex.ryu_wy[6], &g.tex.ryu_wy[7],
+                          &g.tex.ryu_walkx[4], &g.tex.ryu_walkx[5],
+                          &g.tex.ryu_walky[4], &g.tex.ryu_walky[5]);
+
 	}
 
 	// Move right player 1
@@ -909,60 +887,28 @@ void physics(void)
                         &g.tex.xc[1],    g.xres);
 
 
-        if (player1.pos[0] > player2.pos[0]) {
-            g.time_walk2++;
-            if (g.time_walk2 % 6 == 0) {
-                if (g.tex.ryu_wx[7] > -0.5f) {
-                    g.tex.ryu_wx[6] = -0.75f;
-                    g.tex.ryu_wx[7] = -0.875f;
-                }
-                g.tex.ryu_wx[6] += 0.1234f;
-                g.tex.ryu_wx[7] += 0.1234f;
-                g.tex.ryu_walkx[4] = g.tex.ryu_wx[6];
-                g.tex.ryu_walkx[5] = g.tex.ryu_wx[7];
-                g.tex.ryu_walky[4] = g.tex.ryu_wy[6];
-                g.tex.ryu_walky[5] = g.tex.ryu_wy[7];
-            }
-        }
-        else if (player1.pos[0] < player2.pos[0]) {            
-            g.time_walk2++;
-            if (g.time_walk2 % 6 == 0) {
-                if (g.tex.ryu_wx[5] > 0.625f) {
-                    g.tex.ryu_wx[4] = 0.0f;
-                    g.tex.ryu_wx[5] = 0.125f;
-                }
-                g.tex.ryu_wx[4] += 0.132f;
-                g.tex.ryu_wx[5] += 0.132f;
-                g.tex.ryu_walkx[4] = g.tex.ryu_wx[4];
-                g.tex.ryu_walkx[5] = g.tex.ryu_wx[5];
-                g.tex.ryu_walky[4] = g.tex.ryu_wy[4];
-                g.tex.ryu_walky[5] = g.tex.ryu_wy[5];
-            }
-        }
+        displayPlayerRight(player1.pos[0], player2.pos[0], &g.time_walk2,
+                           &g.tex.ryu_wx[4], &g.tex.ryu_wx[5],
+                           &g.tex.ryu_wx[6], &g.tex.ryu_wx[7],
+                           &g.tex.ryu_wy[4], &g.tex.ryu_wy[5],
+                           &g.tex.ryu_wy[6], &g.tex.ryu_wy[7],
+                           &g.tex.ryu_walkx[4], &g.tex.ryu_walkx[5],
+                           &g.tex.ryu_walky[4], &g.tex.ryu_walky[5]);
 
 	}
 
 	// Jump player 1
 	if (g.keyStates[XK_w] && player1.vel[1] == 0 && 
         player1.pos[1] != 600.0f && player1.dead == 0 && !chargeUp) {
-		//player1.vel[1] = 200.0f;
-		//player1.vel[2] = 200.0f;
-		//player1.pos[1] += 500.0ff;
-		//std::cout << "W key pressed" << std::endl;
         jumpPlayer(&player1.vel[1], &player1.vel[2]);
 	}
 
 	if (player1.vel[2] != 0) {
-		//player1.vel[2] -= 5.0f;
-		//player1.pos[1] += 12.5f;
         movePlayerUp(&player1.vel[2], &player1.pos[1]);
 	}
 
 	// Gravity player 1
 	if (player1.vel[1] != 0 && player1.vel[2] == 0.0f) {
-		//std::cout << "yo1" << std::endl;
-		//player1.vel[1] -= 5.0f;
-		//player1.pos[1] -= 12.5f;
         movePlayerDown(&player1.vel[1], &player1.pos[1]);
 	}
 
@@ -990,67 +936,12 @@ void physics(void)
 			player1.punch = 1;
 		}
 
+        //Punch Detection Player 1
         punchAbilityPlayer1(&player1.punch, &player1.sPunch, g.jeflag,
                             &player1.pos[0], &player1.pos[1], player1.pw2,
                             &player2.pos[0], &player2.pos[1], player2.w,
                             &player2.vel[1], &player2.dead,
                             player2.block, &player2.health, player1.weapon);
-        // Punch Detection player 1
-        /*if (player1.pos[0] + player1.pw2 >= player2.pos[0] + (-player2.w) && 
-            player1.pos[0] < player2.pos[0] && player1.weapon==0) {
-            std::cout << "Player 1 hits Player 2!" << std::endl;
-            //player2.health -= 10;
-            //For testing. delete once testing is done
-            if (g.jeflag == 1 && player2.dead == 0) {
-                player2.health -= 50;
-            } else if (player2.dead == 0){
-                if (!player2.block) {    
-                    if(player1.sPunch == 1){
-						player2.health -= 20;
-					}   else {
-						player2.health -= 10;
-					}
-                } else {
-                    if(player1.sPunch == 1){
-						player2.health -=10;
-					} else {
-						player2.health -=5;
-					}
-                }
-                //Jesse - reaction to punches
-                player2.pos[1] += 50.0f;
-                player2.vel[1] += 20.0f;
-                player2.pos[0] += 35.0f;
-            }
-        }
-        // Punch Detection (Flipped)
-        else if (player1.pos[0] - player1.pw2 <= player2.pos[0] + (player2.w) && 
-                 player1.pos[0] > player2.pos[0] && player1.weapon==0) {
-            std::cout << "Player 1 hits Player 2!" << std::endl;
-            //player2.health -= 10;
-            //For testing. delete once testing is done
-            if (g.jeflag == 1 && player2.dead == 0) {
-                player2.health -= 50;
-            } else if (player2.dead == 0){
-                if (!player2.block) {    
-                    if(player1.sPunch == 1){
-						player2.health -= 20;
-					}   else {
-						player2.health -= 10;
-					}
-                } else {
-                    if(player1.sPunch == 1){
-						player2.health -=10;
-					} else {
-						player2.health -=5;
-					}
-                }
-                //Jesse - reaction to punches
-                player2.pos[1] += 50.0f;
-                player2.vel[1] += 20.0f;
-                player2.pos[0] -= 35.0f;
-            }
-        }*/
         //Sword detected for jesse feature
         if (player1.weapon==1 && (player1.pos[0] < player2.pos[0]) && 
             ((player2.pos[0] - player1.pos[0]) <= 230)) {
@@ -1140,75 +1031,15 @@ void physics(void)
 	if (player1.punch == 1) {
         punchCooldownPlayer(&player1.punchcooldown, &player1.punch);
 
-        //IS PLAYER 1 TO THE LEFT OF PlAYER 2?
-        if (player1.pos[0] + player1.w < player2.pos[0] - player2.w) {
-            if (player1.punchcooldown % 35 == 0) {
-                g.tex.ryu_walkx[4] = g.tex.ryu_punchx[4];
-                g.tex.ryu_walkx[5] = g.tex.ryu_punchx[5];
-                g.tex.ryu_walky[4] = g.tex.ryu_punchy[4];
-                g.tex.ryu_walky[5] = g.tex.ryu_punchy[5];
-            }
+        displayPlayerPunch(player1.pos[0], player2.pos[0], &g.gotoFirstFrame,
+                           player1.w, player2.w, player1.punchcooldown,
+                           &g.tex.ryu_punchx[4], &g.tex.ryu_punchx[5],
+                           &g.tex.ryu_punchx[6], &g.tex.ryu_punchx[7],
+                           &g.tex.ryu_punchy[4], &g.tex.ryu_punchy[5],
+                           &g.tex.ryu_punchy[6], &g.tex.ryu_punchy[7],
+                           &g.tex.ryu_walkx[4], &g.tex.ryu_walkx[5],
+                           &g.tex.ryu_walky[4], &g.tex.ryu_walky[5]);
 
-            //ARE WE ON THE LAST FRAME
-            //IF YES, GO TO SECOND FRAME
-            if (g.tex.ryu_punchx[5] + 0.2f > 0.525f) {
-                g.tex.ryu_punchx[4] -= 0.150f;
-                g.tex.ryu_punchx[5] -= 0.250f;
-                g.gotoFirstFrame = 1;
-            }
-            //IF WE ARE ON THE SECOND FRAME COMING FROM LAST FRAME
-            //GO TO FIRST FRAME
-            else if (g.gotoFirstFrame == 1) {
-                g.tex.ryu_punchx[4] -= 0.150f;
-                g.tex.ryu_punchx[5] -= 0.150f;
-                g.gotoFirstFrame = 0;
-            }
-            //GOING FROM FIRST FRAME TO SECOND FRAME
-            else if (g.tex.ryu_punchx[4] != 0.150f) {                
-                g.tex.ryu_punchx[4] += 0.150f;
-                g.tex.ryu_punchx[5] += 0.150f;
-            }
-            //GOING FROM SECOND FRAME TO THIRD FRAME
-            else if (g.tex.ryu_punchx[4] != 0.300f) {               
-                g.tex.ryu_punchx[4] += 0.150f;
-                g.tex.ryu_punchx[5] += 0.250f;
-            }
-        }
-
-        //IS PLAYER 1 TO THE RIGHT OF PlAYER 2?
-        if (player1.pos[0] - player1.w > player2.pos[0] + player2.w) {
-            if (player1.punchcooldown % 35 == 0) {
-                g.tex.ryu_walkx[4] = -g.tex.ryu_punchx[6];
-                g.tex.ryu_walkx[5] = -g.tex.ryu_punchx[7];
-                g.tex.ryu_walky[4] = g.tex.ryu_punchy[6];
-                g.tex.ryu_walky[5] = g.tex.ryu_punchy[7];
-            }
-
-            //ARE WE ON THE LAST FRAME
-            //IF YES, GO TO SECOND FRAME
-            if (g.tex.ryu_punchx[6] - 0.2f < 0.475f) {
-                g.tex.ryu_punchx[7] += 0.150f;
-                g.tex.ryu_punchx[6] += 0.250f;
-                g.gotoFirstFrame = 1;
-            }
-            //IF WE ARE ON THE SECOND FRAME COMING FROM LAST FRAME
-            //GO TO FIRST FRAME
-            else if (g.gotoFirstFrame == 1) {
-                g.tex.ryu_punchx[7] += 0.150f;
-                g.tex.ryu_punchx[6] += 0.150f;
-                g.gotoFirstFrame = 0;
-            }
-            //GOING FROM FIRST FRAME TO SECOND FRAME
-            else if (g.tex.ryu_punchx[7] != 0.850f) {                
-                g.tex.ryu_punchx[7] -= 0.150f;
-                g.tex.ryu_punchx[6] -= 0.150f;
-            }
-            //GOING FROM SECOND FRAME TO THIRD FRAME
-            else if (g.tex.ryu_punchx[7] != 0.700f) {               
-                g.tex.ryu_punchx[7] -= 0.150f;
-                g.tex.ryu_punchx[6] -= 0.250f;
-            }
-        }
 	}
 
 
@@ -1246,36 +1077,16 @@ void physics(void)
                        player2.vel[0], player1.w,
                        player2.w, &g.tex.xc[0], &g.tex.xc[1]);
 
-        if (player2.pos[0] > player1.pos[0]) {
-            g.time_walk++;
-            if (g.time_walk % 6 == 0) {
-                if (g.tex.ryu_wx[1] < -0.5f) {
-                    g.tex.ryu_wx[0] = 0.0f;
-                    g.tex.ryu_wx[1] = 0.125f;
-                }
-                g.tex.ryu_wx[0] -= 0.132f;
-                g.tex.ryu_wx[1] -= 0.132f;
-                g.tex.ryu_walkx[0] = -g.tex.ryu_wx[0];
-                g.tex.ryu_walkx[1] = -g.tex.ryu_wx[1];
-                g.tex.ryu_walky[0] = g.tex.ryu_wy[0];
-                g.tex.ryu_walky[1] = g.tex.ryu_wy[1];
-            }
-        }
-        else if (player2.pos[0] < player1.pos[0]) {            
-            g.time_walk++;
-            if (g.time_walk % 6 == 0) {
-                if (g.tex.ryu_wx[3] < 0.5f) {
-                    g.tex.ryu_wx[2] = 0.875f;
-                    g.tex.ryu_wx[3] = 1.0f;
-                }
-                g.tex.ryu_wx[2] -= 0.1262f;
-                g.tex.ryu_wx[3] -= 0.1262f;
-                g.tex.ryu_walkx[0] = g.tex.ryu_wx[2];
-                g.tex.ryu_walkx[1] = g.tex.ryu_wx[3];
-                g.tex.ryu_walky[0] = g.tex.ryu_wy[2];
-                g.tex.ryu_walky[1] = g.tex.ryu_wy[3];
-            }
-        }
+
+        displayPlayerLeft(player2.pos[0], player1.pos[0], &g.time_walk,
+                          &g.tex.ryu_wx[0], &g.tex.ryu_wx[1],
+                          &g.tex.ryu_wx[2], &g.tex.ryu_wx[3],
+                          &g.tex.ryu_wy[0], &g.tex.ryu_wy[1],
+                          &g.tex.ryu_wy[2], &g.tex.ryu_wy[3],
+                          &g.tex.ryu_walkx[0], &g.tex.ryu_walkx[1],
+                          &g.tex.ryu_walky[0], &g.tex.ryu_walky[1]);
+
+
 	}
 
 	// Move right player 2
@@ -1311,60 +1122,30 @@ void physics(void)
                         player2.w, &g.tex.xc[0],
                         &g.tex.xc[1], g.xres);
 
-        if (player2.pos[0] > player1.pos[0]) {
-            g.time_walk++;
-            if (g.time_walk % 6 == 0) {
-                if (g.tex.ryu_wx[3] > -0.5f) {
-                    g.tex.ryu_wx[2] = -0.75f;
-                    g.tex.ryu_wx[3] = -0.875f;
-                }
-                g.tex.ryu_wx[2] += 0.1234f;
-                g.tex.ryu_wx[3] += 0.1234f;
-                g.tex.ryu_walkx[0] = g.tex.ryu_wx[2];
-                g.tex.ryu_walkx[1] = g.tex.ryu_wx[3];
-                g.tex.ryu_walky[0] = g.tex.ryu_wy[2];
-                g.tex.ryu_walky[1] = g.tex.ryu_wy[3];
-            }
-        }
-        else if (player2.pos[0] < player1.pos[0]) {            
-            g.time_walk++;
-            if (g.time_walk % 6 == 0) {
-                if (g.tex.ryu_wx[1] > 0.625f) {
-                    g.tex.ryu_wx[0] = 0.0f;
-                    g.tex.ryu_wx[1] = 0.125f;
-                }
-                g.tex.ryu_wx[0] += 0.132f;
-                g.tex.ryu_wx[1] += 0.132f;
-                g.tex.ryu_walkx[0] = g.tex.ryu_wx[0];
-                g.tex.ryu_walkx[1] = g.tex.ryu_wx[1];
-                g.tex.ryu_walky[0] = g.tex.ryu_wy[0];
-                g.tex.ryu_walky[1] = g.tex.ryu_wy[1];
-            }
-        }
+
+        displayPlayerRight(player2.pos[0], player1.pos[0], &g.time_walk,
+                           &g.tex.ryu_wx[0], &g.tex.ryu_wx[1],
+                           &g.tex.ryu_wx[2], &g.tex.ryu_wx[3],
+                           &g.tex.ryu_wy[0], &g.tex.ryu_wy[1],
+                           &g.tex.ryu_wy[2], &g.tex.ryu_wy[3],
+                           &g.tex.ryu_walkx[0], &g.tex.ryu_walkx[1],
+                           &g.tex.ryu_walky[0], &g.tex.ryu_walky[1]);
+
+
 	}
 
 	// Jump player 2
 	if (g.keyStates[XK_Up] && player2.vel[1] == 0 && 
         player2.pos[1] != 600.0f && player2.dead == 0) {
-		//player2.vel[1] = 200.0f;
-		//player2.vel[2] = 200.0f;
-		//player2.pos[1] += 500.0f;
-		//std::cout << "Up Arrow key pressed" << std::endl;
-
         jumpPlayer(&player2.vel[1], &player2.vel[2]);
 	}
 
 	if (player2.vel[2] != 0) {
-		//player2.vel[2] -= 5.0f;
-		//player2.pos[1] += 12.5f;
         movePlayerUp(&player2.vel[2], &player2.pos[1]);
 	}
 
 	// Gravity player 2
 	if (player2.vel[1] != 0 && player2.vel[2] == 0.0f) {
-		//std::cout << "Down" << std::endl;
-		//player2.vel[1] -= 5.0f;
-		//player2.pos[1] -= 12.5f;
         movePlayerDown(&player2.vel[1], &player2.pos[1]);
 	}
 
@@ -1382,67 +1163,13 @@ void physics(void)
 			player2.punch = 1;
 		}
 
+        //Punch Detection Player 2
         punchAbilityPlayer2(&player2.punch, &player2.sPunch, g.jeflag,
                             &player2.pos[0], &player2.pos[1], player2.pw2,
                             &player1.pos[0], &player1.pos[1], player1.w,
                             &player1.vel[1], &player1.dead,
                             player1.block, &player1.health, player2.weapon);
-        // Punch detection player 2
-        /*if (player2.pos[0] - player2.pw2 <= player1.pos[0] + (player1.w) && 
-            player2.pos[0] > player1.pos[0] && player2.weapon == 0) {
-            std::cout << "Player 2 hits Player 1!" << std::endl;
-            //player1.health -= 10;
-            //For testing. delete once testing is done
-            if (g.jeflag == 1 && player1.dead == 0) {
-                player1.health -= 50;
-            } else if (player1.dead == 0){
-                if (!player1.block) {    
-                    if(player2.sPunch == 1){
-						player1.health -= 20;
-					}   else {
-						player1.health -= 10;
-					}
-                } else {
-                    if(player2.sPunch == 1){
-						player1.health -=10;
-					} else {
-						player1.health -=5;
-					}
-                }
-                //Jesse - reaction to punches
-                player1.pos[1] += 50.0f;
-                player1.vel[1] += 20.0f;
-                player1.pos[0] -= 35.0f;
-            }
-        }
-        // Punch Detection (Flipped)
-        else if (player2.pos[0] + player2.pw2 >= player1.pos[0] + (-player1.w) 
-                 && player2.pos[0] < player1.pos[0] && player2.weapon == 0) {
-            std::cout << "Player 1 hits Player 2!" << std::endl;
-            //player1.health -= 10;
-            //For testing. delete once testing is done
-            if (g.jeflag == 1 && player1.dead == 0) {
-                player1.health -= 50;
-            } else if (player1.dead == 0) {
-                if (!player1.block) {    
-                    if(player2.sPunch == 1){
-						player1.health -= 20;
-					}   else {
-						player1.health -= 10;
-					}
-                } else {
-                    if(player2.sPunch == 1){
-						player1.health -=10;
-					} else {
-						player1.health -=5;
-					}
-                }
-                //Jesse - raction to punches
-                player1.pos[1] += 50.0f;
-                player1.vel[1] += 20.0f;
-                player1.pos[0] += 35.0f;
-            }
-        }*/
+
         if (player2.weapon==1 && (player1.pos[0] < player2.pos[0]) && 
             ((player2.pos[0] - player1.pos[0]) <= 230)) {
             //not flipped 
@@ -1531,75 +1258,14 @@ void physics(void)
 	if (player2.punch == 1) {
         punchCooldownPlayer(&player2.punchcooldown, &player2.punch);
 
-        //IS PLAYER 2 TO THE LEFT OF PLAYER 1
-        if (player2.pos[0] + player2.w < player1.pos[0] - player1.w) {
-            if (player2.punchcooldown % 35 == 0) {
-                g.tex.ryu_walkx[0] = g.tex.ryu_punchx[0];
-                g.tex.ryu_walkx[1] = g.tex.ryu_punchx[1];
-                g.tex.ryu_walky[0] = g.tex.ryu_punchy[0];
-                g.tex.ryu_walky[1] = g.tex.ryu_punchy[1];
-            }
-
-            //ARE WE ON THE LAST FRAME
-            //IF YES, GO TO SECOND FRAME
-            if (g.tex.ryu_punchx[1] + 0.2f > 0.525f) {
-                g.tex.ryu_punchx[0] -= 0.150f;
-                g.tex.ryu_punchx[1] -= 0.250f;
-                g.gotoFirstFrameP2 = 1;
-            }
-            //IF WE ARE ON THE SECOND FRAME COMING FROM LAST FRAME
-            //GO TO FIRST FRAME
-            else if (g.gotoFirstFrameP2 == 1) {
-                g.tex.ryu_punchx[0] -= 0.150f;
-                g.tex.ryu_punchx[1] -= 0.150f;
-                g.gotoFirstFrameP2 = 0;
-            }
-            //GOING FROM FIRST FRAME TO SECOND FRAME
-            else if (g.tex.ryu_punchx[0] != 0.150f) {                
-                g.tex.ryu_punchx[0] += 0.150f;
-                g.tex.ryu_punchx[1] += 0.150f;
-            }
-            //GOING FROM SECOND FRAME TO THIRD FRAME
-            else if (g.tex.ryu_punchx[0] != 0.300f) {               
-                g.tex.ryu_punchx[0] += 0.150f;
-                g.tex.ryu_punchx[1] += 0.250f;
-            }
-        }
-
-        //IS PLAYER 2 TO THE RIGHT OF PlAYER 1?
-        if (player2.pos[0] - player2.w > player1.pos[0] + player1.w) {
-            if (player2.punchcooldown % 35 == 0) {
-                g.tex.ryu_walkx[0] = -g.tex.ryu_punchx[2];
-                g.tex.ryu_walkx[1] = -g.tex.ryu_punchx[3];
-                g.tex.ryu_walky[0] = g.tex.ryu_punchy[2];
-                g.tex.ryu_walky[1] = g.tex.ryu_punchy[3];
-            }
-
-            //ARE WE ON THE LAST FRAME
-            //IF YES, GO TO SECOND FRAME
-            if (g.tex.ryu_punchx[2] - 0.2f < 0.475f) {
-                g.tex.ryu_punchx[3] += 0.150f;
-                g.tex.ryu_punchx[2] += 0.250f;
-                g.gotoFirstFrameP2 = 1;
-            }
-            //IF WE ARE ON THE SECOND FRAME COMING FROM LAST FRAME
-            //GO TO FIRST FRAME
-            else if (g.gotoFirstFrameP2 == 1) {
-                g.tex.ryu_punchx[3] += 0.150f;
-                g.tex.ryu_punchx[2] += 0.150f;
-                g.gotoFirstFrameP2 = 0;
-            }
-            //GOING FROM FIRST FRAME TO SECOND FRAME
-            else if (g.tex.ryu_punchx[3] != 0.850f) {                
-                g.tex.ryu_punchx[3] -= 0.150f;
-                g.tex.ryu_punchx[2] -= 0.150f;
-            }
-            //GOING FROM SECOND FRAME TO THIRD FRAME
-            else if (g.tex.ryu_punchx[3] != 0.700f) {               
-                g.tex.ryu_punchx[3] -= 0.150f;
-                g.tex.ryu_punchx[2] -= 0.250f;
-            }
-        }
+        displayPlayerPunch(player2.pos[0], player1.pos[0], &g.gotoFirstFrameP2,
+                           player2.w, player1.w, player2.punchcooldown,
+                           &g.tex.ryu_punchx[0], &g.tex.ryu_punchx[1],
+                           &g.tex.ryu_punchx[2], &g.tex.ryu_punchx[3],
+                           &g.tex.ryu_punchy[0], &g.tex.ryu_punchy[1],
+                           &g.tex.ryu_punchy[2], &g.tex.ryu_punchy[3],
+                           &g.tex.ryu_walkx[0], &g.tex.ryu_walkx[1],
+                           &g.tex.ryu_walky[0], &g.tex.ryu_walky[1]);
 	}
 
 	// -- Misc --

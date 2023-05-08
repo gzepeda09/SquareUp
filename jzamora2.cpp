@@ -17,6 +17,7 @@ class Global {
 
 extern void test_text (int gres, int yres)
 {
+    std::cout << gres << std::endl;
     Rect r;
     unsigned int c = 0x00ffff44;
         r.bot = yres - 50;
@@ -112,16 +113,16 @@ void displayCharacter(float x0, float x1,
     glColor4ub(255, 255, 255, 255);
     glu.i++;
     glBegin(GL_QUADS);
-        glTexCoord2f(x0, y1);   glVertex2i(px - 100,       
+        glTexCoord2f(x0, y1);   glVertex2i(px - 90,       
                                            py2 - 10);
-        //glTexCoord2f(x0, y0);   glVertex2i(px,       (yres*4)+py);
-        glTexCoord2f(x0, y0);   glVertex2i(px - 100,       
-                                           (yres + py) - 10);
-        //glTexCoord2f(x1, y0);   glVertex2i((xres/2.5) + px2, (yres*4)+py);
-        glTexCoord2f(x1, y0);   glVertex2i(((xres/3) + px2) - 75, 
-                                           (yres + py) - 10);
-        //glTexCoord2f(x1, y1);   glVertex2i((xres/2.5) + px2,  py2);
-        glTexCoord2f(x1, y1);   glVertex2i(((xres/3) + px2) - 75,  
+
+        glTexCoord2f(x0, y0);   glVertex2i(px - 90,       
+                                           (yres + py) - 200);
+
+        glTexCoord2f(x1, y0);   glVertex2i(((xres/3) + px2) - 90, 
+                                           (yres + py) - 200);
+
+        glTexCoord2f(x1, y1);   glVertex2i(((xres/3) + px2) - 90,  
                                            py2 - 10);
     glEnd();
     glPopMatrix();
@@ -129,6 +130,167 @@ void displayCharacter(float x0, float x1,
     glDisable(GL_ALPHA_TEST);
 }
 
+void displayPlayerLeft(double p_x,  double o_x, int* time, 
+                       float* wx0,  float* wx1, 
+                       float* wx2,  float* wx3,
+                       float* wy0,  float* wy1,
+                       float* wy2,  float* wy3,
+                       float* wkx0, float* wkx1,
+                       float* wky0, float* wky1) {
+    if (p_x > o_x) {
+        *time += 1;
+        if (*time % 6 == 0) {
+            if (*wx1 < -0.5f) {
+                *wx0 = 0.0f;
+                *wx1 = 0.125f;
+            }
+            *wx0 -= 0.132f;
+            *wx1 -= 0.132f;
+            *wkx0 = -(*wx0);
+            *wkx1 = -(*wx1);
+            *wky0 = (*wy0);
+            *wky1 = (*wy1);
+        }
+    }
+
+    else if (p_x < o_x) { 
+        *time += 1;
+        if (*time % 6 == 0) {
+            if (*wx3 < 0.5f) {
+                *wx2 = 0.875f;
+                *wx3 = 1.0f;
+            }
+            *wx2 -= 0.1262f;
+            *wx3 -= 0.1262f;
+            *wkx0 = *wx2;
+            *wkx1 = *wx3;
+            *wky0 = *wy2;
+            *wky1 = *wy3;
+        }
+    }
+}
+
+void displayPlayerRight(double p_x,  double o_x, int* time, 
+                        float* wx0,  float* wx1, 
+                        float* wx2,  float* wx3,
+                        float* wy0,  float* wy1,
+                        float* wy2,  float* wy3,
+                        float* wkx0, float* wkx1,
+                        float* wky0, float* wky1) {
+    if (p_x > o_x) {
+        *time += 1;
+        if (*time % 6 == 0) {
+            if (*wx3 > -0.5f) {
+                *wx2 = -0.75f;
+                *wx3 = -0.875f;
+            }
+            *wx2 += 0.1234f;
+            *wx3 += 0.1234f;
+            *wkx0 = *wx2;
+            *wkx1 = *wx3;
+            *wky0 = *wy2;
+            *wky1 = *wy3;
+        }
+    }
+
+    else if (p_x < o_x) { 
+        *time += 1;
+        if (*time % 6 == 0) {
+            if (*wx1 > 0.625f) {
+                *wx0 = 0.0f;
+                *wx1 = 0.125f;
+            }
+            *wx0 += 0.132f;
+            *wx1 += 0.132f;
+            *wkx0 = *wx0;
+            *wkx1 = *wx1;
+            *wky0 = *wy0;
+            *wky1 = *wy1;
+        }
+    }
+
+}
+
+void displayPlayerPunch(double p_x,  double o_x, int* frame,
+                        float p_w,   float o_w,  int p_cd,
+                        float* px0,  float* px1,
+                        float* px2,  float* px3,
+                        float* py0,  float* py1,
+                        float* py2,  float* py3,
+                        float* wkx0, float* wkx1,
+                        float* wky0, float* wky1) {
+
+    //IS PLAYER TO THE LEFT OF OPPONENT?
+    if (p_x + p_w < o_x - o_w) {
+        if (p_cd % 35 == 0) {
+            *wkx0 = *px0;
+            *wkx1 = *px1;
+            *wky0 = *py0;
+            *wky1 = *py1;
+        }
+
+        //ARE WE ON THE LAST FRAME
+        //IF YES, GO TO SECOND FRAME
+        if (*px1 + 0.2f > 0.525f) {
+            *px0 -= 0.150f;
+            *px1 -= 0.250f;
+            *frame = 1;
+        }
+        //IF WE ARE ON THE SECOND FRAME COMING FROM LAST FRAME
+        //GO TO FIRST FRAME
+        else if (*frame == 1) {
+            *px0 -= 0.150f;
+            *px1 -= 0.150f;
+            *frame = 0;
+        }
+        //GOING FROM FIRST FRAME TO SECOND FRAME
+        else if (*px0 != 0.150f) {
+            *px0 += 0.150f;
+            *px1 += 0.150f;
+        }
+        //GOING FROM SECOND FRAME TO THIRD FRAME
+        else if (*px0 != 0.300f) {
+            *px0 += 0.150f;
+            *px1 += 0.250f;
+        }
+    }
+
+    //IS PLAYER TO THE RIGHT OF OPPONENT?
+    if (p_x - p_w > o_x + o_w) {
+        if (p_cd % 35 == 0) {
+            *wkx0 = -(*px2);
+            *wkx1 = -(*px3);
+            *wky0 = *py2;
+            *wky1 = *py3;
+        }
+
+        //ARE WE ON THE LAST FRAME
+        //IF YES, GO TO SECOND FRAME
+        if (*px2 - 0.2f < 0.475f) {
+            *px3 += 0.150f;
+            *px2 += 0.250f;
+            *frame = 1;
+        }
+        //IF WE ARE ON THE SECOND FRAME COMING FROM LAST FRAME
+        //GO TO FIRST FRAME
+        else if (*frame == 1) {
+            *px3 += 0.150f;
+            *px2 += 0.150f;
+            *frame = 0;
+        }
+        //GOING FROM FIRST FRAME TO SECOND FRAME
+        else if (*px3 != 0.850f) {
+            *px3 -= 0.150f;
+            *px2 -= 0.150f;
+        }
+        //GOING FROM SECOND FRAME TO THIRD FRAME
+        else if (*px3 != 0.700f) {
+            *px3 -= 0.150f;
+            *px2 -= 0.250f;
+        }
+    }
+
+}
 
 //-----------------------------------------------
 //HITBOXES FOR PLAYERS & THEIR PUNCHES
