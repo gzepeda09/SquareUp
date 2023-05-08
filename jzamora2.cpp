@@ -316,19 +316,11 @@ void movePlayerRight(double* pos_x, double* pos2_x,
     }
 }
 
-<<<<<<< HEAD
 /*extern*/ void punchAbilityPlayer2(int* p2_punch, int* sPunch, int jeflag,
                                 double* p2_pos_x, double* p2_y, float p2_pw2,
                                 double* p1_pos_x, double* p1_pos_y, float p1_w, 
                                 double* p1_vel_1, int* p1_dead,
                                 int p1_block, int* p1_health, int weapon)
-=======
-void punchAbilityPlayer2(int* p2_punch, int* sPunch, int jeflag,
-                         double* p2_pos_x, double* p2_y, float p2_pw2,
-                         double* p1_pos_x, double* p1_pos_y, float p1_w, 
-                         double* p1_vel_1, int* p1_dead,
-                         int p1_block, int* p1_health)
->>>>>>> 46607be (v0.03 - First Rendention of Sprites)
 {
     if((*sPunch) == 1){
         *p2_punch = 0;
@@ -403,7 +395,7 @@ void punchAbilityPlayer2(int* p2_punch, int* sPunch, int jeflag,
     }
 }
 
-/*extern*/ void punchCooldownPlayer(float* cooldown, int* punch)
+/*extern*/ void punchCooldownPlayer(int* cooldown, int* punch)
 {
     if (*cooldown == 0) {
         *punch = 0;

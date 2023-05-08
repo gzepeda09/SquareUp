@@ -84,8 +84,8 @@ extern void cntrlMenu(int yres, int xres);
 Image img[5] = {"images/Freddy2.png",
             	"images/map1-06.png",
             	"images/scott.gif",
-                "images/ryu_walking_lar2.png",
-                "images/ryu_walking_lar2_2.png"};
+                "images/ryu_lrp.png",
+                "images/ryu_lrp_2.png"};
 
 //JOSE: sets up variables used for creating the background.
 class Texture {
@@ -101,6 +101,8 @@ class Texture {
         GLuint ryu_punch;
         float ryu_wx[8];
         float ryu_wy[8];
+        float ryu_punchx[8];
+        float ryu_punchy[8];
         float ryu_walkx[8];
         float ryu_walky[8];
 };
@@ -122,7 +124,7 @@ class Player_1 {
 		float pw2 = 100.0f;
 		float ph = 10.0f;
 		int punch;
-		float punchcooldown = 250.0f;
+		int punchcooldown = 250;
 		int health = 150;
 } player1;
 
@@ -143,7 +145,7 @@ class Player_2 {
 		float pw2 = 100.0f;
 		float ph = 10.0f;
 		int punch;
-		float punchcooldown = 250.0f;
+		int punchcooldown = 250;
 		int health = 150;
 } player2;
 
@@ -209,6 +211,8 @@ class Global {
         int time_walk = 0;
         int time_walk2 = 0;
         float scroll = 0.0f;
+        int gotoFirstFrame;
+        int gotoFirstFrameP2;
 		Vec box[20];
 		Global() {
 			done=0;
@@ -501,13 +505,25 @@ void initOpengl(void)
     g.tex.ryu_wx[0] = 0.0f;
     g.tex.ryu_wx[1] = 0.125f;
     g.tex.ryu_wy[0] = 0.0f;
-    g.tex.ryu_wy[1] = 0.5f;
+    g.tex.ryu_wy[1] = 0.33f;
 
     //PLAYER 1 TEXTURE COORDINATES: MOVING LEFT
     g.tex.ryu_wx[2] = 0.875f;
     g.tex.ryu_wx[3] = 1.0f;
-    g.tex.ryu_wy[2] = 0.5f;
-    g.tex.ryu_wy[3] = 1.0f;
+    g.tex.ryu_wy[2] = 0.33f;
+    g.tex.ryu_wy[3] = 0.66f;
+
+    //PUNCH FOR PLAYER 1: NORMAL
+    g.tex.ryu_punchx[0] = 0.0f;
+    g.tex.ryu_punchx[1] = 0.125f;
+    g.tex.ryu_punchy[0] = 0.66f;
+    g.tex.ryu_punchy[1] = 0.99f;
+
+    //PUNCH FOR PLAYER 1: FLIPPED
+    g.tex.ryu_punchx[2] = 0.875f;
+    g.tex.ryu_punchx[3] = 1.0f;
+    g.tex.ryu_punchy[2] = 0.66f;
+    g.tex.ryu_punchy[3] = 0.99f;
 
     //SETTING CHARACTER TEXTURES FOR PLAYER 1:
     g.tex.ryu_walkx[0] = g.tex.ryu_wx[0];
@@ -519,13 +535,25 @@ void initOpengl(void)
     g.tex.ryu_wx[4] = 0.0f;
     g.tex.ryu_wx[5] = 0.125f;
     g.tex.ryu_wy[4] = 0.0f;
-    g.tex.ryu_wy[5] = 0.5f;
+    g.tex.ryu_wy[5] = 0.33f;
 
     //PLAYER 2 TEXTURE COORDINATES: MOVING LEFT
     g.tex.ryu_wx[6] = 0.875f;
     g.tex.ryu_wx[7] = 1.0f;
-    g.tex.ryu_wy[6] = 0.5f;
-    g.tex.ryu_wy[7] = 1.0f;
+    g.tex.ryu_wy[6] = 0.33f;
+    g.tex.ryu_wy[7] = 0.66f;
+
+    //PUNCH FOR PLAYER 2: NORMAL
+    g.tex.ryu_punchx[4] = 0.0f;
+    g.tex.ryu_punchx[5] = 0.123f;
+    g.tex.ryu_punchy[4] = 0.66f;
+    g.tex.ryu_punchy[5] = 0.99f;
+
+    //PUNCH FOR PLAYER 2: FLIPPED
+    g.tex.ryu_punchx[6] = 0.875f;
+    g.tex.ryu_punchx[7] = 1.0f;
+    g.tex.ryu_punchy[6] = 0.66f;
+    g.tex.ryu_punchy[7] = 0.99f;
 
     //SETTING CHARACTER TEXTURES FOR PLAYER 2:
     g.tex.ryu_walkx[4] = g.tex.ryu_wx[4];
@@ -1110,14 +1138,77 @@ void physics(void)
 
 	// Punch cooldown player 1
 	if (player1.punch == 1) {
-		/*if (player1.punchcooldown == 0) {
-			player1.punch = 0;
-			player1.punchcooldown = 250.0f;
-		}
-		else {
-			player1.punchcooldown -= 10.0f;
-		}*/
         punchCooldownPlayer(&player1.punchcooldown, &player1.punch);
+
+        //IS PLAYER 1 TO THE LEFT OF PlAYER 2?
+        if (player1.pos[0] + player1.w < player2.pos[0] - player2.w) {
+            if (player1.punchcooldown % 35 == 0) {
+                g.tex.ryu_walkx[4] = g.tex.ryu_punchx[4];
+                g.tex.ryu_walkx[5] = g.tex.ryu_punchx[5];
+                g.tex.ryu_walky[4] = g.tex.ryu_punchy[4];
+                g.tex.ryu_walky[5] = g.tex.ryu_punchy[5];
+            }
+
+            //ARE WE ON THE LAST FRAME
+            //IF YES, GO TO SECOND FRAME
+            if (g.tex.ryu_punchx[5] + 0.2f > 0.525f) {
+                g.tex.ryu_punchx[4] -= 0.150f;
+                g.tex.ryu_punchx[5] -= 0.250f;
+                g.gotoFirstFrame = 1;
+            }
+            //IF WE ARE ON THE SECOND FRAME COMING FROM LAST FRAME
+            //GO TO FIRST FRAME
+            else if (g.gotoFirstFrame == 1) {
+                g.tex.ryu_punchx[4] -= 0.150f;
+                g.tex.ryu_punchx[5] -= 0.150f;
+                g.gotoFirstFrame = 0;
+            }
+            //GOING FROM FIRST FRAME TO SECOND FRAME
+            else if (g.tex.ryu_punchx[4] != 0.150f) {                
+                g.tex.ryu_punchx[4] += 0.150f;
+                g.tex.ryu_punchx[5] += 0.150f;
+            }
+            //GOING FROM SECOND FRAME TO THIRD FRAME
+            else if (g.tex.ryu_punchx[4] != 0.300f) {               
+                g.tex.ryu_punchx[4] += 0.150f;
+                g.tex.ryu_punchx[5] += 0.250f;
+            }
+        }
+
+        //IS PLAYER 1 TO THE RIGHT OF PlAYER 2?
+        if (player1.pos[0] - player1.w > player2.pos[0] + player2.w) {
+            if (player1.punchcooldown % 35 == 0) {
+                g.tex.ryu_walkx[4] = -g.tex.ryu_punchx[6];
+                g.tex.ryu_walkx[5] = -g.tex.ryu_punchx[7];
+                g.tex.ryu_walky[4] = g.tex.ryu_punchy[6];
+                g.tex.ryu_walky[5] = g.tex.ryu_punchy[7];
+            }
+
+            //ARE WE ON THE LAST FRAME
+            //IF YES, GO TO SECOND FRAME
+            if (g.tex.ryu_punchx[6] - 0.2f < 0.475f) {
+                g.tex.ryu_punchx[7] += 0.150f;
+                g.tex.ryu_punchx[6] += 0.250f;
+                g.gotoFirstFrame = 1;
+            }
+            //IF WE ARE ON THE SECOND FRAME COMING FROM LAST FRAME
+            //GO TO FIRST FRAME
+            else if (g.gotoFirstFrame == 1) {
+                g.tex.ryu_punchx[7] += 0.150f;
+                g.tex.ryu_punchx[6] += 0.150f;
+                g.gotoFirstFrame = 0;
+            }
+            //GOING FROM FIRST FRAME TO SECOND FRAME
+            else if (g.tex.ryu_punchx[7] != 0.850f) {                
+                g.tex.ryu_punchx[7] -= 0.150f;
+                g.tex.ryu_punchx[6] -= 0.150f;
+            }
+            //GOING FROM SECOND FRAME TO THIRD FRAME
+            else if (g.tex.ryu_punchx[7] != 0.700f) {               
+                g.tex.ryu_punchx[7] -= 0.150f;
+                g.tex.ryu_punchx[6] -= 0.250f;
+            }
+        }
 	}
 
 
@@ -1438,14 +1529,77 @@ void physics(void)
 
 	// Punch cooldown player 2
 	if (player2.punch == 1) {
-		/*if (player2.punchcooldown == 0) {
-			player2.punch = 0;
-			player2.punchcooldown = 250.0f;
-		}
-		else {
-			player2.punchcooldown -= 10.0f;
-		}*/
         punchCooldownPlayer(&player2.punchcooldown, &player2.punch);
+
+        //IS PLAYER 2 TO THE LEFT OF PLAYER 1
+        if (player2.pos[0] + player2.w < player1.pos[0] - player1.w) {
+            if (player2.punchcooldown % 35 == 0) {
+                g.tex.ryu_walkx[0] = g.tex.ryu_punchx[0];
+                g.tex.ryu_walkx[1] = g.tex.ryu_punchx[1];
+                g.tex.ryu_walky[0] = g.tex.ryu_punchy[0];
+                g.tex.ryu_walky[1] = g.tex.ryu_punchy[1];
+            }
+
+            //ARE WE ON THE LAST FRAME
+            //IF YES, GO TO SECOND FRAME
+            if (g.tex.ryu_punchx[1] + 0.2f > 0.525f) {
+                g.tex.ryu_punchx[0] -= 0.150f;
+                g.tex.ryu_punchx[1] -= 0.250f;
+                g.gotoFirstFrameP2 = 1;
+            }
+            //IF WE ARE ON THE SECOND FRAME COMING FROM LAST FRAME
+            //GO TO FIRST FRAME
+            else if (g.gotoFirstFrameP2 == 1) {
+                g.tex.ryu_punchx[0] -= 0.150f;
+                g.tex.ryu_punchx[1] -= 0.150f;
+                g.gotoFirstFrameP2 = 0;
+            }
+            //GOING FROM FIRST FRAME TO SECOND FRAME
+            else if (g.tex.ryu_punchx[0] != 0.150f) {                
+                g.tex.ryu_punchx[0] += 0.150f;
+                g.tex.ryu_punchx[1] += 0.150f;
+            }
+            //GOING FROM SECOND FRAME TO THIRD FRAME
+            else if (g.tex.ryu_punchx[0] != 0.300f) {               
+                g.tex.ryu_punchx[0] += 0.150f;
+                g.tex.ryu_punchx[1] += 0.250f;
+            }
+        }
+
+        //IS PLAYER 2 TO THE RIGHT OF PlAYER 1?
+        if (player2.pos[0] - player2.w > player1.pos[0] + player1.w) {
+            if (player2.punchcooldown % 35 == 0) {
+                g.tex.ryu_walkx[0] = -g.tex.ryu_punchx[2];
+                g.tex.ryu_walkx[1] = -g.tex.ryu_punchx[3];
+                g.tex.ryu_walky[0] = g.tex.ryu_punchy[2];
+                g.tex.ryu_walky[1] = g.tex.ryu_punchy[3];
+            }
+
+            //ARE WE ON THE LAST FRAME
+            //IF YES, GO TO SECOND FRAME
+            if (g.tex.ryu_punchx[2] - 0.2f < 0.475f) {
+                g.tex.ryu_punchx[3] += 0.150f;
+                g.tex.ryu_punchx[2] += 0.250f;
+                g.gotoFirstFrameP2 = 1;
+            }
+            //IF WE ARE ON THE SECOND FRAME COMING FROM LAST FRAME
+            //GO TO FIRST FRAME
+            else if (g.gotoFirstFrameP2 == 1) {
+                g.tex.ryu_punchx[3] += 0.150f;
+                g.tex.ryu_punchx[2] += 0.150f;
+                g.gotoFirstFrameP2 = 0;
+            }
+            //GOING FROM FIRST FRAME TO SECOND FRAME
+            else if (g.tex.ryu_punchx[3] != 0.850f) {                
+                g.tex.ryu_punchx[3] -= 0.150f;
+                g.tex.ryu_punchx[2] -= 0.150f;
+            }
+            //GOING FROM SECOND FRAME TO THIRD FRAME
+            else if (g.tex.ryu_punchx[3] != 0.700f) {               
+                g.tex.ryu_punchx[3] -= 0.150f;
+                g.tex.ryu_punchx[2] -= 0.250f;
+            }
+        }
 	}
 
 	// -- Misc --

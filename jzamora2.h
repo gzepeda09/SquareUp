@@ -60,6 +60,6 @@ extern void punchAbilityPlayer2(int* p2_punch, int* sPunch, int jeflag,
                                 double* p1_vel_1, int* p1_dead,
                                 int p1_block, int* p1_health, int weapon);
 
-extern void punchCooldownPlayer(float* cooldown, int* punch);
+extern void punchCooldownPlayer(int* cooldown, int* punch);
 
 #endif
