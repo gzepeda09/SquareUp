@@ -4,11 +4,21 @@
 #include <GL/glx.h>
 
 // --- Jose ---
+
+//-------------------------------------
+//BACKGROUND TEXTURE
+//-------------------------------------
+
 extern void displayBackground(float x0, float x1,
                               float y0, float y1,
                               int xres, int yres,
                               int width, int height,
                               GLuint texture, GLvoid* data);
+
+extern void display_map(float x0, float x1,
+                        float y0, float y1,
+                        int xres, int yres);
+
 //-------------------------------------
 //PLAYER TEXTURE
 //-------------------------------------
@@ -44,18 +54,12 @@ extern void displayPlayerPunch(double p_x, double o_x, int* frame,
                                float* py2,  float* py3,
                                float* wkx0, float* wkx1,
                                float* wky0, float* wky1);
-
-extern void display_map(float x0, float x1,
-                        float y0, float y1,
-                        int xres, int yres);
-
+//-------------------------------------
+//PLAYER RELATED ITEMS:
+//-------------------------------------
 extern void player_hitbox(int w, int h, float x, float y);
 
 extern void punch_hitbox(int w1, int w2, int h, float x, float y);
-
-extern void fmBorder(int xres, int yres);
-
-extern void display_controls(int wf, int yres);
 
 extern void movePlayerLeft(double* pos_x, double* pos2_x,
                            double* pos_y, double* pos2_y,
@@ -88,5 +92,20 @@ extern void punchAbilityPlayer2(int* p2_punch, int* sPunch, int jeflag,
                                 int p1_block, int* p1_health, int weapon);
 
 extern void punchCooldownPlayer(int* cooldown, int* punch);
+
+//-------------------------------------
+//UTILITY
+//-------------------------------------
+
+extern void fillArrays(float ryu_wx[], float ryu_wy[],
+                       float ryu_punchx[], float ryu_punchy[],
+                       float ryu_walkx[], float ryu_walky[]);
+
+//-------------------------------------
+//FEATURE MODE
+//-------------------------------------
+extern void fmBorder(int xres, int yres);
+extern void fmHeader(int xres, int yres);
+extern void display_controls(int wf, int yres);
 
 #endif

@@ -5,32 +5,77 @@
 #include "fonts.h"
 #include "jzamora2.h"
 #include <iostream>
+#include <cstdlib>
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
 #include <GL/glx.h>
 #include <cstring>
 
+//-----------------------------------------------
+//GENERAL TESTING CLASS
+//-----------------------------------------------
 class Global {
     public:
         int i = 0;
+        int c1 = 0;
+        int c2 = 255;
+        int c3 = 0;
 } glu; 
 
-extern void test_text (int gres, int yres)
+//-----------------------------------------------
+//MY FEATURE MODE
+//-----------------------------------------------
+
+void fmHeader(int xres, int yres)
 {
-    std::cout << gres << std::endl;
     Rect r;
     unsigned int c = 0x00ffff44;
-        r.bot = yres - 50;
-        r.left = 100;
-        r.center = 1;
-        ggprint8b(&r, 16, c, "Jose's Feature Mode");
-    ggprint8b(&r, 16, c, "As a text");
+    r.bot = yres - 50;
+    r.left = (xres / xres) + 50;
+    r.center = 0;
+    ggprint8b(&r, 16, c, "Jose's Feature Mode:");
+    ggprint8b(&r, 16, c, "   ");
+    ggprint8b(&r, 16, c, "PLAYER 1 HITBOX:");
+    ggprint8b(&r, 16, c, "SHIFT + 7 - Increase Player 1 Width");
+    ggprint8b(&r, 16, c, "SHIFT + 8 - Increase Player 1 Height");
+    ggprint8b(&r, 16, c, "SHIFT + F7 - Decrease Player 1 Width");
+    ggprint8b(&r, 16, c, "SHIFT + F8 - Decrease Player 1 Height");
+    ggprint8b(&r, 16, c, "   ");
+    ggprint8b(&r, 16, c, "PLAYER 2 HITBOX:");
+    ggprint8b(&r, 16, c, "SHIFT + 9 - Increase Player 2 Width");
+    ggprint8b(&r, 16, c, "SHIFT + 0 - Increase Player 2 Height");
+    ggprint8b(&r, 16, c, "SHIFT + F9 - Decrease Player 2 Width");
+    ggprint8b(&r, 16, c, "SHIFT + F10 - Decrease Player 2 Height");
+    ggprint8b(&r, 16, c, "   ");
+    ggprint8b(&r, 16, c, "PLAYER 1 PUNCH HITBOX:");
+    ggprint8b(&r, 16, c, "CTRL + 7 - Increase Player 1 Punch Length");
+    ggprint8b(&r, 16, c, "CTRL + 8 - Increase Player 1 Punch Width");
+    ggprint8b(&r, 16, c, "CTRL + F7 - Decrease Player 1 Punch Length");
+    ggprint8b(&r, 16, c, "CTRL + F8 - Decrease Player 1 Punch Width");
+    ggprint8b(&r, 16, c, "   ");
+    ggprint8b(&r, 16, c, "PLAYER 2 PUNCH HITBOX:");
+    ggprint8b(&r, 16, c, "CTRL + 9 - Increase Player 2 Punch Length");
+    ggprint8b(&r, 16, c, "CTRL + 0 - Increase Player 2 Punch Width");
+    ggprint8b(&r, 16, c, "CTRL + F9 - Decrease Player 2 Punch Length");
+    ggprint8b(&r, 16, c, "CTRL + F10 - Decrease Player 2 Punch Width");
+    ggprint8b(&r, 16, c, "   ");
+    ggprint8b(&r, 16, c, "PLAYER SPEED:");
+    ggprint8b(&r, 16, c, "'+' - Increase Player Speed");
+    ggprint8b(&r, 16, c, "'-' - Decrease Player Speed");
 }
 
-extern void fmBorder(int xres, int yres) 
+void fmBorder(int xres, int yres) 
 {
     int t = 10;
-    glColor3f(0.0, 1.0, 0.0);
+    // Providing a seed value
+	srand((unsigned) time(NULL));
+	// Get a random number
+    if (glu.i % 20 == 0) {            
+	    glu.c1 = 1 + (rand() % 255);
+        glu.c2 = 1 + (rand() % 255);
+        glu.c3 = 1 + (rand() % 255);
+    }
+    glColor3ub(glu.c1, glu.c2, glu.c3);
     glBegin(GL_TRIANGLE_STRIP);
         glVertex2f(0,           0);
         glVertex2f(t,           t);
@@ -136,7 +181,8 @@ void displayPlayerLeft(double p_x,  double o_x, int* time,
                        float* wy0,  float* wy1,
                        float* wy2,  float* wy3,
                        float* wkx0, float* wkx1,
-                       float* wky0, float* wky1) {
+                       float* wky0, float* wky1) 
+{
     if (p_x > o_x) {
         *time += 1;
         if (*time % 6 == 0) {
@@ -176,7 +222,8 @@ void displayPlayerRight(double p_x,  double o_x, int* time,
                         float* wy0,  float* wy1,
                         float* wy2,  float* wy3,
                         float* wkx0, float* wkx1,
-                        float* wky0, float* wky1) {
+                        float* wky0, float* wky1) 
+{
     if (p_x > o_x) {
         *time += 1;
         if (*time % 6 == 0) {
@@ -218,7 +265,8 @@ void displayPlayerPunch(double p_x,  double o_x, int* frame,
                         float* py0,  float* py1,
                         float* py2,  float* py3,
                         float* wkx0, float* wkx1,
-                        float* wky0, float* wky1) {
+                        float* wky0, float* wky1) 
+{
 
     //IS PLAYER TO THE LEFT OF OPPONENT?
     if (p_x + p_w < o_x - o_w) {
@@ -572,4 +620,67 @@ void movePlayerRight(double* pos_x, double* pos2_x,
 //UTILITY:
 //-----------------------------------------------
 
+void fillArrays(float ryu_wx[], float ryu_wy[],
+                float ryu_punchx[], float ryu_punchy[],
+                float ryu_walkx[], float ryu_walky[]) 
+{
+    //PLAYER 1 TEXTURE COORDINATES: MOVING RIGHT:
+    ryu_wx[0] = 0.0f;
+    ryu_wx[1] = 0.125f;
+    ryu_wy[0] = 0.0f;
+    ryu_wy[1] = 0.33f;
 
+    //PLAYER 1 TEXTURE COORDINATES: MOVING LEFT
+    ryu_wx[2] = 0.875f;
+    ryu_wx[3] = 1.0f;
+    ryu_wy[2] = 0.33f;
+    ryu_wy[3] = 0.66f;
+
+    //PUNCH FOR PLAYER 1: NORMAL
+    ryu_punchx[0] = 0.0f;
+    ryu_punchx[1] = 0.125f;
+    ryu_punchy[0] = 0.66f;
+    ryu_punchy[1] = 0.99f;
+
+    //PUNCH FOR PLAYER 1: FLIPPED
+    ryu_punchx[2] = 0.875f;
+    ryu_punchx[3] = 1.0f;
+    ryu_punchy[2] = 0.66f;
+    ryu_punchy[3] = 0.99f;
+
+    //SETTING CHARACTER TEXTURES FOR PLAYER 1:
+    ryu_walkx[0] = ryu_wx[0];
+    ryu_walkx[1] = ryu_wx[1];
+    ryu_walky[0] = ryu_wy[0];
+    ryu_walky[1] = ryu_wy[1];
+
+    //PLAYER 2 TEXTURE COORDINATES: MOVING RIGHT
+    ryu_wx[4] = 0.0f;
+    ryu_wx[5] = 0.125f;
+    ryu_wy[4] = 0.0f;
+    ryu_wy[5] = 0.33f;
+
+    //PLAYER 2 TEXTURE COORDINATES: MOVING LEFT
+    ryu_wx[6] = 0.875f;
+    ryu_wx[7] = 1.0f;
+    ryu_wy[6] = 0.33f;
+    ryu_wy[7] = 0.66f;
+
+    //PUNCH FOR PLAYER 2: NORMAL
+    ryu_punchx[4] = 0.0f;
+    ryu_punchx[5] = 0.123f;
+    ryu_punchy[4] = 0.66f;
+    ryu_punchy[5] = 0.99f;
+ 
+    //PUNCH FOR PLAYER 2: FLIPPED
+    ryu_punchx[6] = 0.875f;
+    ryu_punchx[7] = 1.0f;
+    ryu_punchy[6] = 0.66f;
+    ryu_punchy[7] = 0.99f;
+ 
+    //SETTING CHARACTER TEXTURES FOR PLAYER 2:
+    ryu_walkx[4] = ryu_wx[4];
+    ryu_walkx[5] = ryu_wx[5];
+    ryu_walky[4] = ryu_wy[4];
+    ryu_walky[5] = ryu_wy[5];
+}
