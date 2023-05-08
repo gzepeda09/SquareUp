@@ -477,6 +477,6 @@ extern void supPunchPhys1(bool *btnPress, int *pB, int *sPnch)
 
 extern void supPunchPhys2(bool *btnPress, int *sPnch)
 {
-		(*btnPress) = false;
-	    (*sPnch) = 0;
+      (*btnPress) = false;
+      (*sPnch) = 0;
 }
