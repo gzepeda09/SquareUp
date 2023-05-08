@@ -1837,6 +1837,7 @@ void render(void)
                               g.tex.map1Texture, img[1].data);
 
             //PLAYER 1 SPIRTE:
+            //FIXME: SWAP AROUND THE VARIABLES USED IN WALKX AND WALKY
             unsigned char *Data1 = buildAlphaData(&img[3]);
             displayCharacter(g.tex.ryu_walkx[4], g.tex.ryu_walkx[5],
                              g.tex.ryu_walky[4], g.tex.ryu_walky[5],
