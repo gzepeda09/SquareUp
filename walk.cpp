@@ -93,6 +93,11 @@ extern void powBar(float w, float h, unsigned char color[3], float pos0,
 		float pos1);
 extern void superPunch(int w, int w2, int h, float x, float y, int flipped, int player);
 extern void cntrlMenu(int yres, int xres);
+extern void playDeathP1Sound();
+extern void playDeathP2Sound();
+extern void playChargeSound();
+extern void playPunchP2Sound();
+extern void playJumpSound();
 
 
 //JOSE: THIS IS WHERE ANY IMAGES WE USE GO
@@ -799,8 +804,15 @@ bool idle2 = true;
 
 bool ePressed = false; 
 bool kPressed = false;
+bool cPressed = false;
+bool slPressed = false;
 bool rndrPbar = false;
 bool rndrPbar2 = false;
+
+bool deathP1 = false;
+bool deathP2 = false;
+bool chrgSound = false;
+bool chrgSound2 = false;
 void physics(void)
 {
 	//int addgrav = 1;
@@ -974,6 +986,7 @@ void physics(void)
 		//player1.vel[2] = 200.0f;
 		//player1.pos[1] += 500.0ff;
 		//std::cout << "W key pressed" << std::endl;
+		playJumpSound();
 		jumpPlayer(&player1.vel[1], &player1.vel[2]);
 		g.walkFrame = 24;
 	}
@@ -1261,7 +1274,7 @@ void physics(void)
 		//player2.vel[2] = 200.0f;
 		//player2.pos[1] += 500.0f;
 		//std::cout << "Up Arrow key pressed" << std::endl;
-
+		playJumpSound();
 		jumpPlayer(&player2.vel[1], &player2.vel[2]);
 		g.walk2Frame = 24;
 	}
@@ -1312,6 +1325,7 @@ void physics(void)
 		else{
 			player2.punch = 1;
 		}
+		playPunchP2Sound();
 
 		punchAbilityPlayer2(&player2.punch, &player2.sPunch, g.jeflag,
 				&player2.pos[0], &player2.pos[1], player2.pw2,
@@ -1455,6 +1469,17 @@ void physics(void)
 	else if (player1.pos[0] < player2.pos[0]) {
 		g.punchflip = 1;
 	}
+	
+	if(player1.dead == 1 && !deathP1){
+		playDeathP1Sound();
+		deathP1 = true;
+	}
+
+	if(player2.dead == 1 && !deathP2){
+		playDeathP2Sound();
+		deathP2 = true;
+	}
+
 
 	// //Geno - rand platform detection
 	// extern void pltPhysics(double plPos0, double plPos1, double plVel,
@@ -1593,25 +1618,41 @@ void physics(void)
 	extern void chrgPhys(int *pBar, bool *chrg);
 
 
-
 	//Geno - physics for charge up
 	if (g.keyStates[XK_c] && player1.pBar <= 150 && player1.pBar >= 0 && player1.block != 1) {
 
+		cPressed = true;
+
 		chrgPhys(&player1.pBar, &chargeUp);
+		if(!chrgSound && cPressed){
+			playChargeSound();
+			chrgSound = true;
+		}
+
 		rndrPbar = true;
 	} else {
 		chargeUp = false;
+		chrgSound = false;
+		cPressed = false;
 	}
 
 
 
 	if (g.keyStates[XK_slash] && player2.pBar <= 150 && player2.pBar >= 0 && player2.block != 1) {
-
+		slPressed = true;
 		chrgPhys(&player2.pBar, &chargeUp2);
+		if(!chrgSound2 && slPressed){
+			playChargeSound();
+			chrgSound2 = true;
+		}
+
 		rndrPbar2 = true;
 	} else {
 		chargeUp2 = false;
+		chrgSound2 = false;
+		slPressed = false;
 	}
+
 
 	once = false;
 
