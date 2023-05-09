@@ -539,7 +539,7 @@ void showPowerUp(int weapon, int ywin, int xwin)
 void restartGame(int* p1Health, int* p2Health, double* p1Pos, double* p2Pos,
                 int* p1Dead, int* p2Dead, int* p1Weapon, int* p2Weapon,
                 time_t* p1TimeLimit, time_t* p2TimeLimit, int* gRestart,
-                int* nextMB, int* mBS, int xwin) 
+                int* nextMB, int* mBS, int xwin, bool* deathP1, bool* deathP2) 
 {
     if ((*p1Dead == 1 || *p2Dead == 1) && *gRestart == 1) {    
         *p1Health = 150;
@@ -549,6 +549,8 @@ void restartGame(int* p1Health, int* p2Health, double* p1Pos, double* p2Pos,
         *p1Dead = 0;
         *p2Dead = 0;
         *p1Weapon = 0;
+	*deathP1 = false;
+	*deathP2 = false;
         *p2Weapon = 0;
         *p1TimeLimit = 0;
         *p2TimeLimit = 0;
