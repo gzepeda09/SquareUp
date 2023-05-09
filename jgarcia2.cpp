@@ -506,7 +506,7 @@ void showPowerUp(int weapon, int ywin, int xwin)
             glTexCoord2f(1.0f, 1.0f); glVertex2i(xwin/2+widthR, ywin/1.2);
         glEnd();
         glBindTexture(GL_TEXTURE_2D, 0);
-    } else {//damage
+    } else if (weapon == 5){//damage
         glEnable(GL_TEXTURE_2D);
         glGenTextures(1, &gl.damage);
         
