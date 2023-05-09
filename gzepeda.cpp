@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "image.h"
+#include "fonts.h"
 
 
 using namespace std;
