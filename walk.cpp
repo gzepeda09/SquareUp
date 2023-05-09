@@ -65,33 +65,36 @@ extern void holdingWeapon(float w, float h, float x, float y, int flipped, int w
 extern void useWeapon(float w, float h, float x, float y, int flipped, int weapon);
 extern void showPowerUp(int weapon, int ywin, int xwin);
 //--- Brian ---
-extern void draw_power_ups(int w, int h, float x, float y);
-extern void power_ups_effects();
-extern void sprite(int cx, int cy, int walkFrame, GLuint walkTexture);
-
+extern void Player_1(int cx, int cy, int walkFrame, GLuint walkTexture);
+extern void Player_1_fliped(int cx, int cy, int walkFrame, GLuint walkTexture);
+extern void Player_2(int cx, int cy, int walkFrame, GLuint walkTexture);
+extern void Player_2_fliped(int cx, int cy, int walkFrame, GLuint walkTexture);
+extern void Player_2_spe(int cx, int cy, int walkFrame, GLuint walkTexture);
+extern void Player_2_spe_fliped(int cx, int cy, int walkFrame, GLuint walkTexture);
 
 
 // Geno
 extern void playSound();
 extern void strMenu(int yres, int xres);
 extern void powBar(float w, float h, unsigned char color[3], float pos0, 
-				   float pos1);
+		float pos1);
 extern void superPunch(int w, int w2, int h, float x, float y, int flipped, int player);
 extern void cntrlMenu(int yres, int xres);
 
 
 //JOSE: THIS IS WHERE ANY IMAGES WE USE GO
-Image img[3] = {"images/Freddy2.png",
-            	"images/map1-06.png",
-            	"images/scott.gif"};
+Image img[4] = {"images/Freddy2.png",
+	"images/map1-06.png",
+	"images/Wolf.png",
+	"images/Wolf_spe.png"};
 
 //JOSE: sets up variables used for creating the background.
 class Texture {
 	public:
 		Image *backimage;
 		GLuint backTexture;
-        GLuint map1Texture;
-        GLuint map2Texture;
+		GLuint map1Texture;
+		GLuint map2Texture;
 		float xc[2];
 		float yc[2];
 };
@@ -104,7 +107,7 @@ class Player_1 {
 		int block = 0;
 		int sPunch = 0;
 		int pBar = 0;
-        int weapon = 0; 
+		int weapon = 0; 
 		time_t timeLimit = 0; //power up time limit
 		int puLimit = 0;
 		float w = 20.0f;
@@ -113,7 +116,7 @@ class Player_1 {
 		float pw2 = 100.0f;
 		float ph = 10.0f;
 		int punch;
-		float punchcooldown = 250.0f;
+		int punchcooldown = 250;
 		int health = 150;
 } player1;
 
@@ -125,7 +128,7 @@ class Player_2 {
 		int block = 0;
 		int pBar = 0;
 		int sPunch = 0;
-        int weapon = 0;
+		int weapon = 0;
 		time_t timeLimit = 0; //power up time limit
 		int puLimit = 0;
 		float w = 20.0f;
@@ -134,7 +137,7 @@ class Player_2 {
 		float pw2 = 100.0f;
 		float ph = 10.0f;
 		int punch;
-		float punchcooldown = 250.0f;
+		int punchcooldown = 250;
 		int health = 150;
 } player2;
 
@@ -156,6 +159,7 @@ class Timers {
 		struct timespec timeStart, timeEnd, timeCurrent;
 		struct timespec walkTime;
 		struct timespec walk2Time;
+		struct timespec speTime;
 		Timers() {
 			physicsRate = 1.0 / 30.0;
 			oobillion = 1.0 / 1e9;
@@ -180,6 +184,7 @@ class Global {
 		int walk;
 		int walkFrame;
 		int walk2Frame;
+		int speFrame;
 		int gflag, bflag;
 		int start;
 		int ctrls;
@@ -187,17 +192,18 @@ class Global {
 		double delay;
 		int feature_mode;
 		int restart;
-        int mysteryBoxSpawn;
-        int nextMysteryBox;
+		int mysteryBoxSpawn;
+		int nextMysteryBox;
 		GLuint walkTexture;
 		GLuint walk2Texture;
+		GLuint speTexture;
 		int mapCenter;
 		int punchflip = 1;
 		Texture tex;
 		char keyStates[65536];
-        int loadMap = 0;
-        int time_scroll = 0;
-        float scroll = 0.0f;
+		int loadMap = 0;
+		int time_scroll = 0;
+		float scroll = 0.0f;
 		Vec box[20];
 		Global() {
 			done=0;
@@ -210,11 +216,12 @@ class Global {
 			start = 0;
 			ctrls = 0;
 			restart = 0;
-            mysteryBoxSpawn = 0;
-            nextMysteryBox = 100;
+			mysteryBoxSpawn = 0;
+			nextMysteryBox = 100;
 			memset(keyStates, 0, 65536);
 			walkFrame=0;
 			walk2Frame=0;
+			speFrame=0;
 			delay = 0.1;
 			for (int i=0; i<20; i++) {
 				box[i][0] = rnd() * xres;
@@ -423,6 +430,20 @@ void initOpengl(void)
 	glEnable(GL_TEXTURE_2D);
 	initialize_fonts();
 	//
+	//JOSE: Part of displaying map 1; will try and see if i can add to own source file
+	int w1 = img[1].width;
+	int h1 = img[1].height;
+	glBindTexture(GL_TEXTURE_2D, g.tex.backTexture);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, w1, h1, 0,
+			GL_RGB, GL_UNSIGNED_BYTE, img[1].data);
+	g.tex.xc[0] = 0.0f;
+	g.tex.xc[1] = 1.0f;
+	g.tex.yc[0] = 0.0f;
+	//g.tex.yc[1] = 1.0f;
+	g.tex.yc[1] = 0.125f;
+	//==========================================================================
 	//load the images file into a ppm structure.
 	//Brian used for displaying sprites
 	//==========================================================================
@@ -448,20 +469,6 @@ void initOpengl(void)
 	//free(walkData);
 	//unlink("./images/walk.ppm");
 	//-------------------------------------------------------------------------
-	//JOSE: Part of displaying map 1; will try and see if i can add to own source file
-	int w1 = img[1].width;
-	int h1 = img[1].height;
-	glBindTexture(GL_TEXTURE_2D, g.tex.backTexture);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, 3, w1, h1, 0,
-			GL_RGB, GL_UNSIGNED_BYTE, img[1].data);
-	g.tex.xc[0] = 0.0f;
-	g.tex.xc[1] = 1.0f;
-	g.tex.yc[0] = 0.0f;
-	//g.tex.yc[1] = 1.0f;
-	g.tex.yc[1] = 0.125f;
-	//==========================================================================
 	int w2 = img[2].width;
 	int h2 = img[2].height;
 	//
@@ -480,6 +487,26 @@ void initOpengl(void)
 	unsigned char *walk2Data = buildAlphaData(&img[2]);	
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w2, h2, 0,
 			GL_RGBA, GL_UNSIGNED_BYTE, walk2Data);
+	//-------------------------------------------------------------------------
+	int w3 = img[3].width;
+	int h3 = img[3].height;
+	//
+	//create opengl texture elements
+	glGenTextures(1, &g.speTexture);
+	//-------------------------------------------------------------------------
+	//silhouette
+	//this is similar to a sprite graphic
+	//
+	glBindTexture(GL_TEXTURE_2D, g.speTexture);
+	//
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	//
+	//must build a new set of data...
+	unsigned char *speData = buildAlphaData(&img[3]);	
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w3, h3, 0,
+			GL_RGBA, GL_UNSIGNED_BYTE, speData);
+
 
 }
 void init() {
@@ -526,8 +553,9 @@ void checkMouse(XEvent *e)
 
 int checkKeys(XEvent *e)
 {
-	//keyboard input?
+    //keyboard input?
 	static int shift=0;
+    static int ctrl=0;
 	if (e->type != KeyRelease && e->type != KeyPress) {
 		return 0;
 	}
@@ -537,18 +565,25 @@ int checkKeys(XEvent *e)
 		g.keyStates[key] = 0;
 		if (key == XK_Shift_L || key == XK_Shift_R)
 			shift = 0;
+		if (key == XK_Control_L || key == XK_Control_R)
+			 ctrl = 0;
 		return 0;
 	}
 	if (e->type == KeyPress) {
 		g.keyStates[key] = 1;
 		if (key == XK_Shift_L || key == XK_Shift_R) {
 			shift = 1;
-			return 0;
+            return 0;
+        }
+		if (key == XK_Control_L || key == XK_Control_R) {
+			ctrl = 1;
+	        return 0;
 		}
 	}
 
 	// checks keys
 	(void)shift;
+    (void)ctrl;
 	switch (key) {
 		case XK_w:
 			timers.recordTime(&timers.walkTime);
@@ -566,7 +601,7 @@ int checkKeys(XEvent *e)
 			break;
 		case XK_1:
 			//Brian: change the flags to "flag =! flag;" 
-            //       make it toggle with less lines of code
+			//       make it toggle with less lines of code
 			g.gflag =! g.gflag;
 			break;
 		case XK_2:
@@ -580,14 +615,22 @@ int checkKeys(XEvent *e)
 		case XK_j:
 			if (shift)
 				//Brian: change the flags to "flag =! flag;" 
-                //       make it toggle with less lines of code
+				//       make it toggle with less lines of code
 				g.joflag =! g.joflag;
 			break;
 		case XK_Right:
 			break;
-		case XK_Up:
+        case XK_Up:
+            if (shift && g.joflag == 1) {
+                player1.vel[0] += 2.0f;
+                player2.vel[0] += 2.0f;
+            }
 			break;
 		case XK_Down:
+            if (shift && g.joflag == 1) {
+                player1.vel[0] -= 2.0f;
+                player2.vel[0] -= 2.0f;
+            }
 			break;
 		case XK_equal:
 			g.delay -= 0.005;
@@ -607,7 +650,7 @@ int checkKeys(XEvent *e)
 			if(g.start != 1){
 				g.start = 1;
 			}
-            g.loadMap = 1;
+			g.loadMap = 1;
 			break;
 		case XK_F2:
 			if(g.start != 2){
@@ -628,6 +671,74 @@ int checkKeys(XEvent *e)
 		case XK_r:
 			g.restart =! g.restart;
 			break;
+         case XK_7:
+            if (shift && g.joflag == 1) {
+                player1.w += 10;
+            }
+            else if (ctrl && g.joflag == 1) {
+                player1.pw1 += 10;
+                player1.pw2 += 10;
+            }
+            break;
+        case XK_F7:
+            if (shift && g.joflag == 1) {
+                player1.w -= 10;
+            }
+            else if (ctrl && g.joflag == 1) {
+                player1.pw1 -= 10;
+                player1.pw2 -= 10;
+            }
+            break;
+        case XK_8:
+            if (shift && g.joflag == 1) {
+                player1.h += 10;
+            }
+            else if (ctrl && g.joflag == 1) {
+                player1.ph += 10;
+            }
+            break;
+        case XK_F8:
+            if (shift && g.joflag == 1) {
+                player1.h -= 10;
+            }
+            else if (ctrl && g.joflag == 1) {
+                player1.ph -= 10;
+            }
+            break;
+        case XK_9:
+            if (shift && g.joflag == 1) {
+                player2.w += 10;
+            }
+            else if (ctrl && g.joflag == 1) {
+                player2.pw1 += 10;
+                player2.pw2 += 10;
+            }
+            break;
+        case XK_F9:
+            if (shift && g.joflag == 1) {
+                player2.w -= 10;
+            }
+            else if (ctrl && g.joflag == 1) {
+                player2.pw1 -= 10;
+                player2.pw2 -= 10;
+            }
+            break;
+        case XK_0:
+            if (shift && g.joflag == 1) {
+                player2.h += 10;
+            }
+            else if (ctrl && g.joflag == 1) {
+                player2.ph += 10;
+            }
+            break;
+        case XK_F10:
+            if (shift && g.joflag == 1) {
+                player2.h -= 10;
+            }
+            else if (ctrl && g.joflag == 1) {
+                player2.ph -= 10;
+            }
+            break;
 
 	}
 	return 0;
@@ -677,33 +788,39 @@ bool chargeUp2 = false;
 //Geno - for super punch
 bool once = false;
 
+//Brina - for idle animation
+bool idle = true;
+bool idle2 = true;
+
 bool ePressed = false; 
 bool kPressed = false;
 bool rndrPbar = false;
 bool rndrPbar2 = false;
 void physics(void)
 {
-	int addgrav = 1;
-	if (g.walk) {
-		//man is walking...
-		//when time is up, advance the frame.
-		timers.recordTime(&timers.timeCurrent);
-		double timeSpan = timers.timeDiff(&timers.walkTime, &timers.timeCurrent);
-		if (timeSpan > g.delay) {
-			//advance
-			++g.walkFrame;
-			if (g.walkFrame >= 16)
-				g.walkFrame -= 16;
-			timers.recordTime(&timers.walkTime);
-		}
-		for (int i=0; i<20; i++) {
-			g.box[i][0] -= 2.0 * (0.05 / g.delay);
-			if (g.box[i][0] < -16.0)
-				g.box[i][0] += g.xres + 16.0;
-		}
+	//int addgrav = 1;
+	/*
+	   if (g.walk) {
+	//man is walking...
+	//when time is up, advance the frame.
+	timers.recordTime(&timers.timeCurrent);
+	double timeSpan = timers.timeDiff(&timers.walkTime, &timers.timeCurrent);
+	if (timeSpan > g.delay) {
+	//advance
+	++g.walkFrame;
+	if (g.walkFrame >= 7)
+	g.walkFrame -= 7;
+	timers.recordTime(&timers.walkTime);
 	}
+	for (int i=0; i<20; i++) {
+	g.box[i][0] -= 2.0 * (0.05 / g.delay);
+	if (g.box[i][0] < -16.0)
+	g.box[i][0] += g.xres + 16.0;
+	}
+	}
+	*/
 	//Super-Punch
-	
+
 	extern void supPunchPhys1(bool *btnPress, int *pB, int *sPnch);
 	extern void supPunchPhys2(bool *btnPress, int *sPnch);
 
@@ -726,96 +843,140 @@ void physics(void)
 
 
 
-	//--Player 1 Movement & Abilites--
+	//--Player 1 Movement & Abilites--	
+	if(idle == true) {
+		//man is walking...
+		//when time is up, advance the frame.
+		timers.recordTime(&timers.timeCurrent);
+		double timeSpan = timers.timeDiff(&timers.walkTime, 
+				&timers.timeCurrent);
 
+		//FIXME: this shouldn't be necessary
+		//       our animations shouldn't be automaticate
+		//       or based on a timer
+		if (timeSpan > g.delay) {
+			//advance
+			++g.walkFrame;
+			if(g.walkFrame > 7) {
+				g.walkFrame = 0;
+			}
+			if(g.walkFrame >= 7)
+				g.walkFrame -= 7;
+			timers.recordTime(&timers.walkTime);
+		}
+		for (int i=0; i<20; i++) {
+			g.box[i][0] -= 2.0 * (0.05 / g.delay);
+			if (g.box[i][0] < -16.0)
+				g.box[i][0] += g.xres + 16.0;
+		}
+	}
+	if(g.keyStates[XK_a] || g.keyStates[XK_d]) {
+		idle = false;
+	}else if(g.keyStates[XK_Left] || g.keyStates[XK_Right]) {
+		idle2 = false;
+	}else {
+		idle = true;
+		idle2 = true;
+	}
 	// Move left player 1
 	if(g.keyStates[XK_a] && player1.dead == 0 && !chargeUp) {
-		/*if (player1.pos[0] > player1.w) {
-			//man is walking...
-			//when time is up, advance the frame.
-			timers.recordTime(&timers.timeCurrent);
-			double timeSpan = timers.timeDiff(&timers.walkTime, 
-                                              &timers.timeCurrent);
+		//man is walking...
+		//when time is up, advance the frame.
+		timers.recordTime(&timers.timeCurrent);
+		double timeSpan = timers.timeDiff(&timers.walkTime, 
+				&timers.timeCurrent);
 
-            //FIXME: this shouldn't be necessary
-            //       our animations shouldn't be automaticate
-            //       or based on a timer
-			if (timeSpan > g.delay) {
-				//advance
-				++g.walkFrame;
-				if (g.walkFrame >= 16)
-					g.walkFrame -= 16;
-				timers.recordTime(&timers.walkTime);
+		//FIXME: this shouldn't be necessary
+		//       our animations shouldn't be automaticate
+		//       or based on a timer
+		if (timeSpan > g.delay) {
+			//advance
+			++g.walkFrame;
+			if(g.walkFrame <= 8 || g.walkFrame >= 16) {
+				g.walkFrame = 9;
 			}
-			for (int i=0; i<20; i++) {
-				g.box[i][0] -= 2.0 * (0.05 / g.delay);
-				if (g.box[i][0] < -16.0)
-					g.box[i][0] += g.xres + 16.0;
-			}
+			if (g.walkFrame >= 16)
+				g.walkFrame -= 16;
+			timers.recordTime(&timers.walkTime);
 		}
-		else if (player1.pos[0] <= 20.0f && g.tex.xc[0] >= 0) {
-			g.tex.xc[0] -= 0.001;
-			g.tex.xc[1] -= 0.001;
-		}*/
+		for (int i=0; i<20; i++) {
+			g.box[i][0] -= 2.0 * (0.05 / g.delay);
+			if (g.box[i][0] < -16.0)
+				g.box[i][0] += g.xres + 16.0;
+		}
+		/*if (player1.pos[0] > player1.w) {
+		  }
+		  else if (player1.pos[0] <= 20.0f && g.tex.xc[0] >= 0) {
+		  g.tex.xc[0] -= 0.001;
+		  g.tex.xc[1] -= 0.001;
+		  }*/
 
-        movePlayerLeft(&player1.pos[0], &player2.pos[0], 
-                       &player1.pos[1], &player2.pos[1],
-                       player1.vel[0],  player2.w,
-                       player1.w,       &g.tex.xc[0],    &g.tex.xc[1]);
+		movePlayerLeft(&player1.pos[0], &player2.pos[0], 
+				&player1.pos[1], &player2.pos[1],
+				player1.vel[0],  player2.w,
+				player1.w,       &g.tex.xc[0],    &g.tex.xc[1]);
 
-        cout << player1.pos[0] << endl;
-        cout << player2.pos[0] << endl;
+		cout << player1.pos[0] << endl;
+		cout << player2.pos[0] << endl;
 	}
-
 	// Move right player 1
 	if (g.keyStates[XK_d] && player1.dead == 0 && !chargeUp) {
-		/*if (player1.pos[0] < (float)g.xres - player1.w) {
-			player1.pos[0] += player1.vel[0];
-			std::cout << player1.pos[0] << std::endl;
-			//man is walking...
-			//when time is up, advance the frame.
-			timers.recordTime(&timers.timeCurrent);
-			double timeSpan = timers.timeDiff(&timers.walkTime, 
-                                              &timers.timeCurrent);
-			if (timeSpan > g.delay) {
-				//advance
-				++g.walkFrame;
-				if (g.walkFrame >= 16)
-					g.walkFrame -= 16;
-				timers.recordTime(&timers.walkTime);
-			}
-			for (int i=0; i<20; i++) {
-				g.box[i][0] -= 2.0 * (0.05 / g.delay);
-				if (g.box[i][0] < -16.0)
-					g.box[i][0] += g.xres + 16.0;
-			}
-		}
-		else if (player1.pos[0] >= 1420.0f && g.tex.xc[0] <= 0.166) {
-			g.tex.xc[0] += 0.001;
-			g.tex.xc[1] += 0.001;
-		}*/
+		//idle = true;
+		//man is walking...
+		//when time is up, advance the frame.
+		timers.recordTime(&timers.timeCurrent);
+		double timeSpan = timers.timeDiff(&timers.walkTime, 
+				&timers.timeCurrent);
 
-        movePlayerRight(&player1.pos[0], &player2.pos[0], 
-                        &player1.pos[1], &player2.pos[1],
-                        player1.vel[0],  player2.w,
-                        player1.w,       &g.tex.xc[0],    
-                        &g.tex.xc[1],    g.xres);
+		//FIXME: this shouldn't be necessary
+		//       our animations shouldn't be automaticate
+		//       or based on a timer
+		if (timeSpan > g.delay) {
+			//advance
+			++g.walkFrame;
+			if(g.walkFrame <= 8 || g.walkFrame >= 16) {
+				g.walkFrame = 9;
+			}
+			if (g.walkFrame >= 16)
+				g.walkFrame -= 16;
+			timers.recordTime(&timers.walkTime);
+		}
+		for (int i=0; i<20; i++) {
+			g.box[i][0] -= 2.0 * (0.05 / g.delay);
+			if (g.box[i][0] < -16.0)
+				g.box[i][0] += g.xres + 16.0;
+		}
+		/*if (player1.pos[0] < (float)g.xres - player1.w) {
+		  player1.pos[0] += player1.vel[0];
+		  std::cout << player1.pos[0] << std::endl;
+		  }
+		  else if (player1.pos[0] >= 1420.0f && g.tex.xc[0] <= 0.166) {
+		  g.tex.xc[0] += 0.001;
+		  g.tex.xc[1] += 0.001;
+		  }*/
+
+		movePlayerRight(&player1.pos[0], &player2.pos[0], 
+				&player1.pos[1], &player2.pos[1],
+				player1.vel[0],  player2.w,
+				player1.w,       &g.tex.xc[0],    
+				&g.tex.xc[1],    g.xres);
 	}
 
 	// Jump player 1
 	if (g.keyStates[XK_w] && player1.vel[1] == 0 && 
-        player1.pos[1] != 600.0f && player1.dead == 0 && !chargeUp) {
+			player1.pos[1] != 600.0f && player1.dead == 0 && !chargeUp) {
 		//player1.vel[1] = 200.0f;
 		//player1.vel[2] = 200.0f;
 		//player1.pos[1] += 500.0ff;
 		//std::cout << "W key pressed" << std::endl;
-        jumpPlayer(&player1.vel[1], &player1.vel[2]);
+		jumpPlayer(&player1.vel[1], &player1.vel[2]);
+		g.walkFrame = 24;
 	}
 
 	if (player1.vel[2] != 0) {
 		//player1.vel[2] -= 5.0f;
 		//player1.pos[1] += 12.5f;
-        movePlayerUp(&player1.vel[2], &player1.pos[1]);
+		movePlayerUp(&player1.vel[2], &player1.pos[1]);
 	}
 
 	// Gravity player 1
@@ -823,11 +984,11 @@ void physics(void)
 		//std::cout << "yo1" << std::endl;
 		//player1.vel[1] -= 5.0f;
 		//player1.pos[1] -= 12.5f;
-        movePlayerDown(&player1.vel[1], &player1.pos[1]);
+		movePlayerDown(&player1.vel[1], &player1.pos[1]);
 	}
 
 	//JOSE: apparently after a jump the box doesn't go exactly back 
-    //      to original spot; this would fix it if need be
+	//      to original spot; this would fix it if need be
 	/*if (player1.pos[1] < 100.0f) {
 	  player1.vel[1] = 0;
 	  player1.pos[1] = 100.0f;
@@ -835,132 +996,137 @@ void physics(void)
 
 	// Punch player 1
 	if ((g.keyStates[XK_b] && player1.punch == 0 && 
-        player1.dead == 0 && !chargeUp) ||
-		(g.keyStates[XK_e] && player1.punch == 0 && 
-        player1.dead == 0 && !chargeUp)) {
+				player1.dead == 0 && !chargeUp) ||
+			(g.keyStates[XK_e] && player1.punch == 0 && 
+			 player1.dead == 0 && !chargeUp)) {
 
 		//Functions can be found in gzepeda.cpp
 		extern void playPunchSound();
 		playPunchSound();
 
-        if(player1.sPunch == 1){
+		g.walkFrame = 20;
+
+		if(player1.sPunch == 1){
 			player1.punch = 0;
 		}
 		else{
 			player1.punch = 1;
 		}
 
-        punchAbilityPlayer1(&player1.punch, &player1.sPunch, g.jeflag,
-                            &player1.pos[0], &player1.pos[1], player1.pw2,
-                            &player2.pos[0], &player2.pos[1], player2.w,
-                            &player2.vel[1], &player2.dead,
-                            player2.block, &player2.health, player1.weapon);
-        // Punch Detection player 1
-        /*if (player1.pos[0] + player1.pw2 >= player2.pos[0] + (-player2.w) && 
-            player1.pos[0] < player2.pos[0] && player1.weapon==0) {
-            std::cout << "Player 1 hits Player 2!" << std::endl;
-            //player2.health -= 10;
-            //For testing. delete once testing is done
-            if (g.jeflag == 1 && player2.dead == 0) {
-                player2.health -= 50;
-            } else if (player2.dead == 0){
-                if (!player2.block) {    
-                    if(player1.sPunch == 1){
-						player2.health -= 20;
-					}   else {
-						player2.health -= 10;
-					}
-                } else {
-                    if(player1.sPunch == 1){
-						player2.health -=10;
-					} else {
-						player2.health -=5;
-					}
-                }
-                //Jesse - reaction to punches
-                player2.pos[1] += 50.0f;
-                player2.vel[1] += 20.0f;
-                player2.pos[0] += 35.0f;
-            }
-        }
-        // Punch Detection (Flipped)
-        else if (player1.pos[0] - player1.pw2 <= player2.pos[0] + (player2.w) && 
-                 player1.pos[0] > player2.pos[0] && player1.weapon==0) {
-            std::cout << "Player 1 hits Player 2!" << std::endl;
-            //player2.health -= 10;
-            //For testing. delete once testing is done
-            if (g.jeflag == 1 && player2.dead == 0) {
-                player2.health -= 50;
-            } else if (player2.dead == 0){
-                if (!player2.block) {    
-                    if(player1.sPunch == 1){
-						player2.health -= 20;
-					}   else {
-						player2.health -= 10;
-					}
-                } else {
-                    if(player1.sPunch == 1){
-						player2.health -=10;
-					} else {
-						player2.health -=5;
-					}
-                }
-                //Jesse - reaction to punches
-                player2.pos[1] += 50.0f;
-                player2.vel[1] += 20.0f;
-                player2.pos[0] -= 35.0f;
-            }
-        }*/
-        //Sword detected for jesse feature
-        if (player1.weapon==1 && (player1.pos[0] < player2.pos[0]) && 
-            ((player2.pos[0] - player1.pos[0]) <= 230)) {
-            if (player2.block and !player2.dead) { 
-                //player 2 is blocking and is not dead
-                player2.health -= 10;
-            } else if (!player2.dead) { 
-                //player 2 is not blocking and is not dead
-                player2.health -= 20;
-            }
+		punchAbilityPlayer1(&player1.punch, &player1.sPunch, g.jeflag,
+				&player1.pos[0], &player1.pos[1], player1.pw2,
+				&player2.pos[0], &player2.pos[1], player2.w,
+				&player2.vel[1], &player2.dead,
+				player2.block, &player2.health, player1.weapon);
+		// Punch Detection player 1
+		/*if (player1.pos[0] + player1.pw2 >= player2.pos[0] + (-player2.w) && 
+		  player1.pos[0] < player2.pos[0] && player1.weapon==0) {
+		  std::cout << "Player 1 hits Player 2!" << std::endl;
+		//player2.health -= 10;
+		//For testing. delete once testing is done
+		if (g.jeflag == 1 && player2.dead == 0) {
+		player2.health -= 50;
+		} else if (player2.dead == 0){
+		if (!player2.block) {    
+		if(player1.sPunch == 1){
+		player2.health -= 20;
+		}   else {
+		player2.health -= 10;
+		}
+		} else {
+		if(player1.sPunch == 1){
+		player2.health -=10;
+		} else {
+		player2.health -=5;
+		}
+		}
+		//Jesse - reaction to punches
+		player2.pos[1] += 50.0f;
+		player2.vel[1] += 20.0f;
+		player2.pos[0] += 35.0f;
+		}
+		}
+		// Punch Detection (Flipped)
+		else if (player1.pos[0] - player1.pw2 <= player2.pos[0] + (player2.w) && 
+		player1.pos[0] > player2.pos[0] && player1.weapon==0) {
+		std::cout << "Player 1 hits Player 2!" << std::endl;
+		//player2.health -= 10;
+		//For testing. delete once testing is done
+		if (g.jeflag == 1 && player2.dead == 0) {
+		player2.health -= 50;
+		} else if (player2.dead == 0){
+		if (!player2.block) {    
+		if(player1.sPunch == 1){
+		player2.health -= 20;
+		}   else {
+		player2.health -= 10;
+		}
+		} else {
+		if(player1.sPunch == 1){
+		player2.health -=10;
+		} else {
+		player2.health -=5;
+		}
+		}
+		//Jesse - reaction to punches
+		player2.pos[1] += 50.0f;
+		player2.vel[1] += 20.0f;
+		player2.pos[0] -= 35.0f;
+		}
+		}*/
+		//Sword detected for jesse feature
+		if (player1.weapon==1 && (player1.pos[0] < player2.pos[0]) && 
+				((player2.pos[0] - player1.pos[0]) <= 230)) {
+			if (player2.block and !player2.dead) { 
+				//player 2 is blocking and is not dead
+				player2.health -= 10;
+			} else if (!player2.dead) { 
+				//player 2 is not blocking and is not dead
+				player2.health -= 20;
+			}
 
-            //Reaction to punches
-            player2.pos[1] += 50.0f;
-            player2.vel[1] += 20.0f;
-            player2.pos[0] += 35.0f;
+			//Reaction to punches
+			player2.pos[1] += 50.0f;
+			player2.vel[1] += 20.0f;
+			player2.pos[0] += 35.0f;
 
-            printf("player 1 swings sword\n");
-        }
-        //Sword detected flipped
-        else if (player1.weapon==1 && (player2.pos[0] < player1.pos[0]) && 
-                 ((player1.pos[0] - player2.pos[0]) <= 230)) { 
-            if (player2.block and !player2.dead) { 
-                //player 2 is blocking and is not dead
-                player2.health -= 10;
-            } else if (!player2.dead) { 
-                //player 2 is not blocking and is not dead
-                player2.health -= 20;
-            }
+			printf("player 1 swings sword\n");
+		}
+		//Sword detected flipped
+		else if (player1.weapon==1 && (player2.pos[0] < player1.pos[0]) && 
+				((player1.pos[0] - player2.pos[0]) <= 230)) { 
+			if (player2.block and !player2.dead) { 
+				//player 2 is blocking and is not dead
+				player2.health -= 10;
+			} else if (!player2.dead) { 
+				//player 2 is not blocking and is not dead
+				player2.health -= 20;
+			}
 
-            //Reaction to punches
-            player2.pos[1] += 50.0f;
-            player2.vel[1] += 20.0f;
-            player2.pos[0] -= 35.0f;
+			//Reaction to punches
+			player2.pos[1] += 50.0f;
+			player2.vel[1] += 20.0f;
+			player2.pos[0] -= 35.0f;
 
-            printf("player 1 swings sword\n");
-        }
+			printf("player 1 swings sword\n");
+		}
 
-        //check if player 2 has died
-        if (player2.health <= 0) {
-            player2.health = 0;
-            player2.dead = 1;
-            g.nextMysteryBox = -10;
-        }
-    }
+		//check if player 2 has died
+		if (player2.health <= 0) {
+			player2.health = 0;
+			player2.dead = 1;
+			g.nextMysteryBox = -10;
+			g.walkFrame = 37;
+			g.walk2Frame = 30;
+		}
+	}
 
 	// Block player 1
 	if (g.keyStates[XK_t] && player1.dead == 0 && 
-        player1.punch == 0 && !chargeUp) {
+			player1.punch == 0 && !chargeUp) {
 		//printf("player1 blocking");
 		player1.block = 1;
+		g.walkFrame = 26;
 	} else {
 		player1.block = 0;
 	}
@@ -999,99 +1165,132 @@ void physics(void)
 	// Punch cooldown player 1
 	if (player1.punch == 1) {
 		/*if (player1.punchcooldown == 0) {
-			player1.punch = 0;
-			player1.punchcooldown = 250.0f;
-		}
-		else {
-			player1.punchcooldown -= 10.0f;
-		}*/
-        punchCooldownPlayer(&player1.punchcooldown, &player1.punch);
+		  player1.punch = 0;
+		  player1.punchcooldown = 250.0f;
+		  }
+		  else {
+		  player1.punchcooldown -= 10.0f;
+		  }*/
+		punchCooldownPlayer(&player1.punchcooldown, &player1.punch);
 	}
 
 	// --Player 2 Movement & Abilites--
+	if(idle2 == true) {
+		//man is walking...
+		//when time is up, advance the frame.
+		timers.recordTime(&timers.timeCurrent);
+		double timeSpan = timers.timeDiff(&timers.walk2Time, 
+				&timers.timeCurrent);
+
+		//FIXME: this shouldn't be necessary
+		//       our animations shouldn't be automaticate
+		//       or based on a timer
+		if (timeSpan > g.delay) {
+			//advance
+			++g.walk2Frame;
+			if(g.walk2Frame > 7) {
+				g.walk2Frame = 0;
+			}
+			if(g.walk2Frame >= 7)
+				g.walk2Frame -= 7;
+			timers.recordTime(&timers.walk2Time);
+		}
+		for (int i=0; i<20; i++) {
+			g.box[i][0] -= 2.0 * (0.05 / g.delay);
+			if (g.box[i][0] < -16.0)
+				g.box[i][0] += g.xres + 16.0;
+		}
+	}
 
 	// Move left player 2
 	if (g.keyStates[XK_Left] && player2.dead == 0) {
-		/*if (player2.pos[0] > player2.w) {
-			player2.pos[0] -= player2.vel[0];
-			//man is walking...
-			//when time is up, advance the frame.
-			timers.recordTime(&timers.timeCurrent);
-			double timeSpan = timers.timeDiff(&timers.walk2Time, 
-                                              &timers.timeCurrent);
-			if (timeSpan > g.delay) {
-				//advance
-				++g.walk2Frame;
-				if (g.walk2Frame >= 16)
-					g.walk2Frame -= 16;
-				timers.recordTime(&timers.walk2Time);
+		//man is walking...
+		//when time is up, advance the frame.
+		timers.recordTime(&timers.timeCurrent);
+		double timeSpan = timers.timeDiff(&timers.walk2Time, 
+				&timers.timeCurrent);
+		if (timeSpan > g.delay) {
+			//advance
+			++g.walk2Frame;
+			if(g.walk2Frame <= 8 || g.walk2Frame >=16) {
+				g.walk2Frame = 9;
 			}
-			for (int i=0; i<20; i++) {
-				g.box[i][0] -= 2.0 * (0.05 / g.delay);
-				if (g.box[i][0] < -16.0)
-					g.box[i][0] += g.xres + 16.0;
-			}
+			if (g.walk2Frame >= 16)
+				g.walk2Frame -= 16;
+			timers.recordTime(&timers.walk2Time);
 		}
-		else if (player2.pos[0] <= 20.0f && g.tex.xc[0] >= 0) {
-			g.tex.xc[0] -= 0.001;
-			g.tex.xc[1] -= 0.001;
-		}*/
+		for (int i=0; i<20; i++) {
+			g.box[i][0] -= 2.0 * (0.05 / g.delay);
+			if (g.box[i][0] < -16.0)
+				g.box[i][0] += g.xres + 16.0;
+		}
+		/*if (player2.pos[0] > player2.w) {
+		  player2.pos[0] -= player2.vel[0];
+		  }
+		  else if (player2.pos[0] <= 20.0f && g.tex.xc[0] >= 0) {
+		  g.tex.xc[0] -= 0.001;
+		  g.tex.xc[1] -= 0.001;
+		  }*/
 
-        movePlayerLeft(&player2.pos[0], &player1.pos[0],
-                       &player2.pos[1], &player1.pos[1],
-                       player2.vel[0], player1.w,
-                       player2.w, &g.tex.xc[0], &g.tex.xc[1]);
+		movePlayerLeft(&player2.pos[0], &player1.pos[0],
+				&player2.pos[1], &player1.pos[1],
+				player2.vel[0], player1.w,
+				player2.w, &g.tex.xc[0], &g.tex.xc[1]);
 	}
 
 	// Move right player 2
 	if (g.keyStates[XK_Right] && player2.dead == 0) {
-		/*if (player2.pos[0] < (float)g.xres - player2.w) {
-			player2.pos[0] += player2.vel[0];
-			//man is walking...
-			//when time is up, advance the frame.
-			timers.recordTime(&timers.timeCurrent);
-			double timeSpan = timers.timeDiff(&timers.walk2Time, 
-                                              &timers.timeCurrent);
-			if (timeSpan > g.delay) {
-				//advance
-				++g.walk2Frame;
-				if (g.walk2Frame >= 16)
-					g.walk2Frame -= 16;
-				timers.recordTime(&timers.walk2Time);
+		//man is walking...
+		//when time is up, advance the frame.
+		timers.recordTime(&timers.timeCurrent);
+		double timeSpan = timers.timeDiff(&timers.walk2Time, 
+				&timers.timeCurrent);
+		if (timeSpan > g.delay) {
+			//advance
+			++g.walk2Frame;
+			if(g.walk2Frame <= 8 || g.walk2Frame >= 16) {
+				g.walk2Frame = 9;
 			}
-			for (int i=0; i<20; i++) {
-				g.box[i][0] -= 2.0 * (0.05 / g.delay);
-				if (g.box[i][0] < -16.0)
-					g.box[i][0] += g.xres + 16.0;
-			}
+			if (g.walk2Frame >= 16)
+				g.walk2Frame -= 16;
+			timers.recordTime(&timers.walk2Time);
 		}
-		else if (player2.pos[0] >= 1420.0f && g.tex.xc[0] <= 0.166) {
-			g.tex.xc[0] += 0.001;
-			g.tex.xc[1] += 0.001;
-		}*/
+		for (int i=0; i<20; i++) {
+			g.box[i][0] -= 2.0 * (0.05 / g.delay);
+			if (g.box[i][0] < -16.0)
+				g.box[i][0] += g.xres + 16.0;
+		}
+		/*if (player2.pos[0] < (float)g.xres - player2.w) {
+		  player2.pos[0] += player2.vel[0];
+		  }
+		  else if (player2.pos[0] >= 1420.0f && g.tex.xc[0] <= 0.166) {
+		  g.tex.xc[0] += 0.001;
+		  g.tex.xc[1] += 0.001;
+		  }*/
 
-        movePlayerRight(&player2.pos[0], &player1.pos[0],
-                        &player2.pos[1], &player1.pos[1],
-                        player2.vel[0], player1.w,
-                        player2.w, &g.tex.xc[0],
-                        &g.tex.xc[1], g.xres);
+		movePlayerRight(&player2.pos[0], &player1.pos[0],
+				&player2.pos[1], &player1.pos[1],
+				player2.vel[0], player1.w,
+				player2.w, &g.tex.xc[0],
+				&g.tex.xc[1], g.xres);
 	}
 
 	// Jump player 2
 	if (g.keyStates[XK_Up] && player2.vel[1] == 0 && 
-        player2.pos[1] != 600.0f && player2.dead == 0) {
+			player2.pos[1] != 600.0f && player2.dead == 0) {
 		//player2.vel[1] = 200.0f;
 		//player2.vel[2] = 200.0f;
 		//player2.pos[1] += 500.0f;
 		//std::cout << "Up Arrow key pressed" << std::endl;
 
-        jumpPlayer(&player2.vel[1], &player2.vel[2]);
+		jumpPlayer(&player2.vel[1], &player2.vel[2]);
+		g.walk2Frame = 24;
 	}
 
 	if (player2.vel[2] != 0) {
 		//player2.vel[2] -= 5.0f;
 		//player2.pos[1] += 12.5f;
-        movePlayerUp(&player2.vel[2], &player2.pos[1]);
+		movePlayerUp(&player2.vel[2], &player2.pos[1]);
 	}
 
 	// Gravity player 2
@@ -1099,16 +1298,35 @@ void physics(void)
 		//std::cout << "Down" << std::endl;
 		//player2.vel[1] -= 5.0f;
 		//player2.pos[1] -= 12.5f;
-        movePlayerDown(&player2.vel[1], &player2.pos[1]);
+		movePlayerDown(&player2.vel[1], &player2.pos[1]);
 	}
 
-
+	//if (g.keyStates[XK_K]) {
+		//man is walking...
+		//when time is up, advance the frame.
+		timers.recordTime(&timers.timeCurrent);
+		double timeSpan = timers.timeDiff(&timers.speTime, 
+				&timers.timeCurrent);
+		if (timeSpan > g.delay) {
+			//advance
+			++g.speFrame;
+			if (g.speFrame >= 4)
+				g.speFrame -= 4;
+			timers.recordTime(&timers.speTime);
+		}
+		for (int i=0; i<20; i++) {
+			g.box[i][0] -= 2.0 * (0.05 / g.delay);
+			if (g.box[i][0] < -16.0)
+				g.box[i][0] += g.xres + 16.0;
+		}
+	//}
 	// Punch player 2
 	if ((g.keyStates[XK_m] && player2.punch == 0 && 
-        player2.dead == 0 && !chargeUp2) ||
-		(g.keyStates[XK_k] && player2.punch == 0 && 
-        player2.dead == 0 && !chargeUp2)) {
+				player2.dead == 0 && !chargeUp2) ||
+			(g.keyStates[XK_k] && player2.punch == 0 && 
+			 player2.dead == 0 && !chargeUp2)) {
 		
+		g.walk2Frame = 22;
 		if(player2.sPunch == 1){
 			player2.punch = 0;
 		}
@@ -1116,116 +1334,119 @@ void physics(void)
 			player2.punch = 1;
 		}
 
-        punchAbilityPlayer2(&player2.punch, &player2.sPunch, g.jeflag,
-                            &player2.pos[0], &player2.pos[1], player2.pw2,
-                            &player1.pos[0], &player1.pos[1], player1.w,
-                            &player1.vel[1], &player1.dead,
-                            player1.block, &player1.health, player2.weapon);
-        // Punch detection player 2
-        /*if (player2.pos[0] - player2.pw2 <= player1.pos[0] + (player1.w) && 
-            player2.pos[0] > player1.pos[0] && player2.weapon == 0) {
-            std::cout << "Player 2 hits Player 1!" << std::endl;
-            //player1.health -= 10;
-            //For testing. delete once testing is done
-            if (g.jeflag == 1 && player1.dead == 0) {
-                player1.health -= 50;
-            } else if (player1.dead == 0){
-                if (!player1.block) {    
-                    if(player2.sPunch == 1){
-						player1.health -= 20;
-					}   else {
-						player1.health -= 10;
-					}
-                } else {
-                    if(player2.sPunch == 1){
-						player1.health -=10;
-					} else {
-						player1.health -=5;
-					}
-                }
-                //Jesse - reaction to punches
-                player1.pos[1] += 50.0f;
-                player1.vel[1] += 20.0f;
-                player1.pos[0] -= 35.0f;
-            }
-        }
-        // Punch Detection (Flipped)
-        else if (player2.pos[0] + player2.pw2 >= player1.pos[0] + (-player1.w) 
-                 && player2.pos[0] < player1.pos[0] && player2.weapon == 0) {
-            std::cout << "Player 1 hits Player 2!" << std::endl;
-            //player1.health -= 10;
-            //For testing. delete once testing is done
-            if (g.jeflag == 1 && player1.dead == 0) {
-                player1.health -= 50;
-            } else if (player1.dead == 0) {
-                if (!player1.block) {    
-                    if(player2.sPunch == 1){
-						player1.health -= 20;
-					}   else {
-						player1.health -= 10;
-					}
-                } else {
-                    if(player2.sPunch == 1){
-						player1.health -=10;
-					} else {
-						player1.health -=5;
-					}
-                }
-                //Jesse - raction to punches
-                player1.pos[1] += 50.0f;
-                player1.vel[1] += 20.0f;
-                player1.pos[0] += 35.0f;
-            }
-        }*/
-        if (player2.weapon==1 && (player1.pos[0] < player2.pos[0]) && 
-            ((player2.pos[0] - player1.pos[0]) <= 230)) {
-            //not flipped 
-            if (player1.block and !player1.dead) { 
-                //player 1 is blocking and is not dead
-                player1.health -= 10;
-            } else if (!player1.dead) { 
-                //player 1 is not blocking and is not dead
-                player1.health -= 20;
-            }
+		punchAbilityPlayer2(&player2.punch, &player2.sPunch, g.jeflag,
+				&player2.pos[0], &player2.pos[1], player2.pw2,
+				&player1.pos[0], &player1.pos[1], player1.w,
+				&player1.vel[1], &player1.dead,
+				player1.block, &player1.health, player2.weapon);
+		// Punch detection player 2
+		/*if (player2.pos[0] - player2.pw2 <= player1.pos[0] + (player1.w) && 
+		  player2.pos[0] > player1.pos[0] && player2.weapon == 0) {
+		  std::cout << "Player 2 hits Player 1!" << std::endl;
+		//player1.health -= 10;
+		//For testing. delete once testing is done
+		if (g.jeflag == 1 && player1.dead == 0) {
+		player1.health -= 50;
+		} else if (player1.dead == 0){
+		if (!player1.block) {    
+		if(player2.sPunch == 1){
+		player1.health -= 20;
+		}   else {
+		player1.health -= 10;
+		}
+		} else {
+		if(player2.sPunch == 1){
+		player1.health -=10;
+		} else {
+		player1.health -=5;
+		}
+		}
+		//Jesse - reaction to punches
+		player1.pos[1] += 50.0f;
+		player1.vel[1] += 20.0f;
+		player1.pos[0] -= 35.0f;
+		}
+		}
+		// Punch Detection (Flipped)
+		else if (player2.pos[0] + player2.pw2 >= player1.pos[0] + (-player1.w) 
+		&& player2.pos[0] < player1.pos[0] && player2.weapon == 0) {
+		std::cout << "Player 1 hits Player 2!" << std::endl;
+		//player1.health -= 10;
+		//For testing. delete once testing is done
+		if (g.jeflag == 1 && player1.dead == 0) {
+		player1.health -= 50;
+		} else if (player1.dead == 0) {
+		if (!player1.block) {    
+		if(player2.sPunch == 1){
+		player1.health -= 20;
+		}   else {
+		player1.health -= 10;
+		}
+		} else {
+		if(player2.sPunch == 1){
+		player1.health -=10;
+		} else {
+		player1.health -=5;
+		}
+		}
+		//Jesse - raction to punches
+		player1.pos[1] += 50.0f;
+		player1.vel[1] += 20.0f;
+		player1.pos[0] += 35.0f;
+		}
+		}*/
+		if (player2.weapon==1 && (player1.pos[0] < player2.pos[0]) && 
+				((player2.pos[0] - player1.pos[0]) <= 230)) {
+			//not flipped 
+			if (player1.block and !player1.dead) { 
+				//player 1 is blocking and is not dead
+				player1.health -= 10;
+			} else if (!player1.dead) { 
+				//player 1 is not blocking and is not dead
+				player1.health -= 20;
+			}
 
-            //Reaction to punches
-            player1.pos[1] += 50.0f;
-            player1.vel[1] += 20.0f;
-            player1.pos[0] -= 35.0f;
+			//Reaction to punches
+			player1.pos[1] += 50.0f;
+			player1.vel[1] += 20.0f;
+			player1.pos[0] -= 35.0f;
 
-            printf("player 2 swings sword\n");
-        } else if (player2.weapon==1 && (player2.pos[0] < player1.pos[0]) && 
-                   ((player1.pos[0] - player2.pos[0]) <= 230)) {
-            //flipped
-            if (player1.block and !player1.dead) { 
-                //player 1 is blocking and is not dead
-                player1.health -= 10;
-            } else if (!player1.dead) { 
-                //player 1 is not blocking and is not dead
-                player1.health -= 20;
-            }
+			printf("player 2 swings sword\n");
+		} else if (player2.weapon==1 && (player2.pos[0] < player1.pos[0]) && 
+				((player1.pos[0] - player2.pos[0]) <= 230)) {
+			//flipped
+			if (player1.block and !player1.dead) { 
+				//player 1 is blocking and is not dead
+				player1.health -= 10;
+			} else if (!player1.dead) { 
+				//player 1 is not blocking and is not dead
+				player1.health -= 20;
+			}
 
-            //Reaction to punches
-            player1.pos[1] += 50.0f;
-            player1.vel[1] += 20.0f;
-            player1.pos[0] += 35.0f;
+			//Reaction to punches
+			player1.pos[1] += 50.0f;
+			player1.vel[1] += 20.0f;
+			player1.pos[0] += 35.0f;
 
-            printf("player 2 swings sword\n");
-        }
-        //player 1 dies
-        if (player1.health <= 0) {
-            player1.health = 0;
-            player1.dead = 1;
-            g.nextMysteryBox = -10;
-        }
+			printf("player 2 swings sword\n");
+		}
+		//player 1 dies
+		if (player1.health <= 0) {
+			player1.health = 0;
+			player1.dead = 1;
+			g.nextMysteryBox = -10;
+			g.walkFrame = 30;
+			g.walk2Frame = 37;
+		}
 	}
 
 	// Block player 2
 	if (g.keyStates[XK_l] && player2.dead == 0 && 
-        player2.punch == 0 && 
-        !chargeUp2) {
+			player2.punch == 0 && 
+			!chargeUp2) {
 		//printf("player1 blocking");
 		player2.block = 1;
+		g.walk2Frame = 24;
 	} else {
 		player2.block = 0;
 	}
@@ -1264,13 +1485,13 @@ void physics(void)
 	// Punch cooldown player 2
 	if (player2.punch == 1) {
 		/*if (player2.punchcooldown == 0) {
-			player2.punch = 0;
-			player2.punchcooldown = 250.0f;
-		}
-		else {
-			player2.punchcooldown -= 10.0f;
-		}*/
-        punchCooldownPlayer(&player2.punchcooldown, &player2.punch);
+		  player2.punch = 0;
+		  player2.punchcooldown = 250.0f;
+		  }
+		  else {
+		  player2.punchcooldown -= 10.0f;
+		  }*/
+		punchCooldownPlayer(&player2.punchcooldown, &player2.punch);
 	}
 
 	// -- Misc --
@@ -1294,10 +1515,10 @@ void physics(void)
 	// bool p1 = false;
 	// bool p2 = false;
 	extern void rplatPhys(float ph, float rh, float rw, 
-                          float rPos0, float rPos1, float pos0, double *pos1,
-						  bool *onPlt, bool *tp, int *activate);
+			float rPos0, float rPos1, float pos0, double *pos1,
+			bool *onPlt, bool *tp, int *activate);
 	extern void rplatPhys2(double *pos1, double *vel, bool *onPlt, 
-	                       bool *tp, bool *stp, int *activate, int yres);
+			bool *tp, bool *stp, int *activate, int yres);
 	if(pltFlg == 1){
 
 
@@ -1306,9 +1527,9 @@ void physics(void)
 
 
 			rplatPhys(player1.h, rplat[i].h, rplat[i].w, rplat[i].pos[0], rplat[i].pos[1], player1.pos[0], 
-						  &player1.pos[1], &onPlat, &top, &activate);
+					&player1.pos[1], &onPlat, &top, &activate);
 			rplatPhys(player2.h, rplat[i].h, rplat[i].w, rplat[i].pos[0], rplat[i].pos[1], player2.pos[0], 
-						  &player2.pos[1], &onPlat2, &top2, &activate2);
+					&player2.pos[1], &onPlat2, &top2, &activate2);
 
 
 			// if (player1.pos[0] >= rplat[i].pos[0] - rplat[i].w &&
@@ -1320,7 +1541,7 @@ void physics(void)
 			// 	if(!top){
 			// 		player1.pos[1] = rplat[i].pos[1] + rplat[i].h/2 + 
 			// 			player1.h/2;
-						
+
 
 			// 	}
 			// 	prevI = i;
@@ -1338,7 +1559,7 @@ void physics(void)
 			// 	if(!top2){
 			// 		player2.pos[1] = rplat[i].pos[1] + rplat[i].h/2 + 
 			// 			player2.h/2;
-					
+
 
 			// 	}
 			// 	prevI = i;
@@ -1358,7 +1579,7 @@ void physics(void)
 		// 	// Player is on a platform, so their vertical velocity should be zero
 		// 	player1.vel[1] = 0.0f;
 		// 	top = true;
-		
+
 
 		// } else {
 
@@ -1423,7 +1644,7 @@ void physics(void)
 
 	//Geno - physics for charge up
 	if (g.keyStates[XK_c] && player1.pBar <= 150 && player1.pBar >= 0 && player1.block != 1) {
-		
+
 		chrgPhys(&player1.pBar, &chargeUp);
 		rndrPbar = true;
 	} else {
@@ -1433,7 +1654,7 @@ void physics(void)
 
 
 	if (g.keyStates[XK_slash] && player2.pBar <= 150 && player2.pBar >= 0 && player2.block != 1) {
-		
+
 		chrgPhys(&player2.pBar, &chargeUp2);
 		rndrPbar2 = true;
 	} else {
@@ -1456,8 +1677,8 @@ void render(void)
 		//Clear the screen
 		glClearColor(0.1, 0.1, 0.1, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT);
-		float cx = g.xres/3.0;
-		float cy = g.yres/2.0;
+		//float cx = g.xres/3.0;
+		//float cy = g.yres/2.0;
 
 		/*if (g.gflag == 0) {
 		  Rect r;
@@ -1474,10 +1695,10 @@ void render(void)
 
 		//Display Background
 		/*glColor3f(1.0, 1.0, 1.0);
-		glBindTexture(GL_TEXTURE_2D, g.tex.backTexture);
-		display_map(g.tex.xc[0], g.tex.xc[1],
-				g.tex.yc[0], g.tex.yc[1],
-				g.xres, 	 g.yres);*/
+		  glBindTexture(GL_TEXTURE_2D, g.tex.backTexture);
+		  display_map(g.tex.xc[0], g.tex.xc[1],
+		  g.tex.yc[0], g.tex.yc[1],
+		  g.xres, 	 g.yres);*/
 
 		//Centers Background; 
 		//will combine with ^this later
@@ -1487,25 +1708,25 @@ void render(void)
 			g.mapCenter = 0;
 		}
 
-        //BACKGROUND 1
-        if (g.loadMap == 1) {
-            g.time_scroll++;
-            if (g.time_scroll % 6 == 0) {
-                if (g.scroll == 1) {
-                    g.scroll = 0;
-                    g.tex.yc[0] = 0.0f;
-                    g.tex.yc[1] = 0.125f;
-                }
-                g.scroll += 0.125;
-                g.tex.yc[0] += g.scroll;
-                g.tex.yc[1] += g.scroll;
-            }
-            displayBackground(g.tex.xc[0], g.tex.xc[1],
-                              g.tex.yc[0], g.tex.yc[1],
-                              g.xres, g.yres,
-                              img[1].width, img[1].height,
-                              g.tex.map1Texture, img[1].data);
-        }
+		//BACKGROUND 1
+		if (g.loadMap == 1) {
+			g.time_scroll++;
+			if (g.time_scroll % 6 == 0) {
+				if (g.scroll == 1) {
+					g.scroll = 0;
+					g.tex.yc[0] = 0.0f;
+					g.tex.yc[1] = 0.125f;
+				}
+				g.scroll += 0.125;
+				g.tex.yc[0] += g.scroll;
+				g.tex.yc[1] += g.scroll;
+			}
+			displayBackground(g.tex.xc[0], g.tex.xc[1],
+					g.tex.yc[0], g.tex.yc[1],
+					g.xres, g.yres,
+					img[1].width, img[1].height,
+					g.tex.map1Texture, img[1].data);
+		}
 
 		//glClear(GL_COLOR_BUFFER_BIT);
 		//static float pos[2] = {g.xres/2.0f, g.yres/2.0f};
@@ -1515,36 +1736,38 @@ void render(void)
 			restartScreen(1, g.yres, g.xres);
 			player1.pBar = 0;
 		} else {
-			player_hitbox(player1.w, player1.h, player1.pos[0], player1.pos[1]);
+			//player_hitbox(player1.w, player1.h, player1.pos[0], player1.pos[1]);
 			// Player 1 punch box
 			if(player1.sPunch == 0){
 				if (player1.punch == 1 ) {
 					int pw2 = player1.pw2 * g.punchflip;
 					int pw1 = player1.pw1 * g.punchflip;
-                    if (player1.weapon==1) {
-                        //call function to swing sword
-                        useWeapon(player1.w, player1.h, 
-                                  player1.pos[0], player1.pos[1], 
-                                  g.punchflip, player1.weapon);
-                    } else {
-        				punch_hitbox(pw2, pw1, 
-                                     player1.ph, player1.pos[0], 
-                                     player1.pos[1] + 40.0f);
-				    }
-    		    }
-            }
-        
-            //Player 1 sword
-            if (player1.weapon==1 && player1.punch == 0 && !player1.block) {
-                holdingWeapon(player1.w, player1.h, 
-                              player1.pos[0], player1.pos[1], 
-                              g.punchflip, player1.weapon); 
-            }
+					if (player1.weapon==1) {
+						//call function to swing sword
+						useWeapon(player1.w, player1.h, 
+								player1.pos[0], player1.pos[1], 
+								g.punchflip, player1.weapon);
+					} else {
+                        if (g.joflag == 1) {
+						    punch_hitbox(pw2, pw1, 
+							    	player1.ph, player1.pos[0], 
+							    	player1.pos[1] + 40.0f);
+                        }
+					}
+				}
+			}
+
+			//Player 1 sword
+			if (player1.weapon==1 && player1.punch == 0 && !player1.block) {
+				holdingWeapon(player1.w, player1.h, 
+						player1.pos[0], player1.pos[1], 
+						g.punchflip, player1.weapon); 
+			}
 
 			// Player 1 block
 			if (player1.block) {
 				playerBlocking(player1.w, player1.h, 
-                               player1.pos[0], player1.pos[1], g.punchflip);
+						player1.pos[0], player1.pos[1], g.punchflip);
 			}
 		}
 		//Player2:
@@ -1553,128 +1776,140 @@ void render(void)
 			restartScreen(2, g.yres, g.xres);
 			player2.pBar = 0;
 		} else {
-			player_hitbox(player2.w, player2.h, player2.pos[0], player2.pos[1]);
+			//player_hitbox(player2.w, player2.h, player2.pos[0], player2.pos[1]);
 			// Player 2 punch box
 			if (player2.punch == 1) {
 				int pw2 = player2.pw2 * g.punchflip;
 				int pw1 = player2.pw1 * g.punchflip;
-                if (player2.weapon == 1) {//call function to swing sword
-                    useWeapon(player2.w, player2.h, 
-                              player2.pos[0], player2.pos[1], 
-                              g.punchflip*-1, player2.weapon);
-                } else {
-                    punch_hitbox(pw1, pw2, 
-                                 player2.ph, player2.pos[0], 
-                                 player2.pos[1] + 40.0f);
+				if (player2.weapon == 1) {//call function to swing sword
+					useWeapon(player2.w, player2.h, 
+							player2.pos[0], player2.pos[1], 
+							g.punchflip*-1, player2.weapon);
+				} else {
+                    if (g.joflag == 1) {
+	    				punch_hitbox(pw1, pw2, 
+		    					player2.ph, player2.pos[0], 
+			    				player2.pos[1] + 40.0f);
                     }
-            }
-            //Player 2 sword
-            if (player2.weapon==1 && player2.punch == 0 && !player2.block) {
-                holdingWeapon(player2.w, player2.h, 
-                              player2.pos[0], player2.pos[1], 
-                              g.punchflip*-1, player2.weapon); 
-            }
+				}
+			}
+			//Player 2 sword
+			if (player2.weapon==1 && player2.punch == 0 && !player2.block) {
+				holdingWeapon(player2.w, player2.h, 
+						player2.pos[0], player2.pos[1], 
+						g.punchflip*-1, player2.weapon); 
+			}
 
 			// Player 2 block
 			if (player2.block) {
 				playerBlocking(player2.w, player2.h, 
-                               player2.pos[0], player2.pos[1], g.punchflip*-1);
+						player2.pos[0], player2.pos[1], g.punchflip*-1);
 			}
 		}
 
-    //Jesse- This resets the players stats 
-    //       if the users wants to restart the game
-    if ( (player1.dead == 1 || player2.dead == 1) && g.restart == 1) {
-            player1.health = reset.health;
-            player2.health = reset.health;
-            player1.pos[0] = reset.player1posX;
-            player2.pos[0] = reset.player2posX;
-            player1.dead = reset.dead;
-            player2.dead = reset.dead;
-            player1.weapon = 0;
-            player2.weapon = 0;
+		//Jesse- This resets the players stats 
+		//       if the users wants to restart the game
+		if ( (player1.dead == 1 || player2.dead == 1) && g.restart == 1) {
+			player1.health = reset.health;
+			player2.health = reset.health;
+			player1.pos[0] = reset.player1posX;
+			player2.pos[0] = reset.player2posX;
+			player1.dead = reset.dead;
+			player2.dead = reset.dead;
+			player1.weapon = 0;
+			player2.weapon = 0;
 			player1.timeLimit = 0;
 			player2.timeLimit = 0;
-            g.restart = 0;
-            g.nextMysteryBox = 100;
-            g.mysteryBoxSpawn = 0;
-    }
+			g.restart = 0;
+			g.nextMysteryBox = 100;
+			g.mysteryBoxSpawn = 0;
+		}
 
-    //Spawn Mystery Box
-    if (player1.health <= g.nextMysteryBox || 
-        player2.health <= g.nextMysteryBox) { // && g.mysteryBoxLimit == 0
-        int temp = mysteryBox(g.xres, g.mysteryBoxSpawn);
-        
-        if (player1.pos[0] >= temp-20 && player1.pos[0] <= (temp+75)
-            && (player1.pos[1]-100) <= 150) { 
-            //if player 1 within box parameters
-            g.mysteryBoxSpawn += 1;
-            g.nextMysteryBox -= 25;
-			player1.timeLimit = time(NULL);
-			srand (time(NULL));
-            if (g.jeflag) { 
-                // for jesse feature
-                player1.weapon = 1;
-            } else {
-				//power up 2-4
-				player1.weapon = (rand()%4)+2;
-            }
-        }
-        if (player2.pos[0] >= temp-20 && player2.pos[0] <= (temp+75)
-            && (player2.pos[1]-100) <= 150) { 
-            //if player 2 within box parameters
-            g.mysteryBoxSpawn += 1;
-            g.nextMysteryBox -= 25;
-			player2.timeLimit = time(NULL);
-			srand (time(NULL));
-            if (g.jeflag) { 
-                // for jesse feature
-                player2.weapon = 1;
-            } else {
-				//power up 2-4
-				player2.weapon = (rand()%4)+2;
-            }
-        }
-    }
+		//Spawn Mystery Box
+		if (player1.health <= g.nextMysteryBox || 
+				player2.health <= g.nextMysteryBox) { // && g.mysteryBoxLimit == 0
+			int temp = mysteryBox(g.xres, g.mysteryBoxSpawn);
 
-	//render power up for player 1
-	if ((time(NULL) - player1.timeLimit) <= 4) {
-		//render for 4 seconds
-		showPowerUp(player1.weapon, g.yres, g.xres); 
-	}
-	//render power up for player 2
-	if ((time(NULL) - player2.timeLimit) <= 4) {
-		//render for 4 seconds
-		showPowerUp(player2.weapon, g.yres, g.xres); 
-	}
+			if (player1.pos[0] >= temp-20 && player1.pos[0] <= (temp+75)
+					&& (player1.pos[1]-100) <= 150) { 
+				//if player 1 within box parameters
+				g.mysteryBoxSpawn += 1;
+				g.nextMysteryBox -= 25;
+				player1.timeLimit = time(NULL);
+				srand (time(NULL));
+				if (g.jeflag) { 
+					// for jesse feature
+					player1.weapon = 1;
+				} else {
+					//power up 2-4
+					player1.weapon = (rand()%4)+2;
+				}
+			}
+			if (player2.pos[0] >= temp-20 && player2.pos[0] <= (temp+75)
+					&& (player2.pos[1]-100) <= 150) { 
+				//if player 2 within box parameters
+				g.mysteryBoxSpawn += 1;
+				g.nextMysteryBox -= 25;
+				player2.timeLimit = time(NULL);
+				srand (time(NULL));
+				if (g.jeflag) { 
+					// for jesse feature
+					player2.weapon = 1;
+				} else {
+					//power up 2-4
+					player2.weapon = (rand()%4)+2;
+				}
+			}
+		}
+
+		//render power up for player 1
+		if ((time(NULL) - player1.timeLimit) <= 4) {
+			//render for 4 seconds
+			showPowerUp(player1.weapon, g.yres, g.xres); 
+		}
+		//render power up for player 2
+		if ((time(NULL) - player2.timeLimit) <= 4) {
+			//render for 4 seconds
+			showPowerUp(player2.weapon, g.yres, g.xres); 
+		}
 
 		//JOSE: I think this is part of Sprite stuff
-		if (g.bflag == 1) {
-			float h = 250.0;
-			float w = h * 0.5;
-			glPushMatrix();
-			glColor3f(1.0, 1.0, 1.0);
-			glBindTexture(GL_TEXTURE_2D, g.walkTexture);
 
-			//JOSE: Sprite stuff; can use later
-			glEnable(GL_ALPHA_TEST);
-			glAlphaFunc(GL_GREATER, 0.0f);
-			glColor4ub(255,255,255,255);
-			int ix = g.walkFrame % 8;
-			int iy = 0;
-			if (g.walkFrame >= 8)
-				iy = 1;
-			float tx = (float)ix / 10.0;
-			float ty = (float)iy / 10.0;
-			glBegin(GL_QUADS);
-			glTexCoord2f(tx,      ty+.5); 	glVertex2i(cx-w, cy-h-150);
-			glTexCoord2f(tx,      ty );    	glVertex2i(cx-w, cy+h-150);
-			glTexCoord2f(tx+.125, ty);    	glVertex2i(cx+w, cy+h-150);
-			glTexCoord2f(tx+.125, ty+.5); 	glVertex2i(cx+w, cy-h-150);
-			glEnd();
-			glPopMatrix();
-			glBindTexture(GL_TEXTURE_2D, 0);
-			glDisable(GL_ALPHA_TEST);
+		if(g.bflag == 0) {
+			// Players flip
+			if(player1.pos[0] > player2.pos[0]) {
+				if (player1.dead == 0) {
+					Player_1_fliped(player1.w + player1.pos[0], player1.h + player1.pos[1], 
+							g.walkFrame, g.walkTexture);
+				}
+				if (player2.dead == 0) {
+					if(g.keyStates[XK_k] && !chargeUp2) {
+						Player_2_spe(player2.w + player2.pos[0], player2.h + player2.pos[1], 
+								g.speFrame, g.speTexture);
+					}else {
+						Player_2(player2.w + player2.pos[0], player2.h + player2.pos[1],
+							       	g.walk2Frame, g.walk2Texture);
+					}
+				}
+			}
+			
+			else if (player1.pos[0] < player2.pos[0]) {
+				if (player1.dead == 0) {
+					Player_1(player1.w + player1.pos[0], player1.h + player1.pos[1],
+						       	g.walkFrame, g.walkTexture);
+				}
+				if(g.keyStates[XK_k] && !chargeUp2) {
+					if (player2.dead == 0) {
+						Player_2_spe_fliped(player2.w + player2.pos[0], player2.h + player2.pos[1], 
+							g.speFrame, g.speTexture);
+					}
+				}else {
+					if (player2.dead == 0) {
+						Player_2_fliped(player2.w + player2.pos[0], player2.h + player2.pos[1], 
+							g.walk2Frame, g.walk2Texture);
+					}
+				}
+			}
 		}
 
 		//JOSE: I JUST HAVE TO KEEP THIS; OTHERWISE, MAP MOVING DOENS'T WORK
@@ -1686,7 +1921,7 @@ void render(void)
 		//
 		if(g.gflag == 1) {	
 
-			
+
 
 
 			// extern void newText(int yres, int xres);
@@ -1697,25 +1932,25 @@ void render(void)
 			//glColor3f(1, 1, 1);
 			//glRasterPos2i(350, 420);
 		}
-			
+
 
 		unsigned char c4[3] = {0, 128, 0};
-			  
-        extern void health(float w, float h, unsigned char color[3], float pos0, float pos1, int player, int health);
 
-        //Geno, Jesse health bar for players
+		extern void health(float w, float h, unsigned char color[3], float pos0, float pos1, int player, int health);
 
-        hbar[0].set_width(player1.health);
-        hbar[0].set_height(20.0f);
-        hbar[0].set_xres(g.xres - 1080.0f);
-        hbar[0].set_yres(g.yres + 900.0f);
-        hbar[0].set_color(c4);
+		//Geno, Jesse health bar for players
 
-        hbar[1].set_width(player2.health);
-        hbar[1].set_height(20.0f);
-        hbar[1].set_xres(g.xres + 1080.0f);
-        hbar[1].set_yres(g.yres + 900.0f);
-        hbar[1].set_color(c4);
+		hbar[0].set_width(player1.health);
+		hbar[0].set_height(20.0f);
+		hbar[0].set_xres(g.xres - 1080.0f);
+		hbar[0].set_yres(g.yres + 900.0f);
+		hbar[0].set_color(c4);
+
+		hbar[1].set_width(player2.health);
+		hbar[1].set_height(20.0f);
+		hbar[1].set_xres(g.xres + 1080.0f);
+		hbar[1].set_yres(g.yres + 900.0f);
+		hbar[1].set_color(c4);
 
 
 
@@ -1771,7 +2006,7 @@ void render(void)
 			}
 
 		} else if ((player1.health >= 60 && player1.health <= 90) || (player2.health >= 60 && player2.health <= 90)){
-			
+
 			pltFlg = 1;
 
 
@@ -1781,11 +2016,11 @@ void render(void)
 
 			//right
 			rplat[1].set_xres(g.xres + 900.0f);
-			rplat[1].set_yres(g.yres - 40.0f);
+			rplat[1].set_yres(g.yres - 60.0f);
 
 			//left 
 			rplat[2].set_xres(g.xres - 450.0f);
-			rplat[2].set_yres(g.yres - 20.0f );
+			rplat[2].set_yres(g.yres - 60.0f );
 
 			for(int i = 0; i < 3; i++){
 
@@ -1796,7 +2031,7 @@ void render(void)
 				rForms(rplat[i].w, rplat[i].h,  rplat[i].color, rplat[i].pos[0], rplat[i].pos[1]);
 			}
 		}  else if ((player1.health >= 20 && player1.health <= 50) || (player2.health >= 20 && player2.health <= 50)){
-			
+
 			pltFlg = 1;
 
 
@@ -1810,7 +2045,7 @@ void render(void)
 
 			//left 
 			rplat[2].set_xres(g.xres - 1200.0f);
-			rplat[2].set_yres(g.yres  - 40.0f );
+			rplat[2].set_yres(g.yres  - 50.0f );
 
 			for(int i = 0; i < 3; i++){
 
@@ -1835,96 +2070,83 @@ void render(void)
 		//
 
 		//
-		if (g.joflag == 1) {
+		if(g.joflag == 1) {
 			//Joses function
-			extern void fmBorder(int xres, int yres);
 			fmBorder(g.xres, g.yres);
+            fmHeader(g.xres, g.yres);
 
+            //PLAYER 1 HITBOX
+		    player_hitbox(player1.w, player1.h, 
+                          player1.pos[0], player1.pos[1]);
 
-            //extern void test_text (int xres, int yres);
-            //test_text(g.xres, g.yres);
-
-            extern void display_controls(int wf, int yres);
-            display_controls(g.walkFrame, g.yres);
+            //PLAYER 2 HITBOX
+			player_hitbox(player2.w, player2.h, 
+                          player2.pos[0], player2.pos[1]);
         }
 
 
 
 
+		unsigned char c5[3] = {0, 0, 255};
 
 
 
+		powerBar[0].set_width(player1.pBar);
+		powerBar[0].set_height(15.0f);
+		powerBar[0].set_xres(g.xres - 1080.0f);
+		powerBar[0].set_yres(g.yres + 830.0f);
+		powerBar[0].set_color(c5);
 
 
 
-
-			unsigned char c5[3] = {0, 0, 255};
-
-
-
-		   powerBar[0].set_width(player1.pBar);
-		   powerBar[0].set_height(15.0f);
-		   powerBar[0].set_xres(g.xres - 1080.0f);
-		   powerBar[0].set_yres(g.yres + 830.0f);
-		   powerBar[0].set_color(c5);
-		   
-		  
-
-		   powerBar[1].set_width(player2.pBar);
-		   powerBar[1].set_height(15.0f);
-		   powerBar[1].set_xres(g.xres + 1080.0f);
-		   powerBar[1].set_yres(g.yres + 830.0f);
-		   powerBar[1].set_color(c5);
+		powerBar[1].set_width(player2.pBar);
+		powerBar[1].set_height(15.0f);
+		powerBar[1].set_xres(g.xres + 1080.0f);
+		powerBar[1].set_yres(g.yres + 830.0f);
+		powerBar[1].set_color(c5);
 
 
-		  	if(rndrPbar){
+		if(rndrPbar){
 
-	      		powBar(powerBar[0].w, powerBar[0].h, powerBar[0].color, powerBar[0].pos[0],powerBar[0].pos[1]);
-			}
-
-			if(rndrPbar2){
-				powBar(powerBar[1].w, powerBar[1].h, powerBar[1].color, powerBar[1].pos[0],powerBar[1].pos[1]);
-			}
-
-			if(player1.sPunch == 1) {
-				int pw2 = player1.pw2 * g.punchflip;
-				int pw1 = player1.pw1 * g.punchflip;
-				superPunch(pw1, pw2, player1.ph, player1.pos[0], player1.pos[1], g.punchflip, 1);
-			}
-
-			if(player2.sPunch == 1) {
-				int pw2 = player2.pw2 * g.punchflip;
-				int pw1 = player2.pw1 * g.punchflip;
-				superPunch(pw1, pw2, player2.ph, player2.pos[0], player2.pos[1], g.punchflip, 2);
-			}
-
-
-			if (g.bflag == 1) {
-				draw_power_ups(Power_up.w, Power_up.h, g.xres, g.yres);
-				sprite(player1.w + player1.pos[0], player1.h + player1.pos[1], g.walkFrame, g.walkTexture);
-				sprite(player2.w + player2.pos[0], player2.h + player2.pos[1], g.walk2Frame, g.walk2Texture);
-			}
-
-
-		} else if (g.start == 0) {
-
-			//Clear the screen
-
-
-			glClearColor(0.1, 0.1, 0.1, 1.0);
-			glClear(GL_COLOR_BUFFER_BIT);
-
-			strMenu(g.yres, g.xres);
-
-
-		} else if (g.start == 2){
-			glClearColor(0.1, 0.1, 0.1, 1.0);
-			glClear(GL_COLOR_BUFFER_BIT);
-
-			cntrlMenu(g.yres, g.xres);
+			powBar(powerBar[0].w, powerBar[0].h, powerBar[0].color, powerBar[0].pos[0],powerBar[0].pos[1]);
 		}
 
-		if(g.ctrls == 1){
-			cntrlMenu(g.yres, g.xres);
+		if(rndrPbar2){
+			powBar(powerBar[1].w, powerBar[1].h, powerBar[1].color, powerBar[1].pos[0],powerBar[1].pos[1]);
 		}
+
+		if(player1.sPunch == 1) {
+			int pw2 = player1.pw2 * g.punchflip;
+			int pw1 = player1.pw1 * g.punchflip;
+			superPunch(pw1, pw2, player1.ph, player1.pos[0], player1.pos[1], g.punchflip, 1);
+		}
+
+		if(player2.sPunch == 1) {
+			int pw2 = player2.pw2 * g.punchflip;
+			int pw1 = player2.pw1 * g.punchflip;
+			superPunch(pw1, pw2, player2.ph, player2.pos[0], player2.pos[1], g.punchflip, 2);
+		}
+
+
+	} else if (g.start == 0) {
+
+		//Clear the screen
+
+
+		glClearColor(0.1, 0.1, 0.1, 1.0);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		strMenu(g.yres, g.xres);
+
+
+	} else if (g.start == 2){
+		glClearColor(0.1, 0.1, 0.1, 1.0);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		cntrlMenu(g.yres, g.xres);
+	}
+
+	if(g.ctrls == 1){
+		cntrlMenu(g.yres, g.xres);
+	}
 }
