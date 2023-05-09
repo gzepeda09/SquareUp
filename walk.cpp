@@ -64,6 +64,19 @@ extern int mysteryBox(int x, int mbn);
 extern void holdingWeapon(float w, float h, float x, float y, int flipped, int weapon);
 extern void useWeapon(float w, float h, float x, float y, int flipped, int weapon);
 extern void showPowerUp(int weapon, int ywin, int xwin);
+extern void restartGame(int* p1Health, int* p2Health, double* p1Pos, double* p2Pos,
+                		int* p1Dead, int* p2Dead, int* p1Weapon, int* p2Weapon,
+                		time_t* p1TimeLimit, time_t* p2TimeLimit, int* gRestart,
+                		int* nextMB, int* mBS, int xwin);
+extern void player1PU (int* p1PUL, double* p1Vel, double* p2Vel, 
+                int* p1Health, time_t* p1TL, int* weapon, time_t p2TL);
+extern void player2PU (int* p2PUL, double* p1Vel, double* p2Vel, 
+                int* p2Health, time_t* p2TL, int* weapon, time_t p1TL);
+extern void spawnMysteryBox(int* mBS, int* nMB, time_t* p1TL,
+                    int* weapon1, time_t* p2TL, int* weapon2,
+                    int p1Health, int p2Health, int xwin,
+                    int flag, double p1PosX, double p2PosX,
+                    double p1PosY, double p2PosY);
 //--- Brian ---
 extern void draw_power_ups(int w, int h, float x, float y);
 extern void power_ups_effects();
@@ -105,7 +118,7 @@ class Player_1 {
 		int sPunch = 0;
 		int pBar = 0;
         int weapon = 0; 
-		time_t timeLimit = 0; //power up time limit
+		time_t timeLimit = 0;
 		int puLimit = 0;
 		float w = 20.0f;
 		float h = 100.0f;
@@ -126,7 +139,7 @@ class Player_2 {
 		int pBar = 0;
 		int sPunch = 0;
         int weapon = 0;
-		time_t timeLimit = 0; //power up time limit
+		time_t timeLimit = 0;
 		int puLimit = 0;
 		float w = 20.0f;
 		float h = 100.0f;
@@ -232,14 +245,6 @@ Box powerBar[2];
 
 // Box rpl[3] = {Box(g.yres, g.xres), Box(g.yres, g.xres), Box(g.yres, g.xres)};
 
-//Jesse - added values to reset character stats
-class Reset_Values {
-	public:
-		int dead = 0;
-		float player1posX = (float)g.xres/4;
-		float player2posX = (float)g.xres/1.3;
-		int health = 150;
-} reset;
 
 class X11_wrapper {
 	private:
@@ -966,35 +971,9 @@ void physics(void)
 	}
 
 	//Player 1 powerups and time limit
-	if (player1.timeLimit) {
-		if (player1.weapon == 2 && player1.puLimit == 0) { //speed
-			player1.puLimit += 1;
-			player1.vel[0] += 10.0f;
-			printf("player 1 speed upgrade\n");
-		} else if (player1.weapon == 3 && player1.puLimit == 0) {//slow other player
-			player1.puLimit += 1;
-			player2.vel[0] -= 8.0f;
-			printf("player 2 slowed down\n");
-		} else if (player1.weapon == 4 && player1.puLimit == 0) {//add health
-			player1.puLimit += 1;
-			player1.health += 25;
-			printf("player 1 health gain +25\n");
-		} else if (player1.weapon == 5 && player1.puLimit == 0) {//damage
-			printf("player 1 damage upgrade\n");
-			player1.puLimit += 1;
-		}
-		if ((time(NULL) - player1.timeLimit) > 15) {
-			//reset player time limit to take power up away
-			player1.timeLimit = 0;
-			printf("power time limit up for player 1\n");
-		}
-	} else if (player2.timeLimit == 0) {
-		//take power up away
-		player1.weapon = 0;
-		player1.puLimit = 0;
-		player1.vel[0] = 10.0f;
-		player2.vel[0] = 10.0f;
-	}
+	player1PU (&player1.puLimit, &player1.vel[0], &player2.vel[0], 
+                &player1.health, &player1.timeLimit, &player1.weapon, 
+				player2.timeLimit);
 
 	// Punch cooldown player 1
 	if (player1.punch == 1) {
@@ -1231,35 +1210,8 @@ void physics(void)
 	}
 
 	//Player 2 powerups and time limit
-	if (player2.timeLimit) {
-		if (player2.weapon == 2 && player2.puLimit == 0) { //speed
-			player2.puLimit += 1;
-			player2.vel[0] += 10.0f;
-			printf("player 2 speed upgrade\n");
-		} else if (player2.weapon == 3 && player2.puLimit == 0) {//slow other player
-			player2.puLimit += 1;
-			player1.vel[0] -= 8.0f;
-			printf("player 1 slowed down\n");
-		} else if (player2.weapon == 4 && player2.puLimit == 0) {//add health
-			player2.puLimit += 1;
-			player2.health += 25;
-			printf("player 2 health gain +25\n");
-		} else if (player2.weapon == 5 && player2.puLimit == 0) {//damage
-			printf("player 2 damage upgrade\n");
-			player2.puLimit += 1;
-		}
-		if ((time(NULL) - player2.timeLimit) > 15) {
-			//reset player time limit to take power up away
-			player2.timeLimit = 0;
-			printf("power time limit up for player 2\n");
-		}
-	} else if (player1.timeLimit == 0){
-		//take power up away
-		player2.weapon = 0;
-		player2.puLimit = 0;
-		player2.vel[0] = 10.0f;
-		player1.vel[0] = 10.0f;
-	}
+	player2PU (&player2.puLimit, &player1.vel[0], &player2.vel[0], 
+            &player2.health, &player2.timeLimit, &player2.weapon, player1.timeLimit);
 
 	// Punch cooldown player 2
 	if (player2.punch == 1) {
@@ -1582,67 +1534,26 @@ void render(void)
 			}
 		}
 
-    //Jesse- This resets the players stats 
+	//Jesse- This resets the players stats 
     //       if the users wants to restart the game
-    if ( (player1.dead == 1 || player2.dead == 1) && g.restart == 1) {
-            player1.health = reset.health;
-            player2.health = reset.health;
-            player1.pos[0] = reset.player1posX;
-            player2.pos[0] = reset.player2posX;
-            player1.dead = reset.dead;
-            player2.dead = reset.dead;
-            player1.weapon = 0;
-            player2.weapon = 0;
-			player1.timeLimit = 0;
-			player2.timeLimit = 0;
-            g.restart = 0;
-            g.nextMysteryBox = 100;
-            g.mysteryBoxSpawn = 0;
-    }
+	restartGame(&player1.health, &player2.health, &player1.pos[0], &player2.pos[0],
+                &player1.dead, &player2.dead, &player1.weapon, &player2.weapon,
+                &player1.timeLimit, &player2.timeLimit, &g.restart,
+                &g.nextMysteryBox, &g.mysteryBoxSpawn, g.xres);
 
     //Spawn Mystery Box
-    if (player1.health <= g.nextMysteryBox || 
-        player2.health <= g.nextMysteryBox) { // && g.mysteryBoxLimit == 0
-        int temp = mysteryBox(g.xres, g.mysteryBoxSpawn);
-        
-        if (player1.pos[0] >= temp-20 && player1.pos[0] <= (temp+75)
-            && (player1.pos[1]-100) <= 150) { 
-            //if player 1 within box parameters
-            g.mysteryBoxSpawn += 1;
-            g.nextMysteryBox -= 25;
-			player1.timeLimit = time(NULL);
-			srand (time(NULL));
-            if (g.jeflag) { 
-                // for jesse feature
-                player1.weapon = 1;
-            } else {
-				//power up 2-4
-				player1.weapon = (rand()%4)+2;
-            }
-        }
-        if (player2.pos[0] >= temp-20 && player2.pos[0] <= (temp+75)
-            && (player2.pos[1]-100) <= 150) { 
-            //if player 2 within box parameters
-            g.mysteryBoxSpawn += 1;
-            g.nextMysteryBox -= 25;
-			player2.timeLimit = time(NULL);
-			srand (time(NULL));
-            if (g.jeflag) { 
-                // for jesse feature
-                player2.weapon = 1;
-            } else {
-				//power up 2-4
-				player2.weapon = (rand()%4)+2;
-            }
-        }
-    }
+	spawnMysteryBox(&g.mysteryBoxSpawn, &g.nextMysteryBox, &player1.timeLimit,
+                    &player1.weapon, &player2.timeLimit, &player2.weapon,
+                    player1.health, player2.health, g.xres,
+                    g.jeflag, player1.pos[0], player2.pos[0],
+                    player1.pos[1], player2.pos[1]);
 
-	//render power up for player 1
+	//render power up for player 1 //move?
 	if ((time(NULL) - player1.timeLimit) <= 4) {
 		//render for 4 seconds
 		showPowerUp(player1.weapon, g.yres, g.xres); 
 	}
-	//render power up for player 2
+	//render power up for player 2 //move?
 	if ((time(NULL) - player2.timeLimit) <= 4) {
 		//render for 4 seconds
 		showPowerUp(player2.weapon, g.yres, g.xres); 
