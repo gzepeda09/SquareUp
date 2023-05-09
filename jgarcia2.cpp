@@ -563,35 +563,35 @@ void restartGame(int* p1Health, int* p2Health, double* p1Pos, double* p2Pos,
 void player1PU (int* p1PUL, double* p1Vel, double* p2Vel, 
                 int* p1Health, time_t* p1TL, int* weapon, time_t p2TL) 
 {
-    if (*p1TL != 0) {
-        if (*weapon == 2 && *p1PUL == 0) { //speed
-            *p1PUL += 1;
-            *p1Vel += 10.0f;
-            printf("player 1 speed upgrade\n");
-        } else if (*weapon == 3 && *p1PUL == 0) {//slow other player
-            *p1PUL += 1;
-            *p2Vel -= 8.0f;
-            printf("player 2 slowed down\n");
-        } else if (*weapon == 4 && *p1PUL == 0) {//add health
-            *p1PUL += 1;
-            *p1Health += 25;
-            printf("player 1 health gain +25\n");
-        } else if (*weapon == 5 && *p1PUL == 0) {//damage
-            printf("player 1 damage upgrade\n");
-            *p1PUL += 1;
-        }
-        if ((time(NULL) - *p1TL) > 15) {
-            //reset player time limit to take power up away
-            *p1TL = 0;
-            printf("power time limit up for player 1\n");
-        }
-    } else if (p2TL == 0){
-        //take power up away
+	if (*p1TL != 0) {
+        	if (*weapon == 2 && *p1PUL == 0) { //speed
+            		*p1PUL += 1;
+            		*p1Vel += 10.0f;
+            		printf("player 1 speed upgrade\n");
+        	} else if (*weapon == 3 && *p1PUL == 0) {//slow other player
+            		*p1PUL += 1;
+            		*p2Vel -= 8.0f;
+            		printf("player 2 slowed down\n");
+        	} else if (*weapon == 4 && *p1PUL == 0) {//add health
+            		*p1PUL += 1;
+            		*p1Health += 25;
+            		printf("player 1 health gain +25\n");
+        	} else if (*weapon == 5 && *p1PUL == 0) {//damage
+            		printf("player 1 damage upgrade\n");
+            		*p1PUL += 1;
+        	}
+        	if ((time(NULL) - *p1TL) > 15) {
+            		//reset player time limit to take power up away
+            		*p1TL = 0;
+            		printf("power time limit up for player 1\n");
+        	}
+	} else if (p2TL == 0){
+        	//take power up away
 		*weapon = 0;
 		*p1PUL = 0;
 		*p1Vel = 10.0f;
 		*p2Vel = 10.0f;
-    }
+	}
 }
 
 void player2PU (int* p2PUL, double* p1Vel, double* p2Vel, 
@@ -642,14 +642,14 @@ void spawnMysteryBox(int* mBS, int* nMB, time_t* p1TL,
             //if player 1 within box parameters
             *mBS += 1;
             *nMB -= 25;
-			*p1TL = time(NULL);
-			srand (time(NULL));
+	    *p1TL = time(NULL);
+	    srand (time(NULL));
             if (flag) { 
                 // for jesse feature
                 *weapon1 = 1;
             } else {
-				//power up 2-4
-				*weapon1 = (rand()%4)+2;
+	    	//power up 2-4
+		*weapon1 = (rand()%4)+2;
             }
         }
         if (p2PosX >= temp-20 && p2PosX <= (temp+75)
@@ -657,14 +657,14 @@ void spawnMysteryBox(int* mBS, int* nMB, time_t* p1TL,
             //if player 2 within box parameters
             *mBS += 1;
             *nMB -= 25;
-			*p2TL = time(NULL);
-			srand (time(NULL));
+	    *p2TL = time(NULL);
+	    srand (time(NULL));
             if (flag) { 
                 // for jesse feature
                 *weapon2 = 1;
             } else {
-				//power up 2-4
-				*weapon2 = (rand()%4)+2;
+		//power up 2-4
+		*weapon2 = (rand()%4)+2;
             }
         }
     }
