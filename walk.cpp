@@ -67,7 +67,7 @@ extern void showPowerUp(int weapon, int ywin, int xwin);
 extern void restartGame(int* p1Health, int* p2Health, double* p1Pos, double* p2Pos,
                 		int* p1Dead, int* p2Dead, int* p1Weapon, int* p2Weapon,
                 		time_t* p1TimeLimit, time_t* p2TimeLimit, int* gRestart,
-                		int* nextMB, int* mBS, int xwin);
+                		int* nextMB, int* mBS, int xwin, bool* deathP1, bool* deathP2);
 extern void player1PU (int* p1PUL, double* p1Vel, double* p2Vel, 
                 int* p1Health, time_t* p1TL, int* weapon, time_t p2TL);
 extern void player2PU (int* p2PUL, double* p1Vel, double* p2Vel, 
@@ -1805,7 +1805,7 @@ void render(void)
 	restartGame(&player1.health, &player2.health, &player1.pos[0], &player2.pos[0],
                 &player1.dead, &player2.dead, &player1.weapon, &player2.weapon,
                 &player1.timeLimit, &player2.timeLimit, &g.restart,
-                &g.nextMysteryBox, &g.mysteryBoxSpawn, g.xres);
+                &g.nextMysteryBox, &g.mysteryBoxSpawn, g.xres, &deathP1, &deathP2);
 
     //Spawn Mystery Box
 	spawnMysteryBox(&g.mysteryBoxSpawn, &g.nextMysteryBox, &player1.timeLimit,
