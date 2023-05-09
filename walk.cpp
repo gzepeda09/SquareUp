@@ -1874,6 +1874,105 @@ void render(void)
 		}
 
 		//JOSE: I think this is part of Sprite stuff
+		if(g.bflag == 1)
+		{
+			float cx = g.xres/3.0;
+                	float cy = g.yres/3.0;
+			float h = 250.0;
+                        float w = h;
+			//Display player1
+                        glPushMatrix();
+                        glColor3f(1.0, 1.0, 1.0);
+                        glBindTexture(GL_TEXTURE_2D, g.walkTexture);
+                        glEnable(GL_ALPHA_TEST);
+                        glAlphaFunc(GL_GREATER, 0.0f);
+                        glColor4ub(255,255,255,255);
+                        int numColumns = 8;
+                        int numRows = 5;
+                        int ix = g.walkFrame % numColumns;
+                        int iy = g.walkFrame / numColumns;
+
+                        float tx = (float)ix / (float)numColumns;
+                        float ty = (float)iy / (float)numRows;
+                        float tw = 1.0f / (float)numColumns;
+                        float th = 1.0f / (float)numRows;
+
+                        glBegin(GL_QUADS);
+			glTexCoord2f(tx, ty + th);      glVertex2i(cx - w, cy - h - 70);
+			glTexCoord2f(tx, ty);           glVertex2i(cx - w, cy + h - 70);
+			glTexCoord2f(tx + tw, ty);      glVertex2i(cx + w, cy + h - 70);
+			glTexCoord2f(tx + tw, ty + th); glVertex2i(cx + w, cy - h - 70);
+                        glEnd();
+                        glPopMatrix();
+                        glBindTexture(GL_TEXTURE_2D, 0);
+                        glDisable(GL_ALPHA_TEST);
+			//display Player2
+			if(g.keyStates[XK_k] && !chargeUp2) {
+				float cx3 = g.xres/1.5;
+                		float cy3 = g.yres/4.0;
+                        	float w2 = h+50;
+                	        glPushMatrix();
+        	                glColor3f(1.0, 1.0, 1.0);
+	                        glBindTexture(GL_TEXTURE_2D, g.speTexture);
+
+                        	//JOSE: Sprite stuff; can use later
+                        	glEnable(GL_ALPHA_TEST);
+                        	glAlphaFunc(GL_GREATER, 0.0f);
+                	        glColor4ub(255,255,255,255);
+        	                int numColumns3 = 4;
+	                        int numRows3 = 1;
+                        	int ix2 = g.speFrame % numColumns3;
+                        	int iy2 = g.speFrame / numColumns3;
+
+                	        float tx3 = (float)ix2 / (float)numColumns3;
+        	                float ty3 = (float)iy2 / (float)numRows3;
+	                        float tw3 = 1.0f / (float)numColumns3;
+                        	float th3 = 1.0f / (float)numRows3;
+
+                        	glBegin(GL_QUADS);
+		       		glTexCoord2f(tx3 + tw3, ty3 + th3);	glVertex2i(cx3 - w2, cy3 - h);
+			    	glTexCoord2f(tx3 + tw3, ty3);		glVertex2i(cx3 - w2, cy3 + h);
+				glTexCoord2f(tx3, ty3);			glVertex2i(cx3 + w2, cy3 + h);
+				glTexCoord2f(tx3, ty3 + th3);		glVertex2i(cx3 + w2, cy3 - h);
+
+                        	glEnd();
+                	        glPopMatrix();
+        	                glBindTexture(GL_TEXTURE_2D, 0);
+	                        glDisable(GL_ALPHA_TEST);
+			}else {
+				float cx2 = g.xres/1.5;
+                		float cy2 = g.yres/4.0;
+                	        glPushMatrix();
+        	                glColor3f(1.0, 1.0, 1.0);
+	                        glBindTexture(GL_TEXTURE_2D, g.walk2Texture);
+
+                        	//JOSE: Sprite stuff; can use later
+                        	glEnable(GL_ALPHA_TEST);
+                        	glAlphaFunc(GL_GREATER, 0.0f);
+                	        glColor4ub(255,255,255,255);
+        	                int numColumns2 = 8;
+	                        int numRows2 = 5;
+                        	int ix2 = g.walk2Frame % numColumns2;
+                        	int iy2 = g.walk2Frame / numColumns2;
+
+                	        float tx2 = (float)ix2 / (float)numColumns2;
+        	                float ty2 = (float)iy2 / (float)numRows2;
+	                        float tw2 = 1.0f / (float)numColumns2;
+                        	float th2 = 1.0f / (float)numRows2;
+
+                        	glBegin(GL_QUADS);
+		       		glTexCoord2f(tx2 + tw2, ty2 + th2);	glVertex2i(cx2 - w, cy2 - h);
+			    	glTexCoord2f(tx2 + tw2, ty2);		glVertex2i(cx2 - w, cy2 + h);
+				glTexCoord2f(tx2, ty2);			glVertex2i(cx2 + w, cy2 + h);
+				glTexCoord2f(tx2, ty2 + th2);		glVertex2i(cx2 + w, cy2 - h);
+
+                        	glEnd();
+                	        glPopMatrix();
+        	                glBindTexture(GL_TEXTURE_2D, 0);
+	                        glDisable(GL_ALPHA_TEST);
+			}
+		}
+
 
 		if(g.bflag == 0) {
 			// Players flip

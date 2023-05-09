@@ -209,8 +209,8 @@ extern void Player_2_spe_fliped(int cx, int cy, int walkFrame, GLuint walkTextur
 	glBegin(GL_QUADS);
 	glTexCoord2f(tx + tw, ty + th); 	glVertex2i(cx - w, cy - h - 70);
 	glTexCoord2f(tx + tw, ty); 		glVertex2i(cx - w, cy + h - 70);
-	glTexCoord2f(tx, ty); 	glVertex2i(cx + w, cy + h - 70);
-	glTexCoord2f(tx, ty + th); glVertex2i(cx + w, cy - h - 70);
+	glTexCoord2f(tx, ty);			glVertex2i(cx + w, cy + h - 70);
+	glTexCoord2f(tx, ty + th); 		glVertex2i(cx + w, cy - h - 70);
 	glEnd();
 	glPopMatrix();
 	glBindTexture(GL_TEXTURE_2D, 0);
